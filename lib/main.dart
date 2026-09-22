@@ -1,0 +1,4724 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'models/profile.dart';
+import 'models/prescription.dart';
+import 'services/api_service.dart';
+
+void main() {
+  runApp(const MyYakFigmaApp());
+}
+
+class MyYakFigmaApp extends StatelessWidget {
+  final bool initialShowCover;
+  const MyYakFigmaApp({super.key, this.initialShowCover = true});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'My 약 (My Yak)',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        scaffoldBackgroundColor: const Color(0xFFFAF9F6),
+        primaryColor: const Color(0xFFFF6B8B),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFFF6B8B),
+          primary: const Color(0xFFFF6B8B),
+          secondary: const Color(0xFF10B981),
+        ),
+        useMaterial3: true,
+        fontFamily: 'Pretendard',
+      ),
+      home: AppRootScreen(initialShowCover: initialShowCover),
+    );
+  }
+}
+
+class AppRootScreen extends StatefulWidget {
+  final bool initialShowCover;
+  const AppRootScreen({super.key, this.initialShowCover = true});
+
+  @override
+  State<AppRootScreen> createState() => _AppRootScreenState();
+}
+
+class _AppRootScreenState extends State<AppRootScreen> {
+  bool _showCover = true;
+  final List<MemberProfile> _familyProfiles = List.from(defaultFamilyProfiles);
+  late MemberProfile _selectedChild;
+
+  @override
+  void initState() {
+    super.initState();
+    _showCover = widget.initialShowCover;
+    _selectedChild = _familyProfiles.first;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showCover == true) {
+      return WelcomeCoverScreen(
+        profiles: _familyProfiles,
+        initialSelectedChild: _selectedChild,
+        onStartWithChild: (child) => setState(() {
+          _selectedChild = child;
+          _showCover = false;
+        }),
+        onStart: () => setState(() => _showCover = false),
+        onAddNewChild: (newChild) => setState(() {
+          _familyProfiles.add(newChild);
+          _selectedChild = newChild;
+        }),
+      );
+    }
+    return MainFigmaScreen(
+      initialProfile: _selectedChild,
+      familyProfiles: _familyProfiles,
+      onChildChanged: (child) => setState(() => _selectedChild = child),
+      onAddNewChild: (newChild) => setState(() {
+        _familyProfiles.add(newChild);
+        _selectedChild = newChild;
+      }),
+      onOpenCover: () => setState(() => _showCover = true),
+    );
+  }
+}
+
+// ----------------------------------------------------------------------
+// 0. WELCOME COVER SCREEN (나노바나나 디자인 안심 복약 커버 페이지)
+// ----------------------------------------------------------------------
+class WelcomeCoverScreen extends StatefulWidget {
+  final VoidCallback? onStart;
+  final Function(MemberProfile)? onStartWithChild;
+  final List<MemberProfile> profiles;
+  final MemberProfile? initialSelectedChild;
+  final Function(MemberProfile)? onAddNewChild;
+
+  const WelcomeCoverScreen({
+    super.key,
+    this.onStart,
+    this.onStartWithChild,
+    this.profiles = const [],
+    this.initialSelectedChild,
+    this.onAddNewChild,
+  });
+
+  @override
+  State<WelcomeCoverScreen> createState() => _WelcomeCoverScreenState();
+}
+
+class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
+  late MemberProfile _currentChild;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialSelectedChild != null) {
+      _currentChild = widget.initialSelectedChild!;
+    } else if (widget.profiles.isNotEmpty) {
+      _currentChild = widget.profiles.first;
+    } else if (defaultFamilyProfiles.isNotEmpty) {
+      _currentChild = defaultFamilyProfiles.first;
+    } else {
+      _currentChild = MemberProfile(id: '1', name: '하준이', memberType: MemberType.child, weightKg: 9.2);
+    }
+  }
+
+  void _openAddChildModal(BuildContext context) {
+    final nameCtrl = TextEditingController();
+    final ageCtrl = TextEditingController(text: '생후 12개월');
+    final weightCtrl = TextEditingController(text: '10.0');
+    String gender = '남아';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 24,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('👶 새 자녀 등록', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: nameCtrl,
+                decoration: InputDecoration(
+                  labelText: '아이 이름',
+                  hintText: '예: 도윤이',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: ageCtrl,
+                      decoration: InputDecoration(
+                        labelText: '월령/나이',
+                        hintText: '생후 18개월',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: weightCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: '체중(kg)',
+                        hintText: '11.5',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Text('성별: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ChoiceChip(
+                    label: const Text('남아 👦'),
+                    selected: gender == '남아',
+                    onSelected: (val) => setModalState(() => gender = '남아'),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('여아 👧'),
+                    selected: gender == '여아',
+                    onSelected: (val) => setModalState(() => gender = '여아'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6B8B),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                onPressed: () {
+                  final name = nameCtrl.text.trim();
+                  if (name.isEmpty) return;
+                  final w = double.tryParse(weightCtrl.text.trim()) ?? 10.0;
+                  final newProfile = MemberProfile(
+                    id: 'child_${DateTime.now().millisecondsSinceEpoch}',
+                    name: name,
+                    memberType: MemberType.child,
+                    age: ageCtrl.text.trim(),
+                    birthDate: '2025년 등록',
+                    gender: gender,
+                    weightKg: w,
+                  );
+                  widget.onAddNewChild?.call(newProfile);
+                  setState(() {
+                    _currentChild = newProfile;
+                  });
+                  Navigator.pop(ctx);
+                },
+                child: const Text('등록 완료', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final availableProfiles = widget.profiles.isNotEmpty ? widget.profiles : defaultFamilyProfiles;
+
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background Nano Banana Image
+          Image.asset(
+            'assets/images/welcome_cover.jpg',
+            fit: BoxFit.cover,
+            errorBuilder: (ctx, err, stack) => Container(
+              color: const Color(0xFFFFEFF2),
+              child: const Center(
+                child: Text('🌸 My 약 안심 복약 가이드',
+                    style: TextStyle(fontSize: 18, color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ),
+          // Gradient Scrim for Top & Bottom readability
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.2),
+                  Colors.black.withValues(alpha: 0.3),
+                  Colors.black.withValues(alpha: 0.88),
+                ],
+                stops: const [0.0, 0.40, 1.0],
+              ),
+            ),
+          ),
+          // Foreground Content
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (ctx, constraints) => SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.95),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(_currentChild.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 14)),
+                                  const SizedBox(width: 6),
+                                  Text('${_currentChild.name} ${_currentChild.weightKg}kg 맞춤 모드',
+                                      style: const TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.45),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Text('My 약 v1.0', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        const SizedBox(height: 16),
+                        const Text('우리아이 안심 복약 가이드',
+                            style: TextStyle(color: Color(0xFFFFD6DF), fontSize: 15, fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 4),
+                        const Text('My 약 (My Yak)',
+                            style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
+                        const SizedBox(height: 6),
+                        const Text(
+                          '처방전 사진 한 장으로 체중 맞춤 용량 검증,\n중복 처방 DUR 점검 및 소아과 의사용 안심 Q&A까지',
+                          style: TextStyle(color: Colors.white, fontSize: 12, height: 1.4),
+                        ),
+                        const SizedBox(height: 14),
+
+                        // Key Feature Badges
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+                          ),
+                          child: Column(
+                            children: [
+                              _WelcomeFeatureRow(icon: '⚖️', title: '체중 ${_currentChild.weightKg}kg 소아 용량 검증', desc: '식약처 기준 과다·과소 투약 안심 방지'),
+                              const SizedBox(height: 6),
+                              const _WelcomeFeatureRow(icon: '📸', title: '6종 약품 AI 멀티 OCR', desc: '처방전 및 약봉투 약품명 자동 보정'),
+                              const SizedBox(height: 6),
+                              const _WelcomeFeatureRow(icon: '🩺', title: '소아과 의사용 안심 Q&A', desc: '진료 시 확인할 맞춤 질문지 자동 생성'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+
+                        // 👶 Multi-Child Selector Section
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Row(
+                                children: [
+                                  Text('👶', style: TextStyle(fontSize: 14)),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    '복약 관리할 아이를 선택해 주세요:',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    ...availableProfiles.map((p) {
+                                      final isSelected = p.id == _currentChild.id;
+                                      return GestureDetector(
+                                        onTap: () => setState(() => _currentChild = p),
+                                        child: AnimatedContainer(
+                                          duration: const Duration(milliseconds: 200),
+                                          margin: const EdgeInsets.only(right: 8),
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color: isSelected ? const Color(0xFFFF6B8B) : Colors.white.withValues(alpha: 0.2),
+                                            borderRadius: BorderRadius.circular(14),
+                                            border: Border.all(
+                                              color: isSelected ? Colors.white : Colors.transparent,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(p.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 14)),
+                                              const SizedBox(width: 6),
+                                              Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    p.name,
+                                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                                  ),
+                                                  Text(
+                                                    '${p.age} · ${p.weightKg}kg',
+                                                    style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 10),
+                                                  ),
+                                                ],
+                                              ),
+                                              if (isSelected) ...[
+                                                const SizedBox(width: 6),
+                                                const Icon(Icons.check_circle, color: Colors.white, size: 14),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                    // + Add Child Button
+                                    GestureDetector(
+                                      onTap: () => _openAddChildModal(context),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(14),
+                                          border: Border.all(color: Colors.white38),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.add, color: Colors.white, size: 16),
+                                            SizedBox(width: 4),
+                                            Text('아이 추가', style: TextStyle(color: Colors.white, fontSize: 11)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // CTA Button
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF6B8B),
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(54),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                            elevation: 4,
+                          ),
+                          onPressed: () {
+                            if (widget.onStartWithChild != null) {
+                              widget.onStartWithChild!(_currentChild);
+                            } else {
+                              widget.onStart?.call();
+                            }
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('${_currentChild.name} 우리아이 안심 복약 시작하기', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward_rounded, size: 20),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WelcomeFeatureRow extends StatelessWidget {
+  final String icon;
+  final String title;
+  final String desc;
+  const _WelcomeFeatureRow({required this.icon, required this.title, required this.desc});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(icon, style: const TextStyle(fontSize: 16)),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+              Text(desc, style: const TextStyle(color: Colors.white70, fontSize: 10)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class MainFigmaScreen extends StatefulWidget {
+  final MemberProfile? initialProfile;
+  final List<MemberProfile>? familyProfiles;
+  final Function(MemberProfile)? onChildChanged;
+  final Function(MemberProfile)? onAddNewChild;
+  final VoidCallback? onOpenCover;
+
+  const MainFigmaScreen({
+    super.key,
+    this.initialProfile,
+    this.familyProfiles,
+    this.onChildChanged,
+    this.onAddNewChild,
+    this.onOpenCover,
+  });
+
+  @override
+  State<MainFigmaScreen> createState() => _MainFigmaScreenState();
+}
+
+class _MainFigmaScreenState extends State<MainFigmaScreen> {
+  int _currentIndex = 0;
+  final List<int> _tabHistory = [0];
+  List<DrugAnalysisResult> _scannedDrugsList = [];
+
+  late MemberProfile _babyProfile;
+  late List<MemberProfile> _familyProfiles;
+  final Map<String, bool> _childDoseCompletionState = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _familyProfiles = widget.familyProfiles != null && widget.familyProfiles!.isNotEmpty
+        ? List.from(widget.familyProfiles!)
+        : List.from(defaultFamilyProfiles);
+    _babyProfile = widget.initialProfile ?? _familyProfiles.first;
+  }
+
+  @override
+  void didUpdateWidget(MainFigmaScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialProfile != null && widget.initialProfile!.id != _babyProfile.id) {
+      _babyProfile = widget.initialProfile!;
+    }
+    if (widget.familyProfiles != null) {
+      _familyProfiles = List.from(widget.familyProfiles!);
+    }
+  }
+
+  void _switchChild(MemberProfile newChild) {
+    setState(() {
+      _babyProfile = newChild;
+    });
+    widget.onChildChanged?.call(newChild);
+  }
+
+  void _openChildSwitcherModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(
+                  children: [
+                    Text('👶', style: TextStyle(fontSize: 20)),
+                    SizedBox(width: 8),
+                    Text('복약 관리 자녀 선택', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ..._familyProfiles.map((p) {
+              final isSelected = p.id == _babyProfile.id;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFFFFF0F3) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected ? const Color(0xFFFF6B8B) : Colors.grey.shade300,
+                    width: isSelected ? 1.5 : 1,
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isSelected ? const Color(0xFFFF6B8B) : Colors.grey.shade200,
+                      child: Text(p.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 18)),
+                    ),
+                    title: Text(p.name, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? const Color(0xFFFF6B8B) : Colors.black87)),
+                    subtitle: Text('${p.gender} · ${p.age} · ${p.weightKg}kg'),
+                    trailing: isSelected ? const Icon(Icons.check_circle, color: Color(0xFFFF6B8B)) : null,
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _switchChild(p);
+                    },
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                side: const BorderSide(color: Color(0xFFFF6B8B)),
+                foregroundColor: const Color(0xFFFF6B8B),
+              ),
+              icon: const Icon(Icons.add),
+              label: const Text('+ 새 아이 추가 등록'),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _openAddNewChildDialog(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openAddNewChildDialog(BuildContext context) {
+    final nameCtrl = TextEditingController();
+    final ageCtrl = TextEditingController(text: '생후 12개월');
+    final weightCtrl = TextEditingController(text: '10.0');
+    String gender = '남아';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 24,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('👶 새 자녀 등록', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: nameCtrl,
+                decoration: InputDecoration(
+                  labelText: '아이 이름',
+                  hintText: '예: 도윤이',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: ageCtrl,
+                      decoration: InputDecoration(
+                        labelText: '월령/나이',
+                        hintText: '생후 18개월',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: weightCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: '체중(kg)',
+                        hintText: '11.5',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Text('성별: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ChoiceChip(
+                    label: const Text('남아 👦'),
+                    selected: gender == '남아',
+                    onSelected: (val) => setModalState(() => gender = '남아'),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('여아 👧'),
+                    selected: gender == '여아',
+                    onSelected: (val) => setModalState(() => gender = '여아'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6B8B),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                onPressed: () {
+                  final name = nameCtrl.text.trim();
+                  if (name.isEmpty) return;
+                  final w = double.tryParse(weightCtrl.text.trim()) ?? 10.0;
+                  final newProfile = MemberProfile(
+                    id: 'child_${DateTime.now().millisecondsSinceEpoch}',
+                    name: name,
+                    memberType: MemberType.child,
+                    age: ageCtrl.text.trim(),
+                    birthDate: '2025년 등록',
+                    gender: gender,
+                    weightKg: w,
+                  );
+                  widget.onAddNewChild?.call(newProfile);
+                  setState(() {
+                    _familyProfiles.add(newProfile);
+                    _babyProfile = newProfile;
+                  });
+                  Navigator.pop(ctx);
+                },
+                child: const Text('등록 완료', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<DoctorQnaItem> _doctorQuestions = [
+    DoctorQnaItem(
+      id: 'q1',
+      category: '해열제 교차복용',
+      question: '코미시럽과 다른 해열제(타이레놀 시럽 등)를 동시에 복용해도 정말 부작용이 없을까요?',
+      isSelected: true,
+    ),
+    DoctorQnaItem(
+      id: 'q2',
+      category: '졸림/대체약',
+      question: '코미시럽 복용 후 졸림 증상이 있는데, 다음 방문 시 처방을 다른 대체약으로 변경할 수 있을까요?',
+      isSelected: true,
+    ),
+    DoctorQnaItem(
+      id: 'q3',
+      category: '항생제/설사',
+      question: '이 항생제(아모클란듀오)는 설사 증상을 유발할 수 있다고 하던데 유산균을 함께 먹여야 하나요?',
+      isSelected: true,
+    ),
+    DoctorQnaItem(
+      id: 'q4',
+      category: '시간 누락',
+      question: '깜빡 잊고 아기 감기약 복용 시간을 놓쳤을 때는 발견 즉시 바로 먹여도 괜찮은가요?',
+      isSelected: false,
+    ),
+  ];
+
+  void _onTabChanged(int index) {
+    setState(() {
+      if (_currentIndex != index) {
+        _tabHistory.add(index);
+      }
+      _currentIndex = index;
+    });
+  }
+
+  void _handleGoBack() {
+    setState(() {
+      if (_tabHistory.length > 1) {
+        _tabHistory.removeLast();
+        _currentIndex = _tabHistory.last;
+      } else {
+        _currentIndex = 0;
+        _tabHistory.clear();
+        _tabHistory.add(0);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screens = [
+      HomeScreen(
+        profile: _babyProfile,
+        onNavigateScan: () => _onTabChanged(2),
+        onNavigateDrugs: () => _onTabChanged(1),
+        onOpenCover: widget.onOpenCover,
+        onSwitchChild: () => _openChildSwitcherModal(context),
+        doseCompletionState: _childDoseCompletionState,
+        scannedDrugs: _scannedDrugsList,
+      ),
+      DrugsListScreen(
+        profile: _babyProfile,
+        scannedDrugs: _scannedDrugsList,
+        onGoBack: _handleGoBack,
+      ),
+      ScanScreen(
+        profile: _babyProfile,
+        onNavigateTab: (idx) => _onTabChanged(idx),
+        onGoBack: _handleGoBack,
+        onUpdateQuestions: (qnaList) {
+          setState(() {
+            _doctorQuestions = qnaList;
+          });
+        },
+        onUpdateScannedDrugs: (drugs) {
+          setState(() {
+            _scannedDrugsList = drugs;
+          });
+        },
+      ),
+      DoctorQnaScreen(
+        profile: _babyProfile,
+        questions: _doctorQuestions,
+        onGoBack: _handleGoBack,
+      ),
+      BabyProfileScreen(
+        profile: _babyProfile,
+        onGoBack: _handleGoBack,
+        onSwitchChild: () => _openChildSwitcherModal(context),
+        onProfileUpdated: (newProfile) {
+          setState(() {
+            _babyProfile = newProfile;
+          });
+        },
+      ),
+    ];
+
+    return PopScope(
+      canPop: _currentIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _handleGoBack();
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: IndexedStack(
+            index: _currentIndex,
+            children: screens,
+          ),
+        ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onTabChanged,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFFFF6B8B),
+        unselectedItemColor: Colors.grey.shade400,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+        unselectedLabelStyle: const TextStyle(fontSize: 11),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.medication_outlined), label: '복용 정보'),
+          BottomNavigationBarItem(icon: Icon(Icons.camera_alt_outlined), label: '스캔'),
+          BottomNavigationBarItem(icon: Icon(Icons.assignment_outlined), label: '의사 Q&A'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: '내 아이'),
+        ],
+      ),
+    ),
+  );
+}
+}
+
+// ----------------------------------------------------------------------
+// 1. HOME SCREEN (홈 화면)
+// ----------------------------------------------------------------------
+class HomeScreen extends StatefulWidget {
+  final MemberProfile profile;
+  final VoidCallback onNavigateScan;
+  final VoidCallback onNavigateDrugs;
+  final VoidCallback? onOpenCover;
+  final VoidCallback? onSwitchChild;
+  final Map<String, bool>? doseCompletionState;
+  final List<DrugAnalysisResult>? scannedDrugs;
+
+  const HomeScreen({
+    super.key,
+    required this.profile,
+    required this.onNavigateScan,
+    required this.onNavigateDrugs,
+    this.onOpenCover,
+    this.onSwitchChild,
+    this.doseCompletionState,
+    this.scannedDrugs,
+  });
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _TodayDoseItem {
+  final String id;
+  final String timeTag;
+  final String title;
+  final String subtitle;
+  bool isCompleted;
+
+  _TodayDoseItem({
+    required this.id,
+    required this.timeTag,
+    required this.title,
+    required this.subtitle,
+    this.isCompleted = false,
+  });
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late List<_TodayDoseItem> _doses;
+  // ARCH-01: childId + doseId 기반 다자녀 복약 완료 상태 격리 저장소
+  final Map<String, bool> _localCompletionState = {};
+  Map<String, bool> get _completionState => widget.doseCompletionState ?? _localCompletionState;
+
+  @override
+  void initState() {
+    super.initState();
+    _doses = _buildDosesForChild(widget.profile);
+  }
+
+  @override
+  void didUpdateWidget(HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.profile.id != widget.profile.id ||
+        oldWidget.profile.weightKg != widget.profile.weightKg ||
+        oldWidget.scannedDrugs != widget.scannedDrugs) {
+      setState(() {
+        _doses = _buildDosesForChild(widget.profile);
+      });
+    }
+  }
+
+  List<_TodayDoseItem> _buildDosesForChild(MemberProfile profile) {
+    final List<_TodayDoseItem> items = [];
+    final scanned = widget.scannedDrugs;
+
+    // 1. 사용자가 스캔한 처방전 데이터가 있는 경우 -> 스캔 약품 기반 일정 자동 생성
+    if (scanned != null && scanned.isNotEmpty) {
+      final morningDrugs = <String>[];
+      final lunchDrugs = <String>[];
+      final dinnerDrugs = <String>[];
+      final nightDrugs = <String>[];
+
+      for (final drug in scanned) {
+        final freq = drug.scannedFreqPerDay ?? 3;
+        final doseStr = drug.scannedDoseUnit != null ? ' ${drug.scannedDoseUnit}ml' : '';
+        final label = '${drug.drugName}$doseStr';
+
+        if (freq >= 3) {
+          morningDrugs.add(label);
+          lunchDrugs.add(label);
+          dinnerDrugs.add(label);
+        } else if (freq == 2) {
+          morningDrugs.add(label);
+          dinnerDrugs.add(label);
+        } else if (freq == 1) {
+          dinnerDrugs.add(label);
+        } else {
+          nightDrugs.add(label);
+        }
+      }
+
+      if (morningDrugs.isNotEmpty) {
+        final key = '${profile.id}_scanned_morn';
+        items.add(_TodayDoseItem(
+          id: 'scanned_morn',
+          timeTag: '아침 08:30',
+          title: morningDrugs.join(' + '),
+          subtitle: '식후 30분 · 스캔 처방전 자동 편성',
+          isCompleted: _completionState[key] ?? false,
+        ));
+      }
+      if (lunchDrugs.isNotEmpty) {
+        final key = '${profile.id}_scanned_lunch';
+        items.add(_TodayDoseItem(
+          id: 'scanned_lunch',
+          timeTag: '점심 13:00',
+          title: lunchDrugs.join(' + '),
+          subtitle: '식사 직후 · 스캔 처방전 자동 편성',
+          isCompleted: _completionState[key] ?? false,
+        ));
+      }
+      if (dinnerDrugs.isNotEmpty) {
+        final key = '${profile.id}_scanned_dinner';
+        items.add(_TodayDoseItem(
+          id: 'scanned_dinner',
+          timeTag: '저녁 19:00',
+          title: dinnerDrugs.join(' + '),
+          subtitle: '식후 30분 · 스캔 처방전 자동 편성',
+          isCompleted: _completionState[key] ?? false,
+        ));
+      }
+      if (nightDrugs.isNotEmpty) {
+        final key = '${profile.id}_scanned_night';
+        items.add(_TodayDoseItem(
+          id: 'scanned_night',
+          timeTag: '취침전 21:30',
+          title: nightDrugs.join(' + '),
+          subtitle: '필요 시/발열 시 복용',
+          isCompleted: _completionState[key] ?? false,
+        ));
+      }
+    }
+
+    // 2. 스캔 데이터가 아직 없는 경우 -> 기본 활성 처방약 기반 일정 유지
+    if (items.isEmpty) {
+      if (profile.id == 'child_2' || profile.name == '서아') {
+        items.addAll([
+          _TodayDoseItem(id: 's1', timeTag: '아침 08:30', title: '기관지염 항생제 (클래리시드 건조시럽)', subtitle: '1회 5ml · 식후 30분', isCompleted: true),
+          _TodayDoseItem(id: 's2', timeTag: '점심 13:00', title: '유산균 정장제 (항생제 설사 예방)', subtitle: '1회 1포 · 식사 직후', isCompleted: false),
+          _TodayDoseItem(id: 's3', timeTag: '저녁 19:00', title: '클래리시드 건조시럽 & 정장제', subtitle: '1회 5ml, 가루 1포 · 식후 30분', isCompleted: false),
+        ]);
+      } else {
+        // Default (하준이 및 등록 자녀)
+        items.addAll([
+          _TodayDoseItem(id: '1', timeTag: '아침 08:30', title: '감기 물약 (코미시럽)', subtitle: '1회 4ml · 식전 30분', isCompleted: true),
+          _TodayDoseItem(id: '2', timeTag: '점심 13:00', title: '기관지 패치 & 항생제', subtitle: '1회 1포 · 식사 직후', isCompleted: false),
+          _TodayDoseItem(id: '3', timeTag: '저녁 19:00', title: '감기 물약 & 정장제', subtitle: '1회 4ml, 가루 1포 · 취침 전', isCompleted: false),
+        ]);
+      }
+    }
+
+    // childId + doseId 고유 키로 이전 완료 체크 상태 복원 (ARCH-01)
+    for (final item in items) {
+      final key = '${profile.id}_${item.id}';
+      if (_completionState.containsKey(key)) {
+        item.isCompleted = _completionState[key]!;
+      }
+    }
+    return items;
+  }
+
+  int get _completedCount => _doses.where((d) => d.isCompleted).length;
+  double get _progress => _doses.isEmpty ? 0 : (_completedCount / _doses.length);
+
+  void _toggleDose(_TodayDoseItem item) {
+    setState(() {
+      item.isCompleted = !item.isCompleted;
+      final key = '${widget.profile.id}_${item.id}';
+      _completionState[key] = item.isCompleted;
+    });
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          item.isCompleted
+              ? '✓ "${item.title}" 복약 완료로 기록되었습니다! 👶👏'
+              : '"${item.title}" 복약 대기 상태로 변경되었습니다.',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _openVomitGuidanceModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        maxChildSize: 0.95,
+        minChildSize: 0.5,
+        builder: (c, scrollCtrl) => ListView(
+          controller: scrollCtrl,
+          padding: const EdgeInsets.all(24),
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text('🤢', style: TextStyle(fontSize: 22)),
+                    ),
+                    const SizedBox(width: 10),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('약 먹고 토했을 때 가이드', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('소아과 전문의 임상 재투약 기준', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                      ],
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Text(
+                '💡 약을 먹인 뒤 경과 시간에 따라 체내 흡수 정도가 다릅니다. 아래 기준을 정확히 확인하세요.',
+                style: TextStyle(fontSize: 12, color: Colors.blueGrey.shade800, height: 1.4),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 1. 10분 이내
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFECFDF5),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFFA7F3D0)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: const Color(0xFF059669), borderRadius: BorderRadius.circular(8)),
+                        child: const Text('⏱️ 10분 이내 토함', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('동일 정량 즉시 재투약', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF065F46))),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '위에서 약물이 거의 흡수되지 않고 그대로 배출된 상태입니다.\n아기를 안아 진정시키고 입안을 헹군 뒤, 1회 정량을 그대로 다시 먹이셔도 안전합니다.',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF047857), height: 1.4),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 2. 10분 ~ 30분
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFBEB),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFFFDE68A)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: const Color(0xFFD97706), borderRadius: BorderRadius.circular(8)),
+                        child: const Text('⏱️ 10 ~ 30분 사이', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('추가 투약 보류 및 관찰', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF92400E))),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '약물의 상당 부분이 십이지장으로 넘어가 흡수 중일 가능성이 큽니다.\n지금 바로 다시 먹이면 과량 투약 위험이 있으므로, 30분~1시간 동안 아기 체온과 증상을 지켜보세요.',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 3. 30분 이후
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFFBFDBFE)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(8)),
+                        child: const Text('⏱️ 30분 이후 토함', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('재투약 절대 금지 (흡수 완료)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E40AF))),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '약의 유효 성분이 이미 체내에 대부분 흡수되었습니다.\n토사물에 약 냄새나 색이 섞여 보여도 절대로 다시 먹이지 마시고, 다음 정규 복용 시간까지 대기하세요.',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF1E3A8A), height: 1.4),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 위험 징후 안내
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFFECACA)),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626), size: 18),
+                      SizedBox(width: 6),
+                      Text('🚨 즉시 소아응급실 내원이 필요한 경우', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFB91C1C))),
+                    ],
+                  ),
+                  SizedBox(height: 6),
+                  Text('• 초록색(담즙) 또는 피가 섞인 토를 할 때\n• 약과 상관없이 물만 마셔도 3회 이상 분수토를 할 때\n• 처지거나 눈이 쑥 들어가고 소변을 6시간 이상 보지 않을 때(탈수)',
+                      style: TextStyle(fontSize: 11, color: Color(0xFF991B1B), height: 1.4)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6B8B),
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('확인 완료', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openAntipyreticCalculatorModal(BuildContext context) {
+    final weight = widget.profile.weightKg ?? 9.2;
+    final months = widget.profile.ageMonths ?? 10;
+    final isNsaidContraindicated = months < 6;
+    final isNeonateWarning = months < 3;
+
+    // 아세트아미노펜 (12.5mg/kg, 농도 32mg/ml - 어린이타이레놀/챔프 빨강)
+    final acetaDose = (weight * 12.5 / 32).toStringAsFixed(1);
+    // 덱시부프로펜 (6.0mg/kg, 농도 12mg/ml - 맥시부펜)
+    final dexiDose = (weight * 6.0 / 12).toStringAsFixed(1);
+
+    double currentTemp = 38.3;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          String triageTitle = '발열 대처 (해열제 1차 투약)';
+          String triageDesc = '1차로 아세트아미노펜 또는 덱시부프로펜을 1회 정량 투약하세요. 2시간 후에도 38도 이상 유지 시 다른 계열로 교차복용을 고려할 수 있습니다.';
+          Color triageColor = const Color(0xFFD97706);
+          Color triageBg = const Color(0xFFFFFBEB);
+          Color triageBorder = const Color(0xFFFDE68A);
+
+          if (currentTemp < 38.0) {
+            triageTitle = '미열 관리 (수분 보충 & 휴식)';
+            triageDesc = '38.0℃ 미만의 미열은 신체 면역 반응입니다. 해열제 투약보다는 얇은 옷으로 갈아입히고 미온수로 땀을 닦아주며 수분을 충분히 보충하세요.';
+            triageColor = const Color(0xFF059669);
+            triageBg = const Color(0xFFECFDF5);
+            triageBorder = const Color(0xFFA7F3D0);
+          } else if (currentTemp >= 39.0) {
+            triageTitle = '🚨 고열 긴급 관찰 (즉시 투약 & 집중 케어)';
+            triageDesc = '즉시 정량 투약하세요. 오한(손발 차가움)이 멈추면 미온수 마사지를 병행하고, 2시간 간격으로 다른 계열 교차복용을 준비하세요. 의식이 처지면 소아응급실 내원이 필요합니다.';
+            triageColor = const Color(0xFFDC2626);
+            triageBg = const Color(0xFFFEF2F2);
+            triageBorder = const Color(0xFFFECACA);
+          }
+
+          return DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: 0.88,
+            maxChildSize: 0.95,
+            minChildSize: 0.5,
+            builder: (c, scrollCtrl) => ListView(
+              controller: scrollCtrl,
+              padding: const EdgeInsets.all(24),
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF7ED),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text('🌡️', style: TextStyle(fontSize: 22)),
+                        ),
+                        const SizedBox(width: 10),
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('해열제 교차복용 계산기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            Text('체온별 Fever Triage & 안전 가드레일', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${widget.profile.name} 현재 체중(${weight}kg, ${widget.profile.age}) 맞춤 권장 용량입니다.',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 16),
+
+                // 생후 3개월 미만 신생아 긴급 경고
+                if (isNeonateWarning) ...[
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF2F2),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFDC2626), width: 1.5),
+                    ),
+                    child: const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.emergency, color: Color(0xFFDC2626), size: 22),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            '⚠️ 생후 3개월 미만 신생아는 38.0℃ 이상 발열 시 패혈증 등 중증 감염 위험이 있습니다. 해열제를 임의 투약하지 마시고 즉시 소아응급실로 직행하세요!',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFB91C1C), height: 1.4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+
+                // 체온 선택 칩 인터랙티브
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('현재 아기 체온을 선택하세요:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ChoiceChip(
+                              label: const Text('37.6℃ 미열'),
+                              selected: currentTemp < 38.0,
+                              onSelected: (_) => setModalState(() => currentTemp = 37.6),
+                              selectedColor: const Color(0xFFA7F3D0),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ChoiceChip(
+                              label: const Text('38.3℃ 발열'),
+                              selected: currentTemp >= 38.0 && currentTemp < 39.0,
+                              onSelected: (_) => setModalState(() => currentTemp = 38.3),
+                              selectedColor: const Color(0xFFFDE68A),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ChoiceChip(
+                              label: const Text('39.2℃ 고열'),
+                              selected: currentTemp >= 39.0,
+                              onSelected: (_) => setModalState(() => currentTemp = 39.2),
+                              selectedColor: const Color(0xFFFECACA),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: triageBg,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: triageBorder),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(triageTitle, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: triageColor)),
+                            const SizedBox(height: 4),
+                            Text(triageDesc, style: TextStyle(fontSize: 11.5, color: triageColor, height: 1.35)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // 1. 아세트아미노펜 계열 카드
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF1F2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFFECDD3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            '아세트아미노펜 계열 (1계열)',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFE11D48)),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                            child: const Text('생후 4개월 이상', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFE11D48))),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text('대표 약품: 챔프시럽(빨강), 어린이 타이레놀 현탁액, 세토펜', style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
+                      const Divider(height: 18),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('1회 권장 투약량', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          Text('$acetaDose ml', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFE11D48))),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      const Text('• 같은 계열 투약 시: 최소 4~6시간 간격 (1일 최대 5회 이내)', style: TextStyle(fontSize: 11, color: Color(0xFF9F1239))),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // 2. 덱시부프로펜 / 이부프로펜 계열 카드
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isNsaidContraindicated ? const Color(0xFFFEF2F2) : const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: isNsaidContraindicated ? const Color(0xFFFCA5A5) : const Color(0xFFBFDBFE)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '덱시부프로펜 계열 (2계열)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: isNsaidContraindicated ? const Color(0xFFDC2626) : const Color(0xFF2563EB),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: isNsaidContraindicated ? const Color(0xFFDC2626) : Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              isNsaidContraindicated ? '⛔ 6개월 미만 금기' : '생후 6개월 이상',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: isNsaidContraindicated ? Colors.white : const Color(0xFF2563EB),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text('대표 약품: 맥시부펜 시럽, 챔프 이부펜(파랑), 어린이 부루펜', style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
+                      const Divider(height: 18),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('1회 권장 투약량', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          Text(
+                            isNsaidContraindicated ? '투약 금기 (의사 상담)' : '$dexiDose ml',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isNsaidContraindicated ? const Color(0xFFDC2626) : const Color(0xFF2563EB),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        isNsaidContraindicated
+                            ? '• 생후 6개월 미만 영아는 신기능 미숙으로 덱시부프로펜 복용이 금기됩니다.'
+                            : '• 같은 계열 투약 시: 최소 4~6시간 간격 (1일 최대 4회 이내)',
+                        style: TextStyle(fontSize: 11, color: isNsaidContraindicated ? const Color(0xFFB91C1C) : const Color(0xFF1E40AF)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // 3. 교차복용 필수 황금 수칙
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFFDE68A)),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.rule, color: Color(0xFFD97706), size: 18),
+                          SizedBox(width: 8),
+                          Text('소아과 전문의 교차복용 황금 수칙', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF92400E))),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Text('1. 서로 다른 계열(아세트아미노펜 ↔ 덱시부프로펜) 교차 투약 시: 최소 2시간 간격을 둡니다.',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4)),
+                      SizedBox(height: 4),
+                      Text('2. 같은 계열을 다시 먹일 때는: 반드시 4~6시간 이상 간격을 유지해야 합니다.',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4)),
+                      SizedBox(height: 4),
+                      Text('3. 38도 미만의 미열이거나 아기 컨디션이 좋을 때는 투약보다 수분 섭취와 휴식을 권장합니다.',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4)),
+                      SizedBox(height: 4),
+                      Text('4. 생후 3개월 미만 신생아 발열(38.0℃ 이상) 시에는 해열제를 먹이지 말고 즉시 소아응급실로 가셔야 합니다.',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFB91C1C), height: 1.4)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF6B8B),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('확인 완료', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        // Header Profile Row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Color(0xFFFFF0F3),
+                  child: Text('👶', style: TextStyle(fontSize: 22)),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('오늘도 건강하게 자라는 중 🌱', style: TextStyle(color: Colors.grey, fontSize: 11)),
+                    Text('${widget.profile.name} (${widget.profile.age}, ${widget.profile.weightKg}kg)',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                if (widget.onSwitchChild != null)
+                  ActionChip(
+                    avatar: const Icon(Icons.swap_horiz, size: 14, color: Color(0xFFFF6B8B)),
+                    label: const Text('아이 변경', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFFF6B8B))),
+                    backgroundColor: const Color(0xFFFFF0F3),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFFFD6DF))),
+                    onPressed: widget.onSwitchChild,
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.notifications_none, color: Colors.grey),
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Nano Banana Welcome Cover Banner
+        if (widget.onOpenCover != null)
+          GestureDetector(
+            onTap: widget.onOpenCover,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFFF0F3), Color(0xFFFFE4E8)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFFFD6DF)),
+                boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+              ),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'assets/images/welcome_cover.jpg',
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                      errorBuilder: (ctx, _, __) => Container(
+                        width: 48,
+                        height: 48,
+                        color: const Color(0xFFFF6B8B),
+                        child: const Center(child: Text('🎨', style: TextStyle(fontSize: 20))),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('🎨 나노바나나 안심 복약 커버 페이지',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFFF6B8B))),
+                        SizedBox(height: 2),
+                        Text('하준이 9.2kg 맞춤 검증 & 서비스 소개 커버 다시보기',
+                            style: TextStyle(fontSize: 11, color: Colors.black87)),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFFFF6B8B)),
+                ],
+              ),
+            ),
+          ),
+
+        // 2 Big Quick Action Buttons
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: widget.onNavigateScan,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF0F3),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: const Color(0xFFFFD6DF)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                        child: const Icon(Icons.crop_free, color: Color(0xFFFF6B8B), size: 24),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text('처방전 스캔하기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const Text('약봉투 & 처방전 OCR', style: TextStyle(color: Colors.grey, fontSize: 11)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GestureDetector(
+                onTap: widget.onNavigateDrugs,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE6F7F0),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: const Color(0xFFA7F3D0)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                        child: const Icon(Icons.medication, color: Color(0xFF10B981), size: 24),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text('처방 기록 보기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const Text('복약 현황 관리', style: TextStyle(color: Colors.grey, fontSize: 11)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+
+        // Schedule criteria explanation banner (스캔 기반 여부 동적 안내)
+        Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
+                ? const Color(0xFFEFF6FF)
+                : const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
+                  ? const Color(0xFFBFDBFE)
+                  : const Color(0xFFCBD5E1),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
+                    ? Icons.document_scanner
+                    : Icons.info_outline,
+                size: 15,
+                color: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
+                    ? const Color(0xFF2563EB)
+                    : const Color(0xFF475569),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
+                      ? '📋 2026.01.24 스캔 처방전 기반 실시간 복약 일정 (총 ${widget.scannedDrugs!.length}개 의약품 연동)'
+                      : '💡 복약 스케줄: ${widget.profile.name}의 활성 처방약(복용 중) 기준 맞춤 일정입니다. 처방전 스캔 시 자동 동기화됩니다.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
+                        ? const Color(0xFF1E40AF)
+                        : const Color(0xFF334155),
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Today's Medication Timeline with interactive toggle & progress
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('오늘의 복약 일정', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: _progress == 1.0 ? const Color(0xFF10B981).withValues(alpha: 0.15) : const Color(0xFFFF6B8B).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$_completedCount/${_doses.length} 완료 (${(_progress * 100).round()}%)',
+                style: TextStyle(
+                  color: _progress == 1.0 ? const Color(0xFF059669) : const Color(0xFFFF6B8B),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        // Progress Bar
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: _progress,
+            minHeight: 6,
+            backgroundColor: Colors.grey.shade200,
+            valueColor: AlwaysStoppedAnimation<Color>(_progress == 1.0 ? const Color(0xFF10B981) : const Color(0xFFFF6B8B)),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        ..._doses.map((dose) => Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _buildTimelineCard(dose),
+        )),
+
+        const SizedBox(height: 10),
+        // Today's Safety Tip Banner
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFBEB),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFFDE68A)),
+          ),
+          child: const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('🔑', style: TextStyle(fontSize: 18)),
+              SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('오늘의 복약 안심 정보', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF92400E))),
+                    SizedBox(height: 2),
+                    Text('하준이가 먹는 세페클러계 항생제는 졸음을 유발할 수 있으니 수분 섭취를 충분히 해주세요.',
+                        style: TextStyle(fontSize: 11, color: Color(0xFFB45309))),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // 💡 소아과 안심 케어 TIP & 긴급 가이드 (하단 2열 컴팩트 카드)
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.health_and_safety_outlined, size: 16, color: Color(0xFFFF6B8B)),
+                  SizedBox(width: 6),
+                  Text('안심 케어 TIP & 긴급 가이드', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  // 1. 열날 때 해열제 계산기 카드 (컴팩트)
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => _openAntipyreticCalculatorModal(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF7ED),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFFED7AA)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Text('🌡️', style: TextStyle(fontSize: 16)),
+                                SizedBox(width: 4),
+                                Expanded(
+                                  child: Text('해열제 교차계산', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFFC2410C))),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text('체온별 적정량·안전 간격', style: TextStyle(fontSize: 9.5, color: Colors.brown.shade700)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // 2. 토했을 때 가이드 카드 (컴팩트)
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => _openVomitGuidanceModal(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFECFDF5),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFA7F3D0)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Text('🤢', style: TextStyle(fontSize: 16)),
+                                SizedBox(width: 4),
+                                Expanded(
+                                  child: Text('토했을 때 가이드', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF065F46))),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text('10분/30분 재투약 수칙', style: TextStyle(fontSize: 9.5, color: Colors.teal.shade800)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimelineCard(_TodayDoseItem dose) {
+    final statusColor = dose.isCompleted ? const Color(0xFF10B981) : const Color(0xFFFF6B8B);
+    final statusText = dose.isCompleted ? '✓ 복용 완료' : '복용 대기';
+
+    return GestureDetector(
+      onTap: () => _toggleDose(dose),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: dose.isCompleted ? const Color(0xFFA7F3D0) : Colors.transparent,
+            width: dose.isCompleted ? 1.5 : 1,
+          ),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    dose.timeTag,
+                    style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      dose.title,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        decoration: dose.isCompleted ? TextDecoration.lineThrough : null,
+                        color: dose.isCompleted ? Colors.grey.shade600 : Colors.black87,
+                      ),
+                    ),
+                    Text(dose.subtitle, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                  ],
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    dose.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
+                    size: 14,
+                    color: statusColor,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(statusText, style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ----------------------------------------------------------------------
+// 2. DRUGS LIST SCREEN (처방약 목록 및 상세 화면)
+// ----------------------------------------------------------------------
+class DrugsListScreen extends StatefulWidget {
+  final MemberProfile profile;
+  final List<DrugAnalysisResult> scannedDrugs;
+  final VoidCallback? onGoBack;
+
+  const DrugsListScreen({
+    super.key,
+    required this.profile,
+    this.scannedDrugs = const [],
+    this.onGoBack,
+  });
+
+  @override
+  State<DrugsListScreen> createState() => _DrugsListScreenState();
+}
+
+class _DrugsListScreenState extends State<DrugsListScreen> {
+  bool _isDetailView = false;
+  int _tabFilter = 0; // 0: 복용 중, 1: 복용 완료
+  String _selectedDrug = '코미시럽 (코감기약)';
+  String _selectedCategory = '권장대비: 상위 안심 1등급';
+  String _selectedDesc = '코막힘, 콧물, 재채기 등 알레르기성 비염 증상 완화제';
+
+  final Set<String> _completedDrugTitles = {
+    '비오플 250산 (유산균 정장제)',
+    '세파클러 건조시럽 (2세대 세파 항생제)',
+    '맥시부펜 시럽 (덱시부프로펜 해열제)',
+    '풀미코트 분무용 현탁액 (호흡기 흡입액)',
+    '유시락스 시럽 (가려움/알레르기)',
+  };
+
+  void _toggleDrugCompletion(String drugTitle) {
+    setState(() {
+      if (_completedDrugTitles.contains(drugTitle)) {
+        _completedDrugTitles.remove(drugTitle);
+      } else {
+        _completedDrugTitles.add(drugTitle);
+      }
+    });
+
+    final isNowDone = _completedDrugTitles.contains(drugTitle);
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isNowDone
+              ? '✓ "$drugTitle"(이)가 [복용 완료]로 이동되었습니다! 🎉'
+              : '"$drugTitle"(이)가 [복용 중]으로 다시 이동되었습니다.',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isDetailView) {
+      return _buildDrugDetailView();
+    }
+
+    final baseActiveList = [
+      '코미시럽 (코감기약)',
+      '아모클란듀오 시럽 (항생제)',
+    ];
+
+    final scannedActiveList = widget.scannedDrugs.map((d) => d.drugName).toList();
+    final allPossibleActive = [...baseActiveList, ...scannedActiveList];
+
+    final currentActiveCount = allPossibleActive.where((d) => !_completedDrugTitles.contains(d)).length;
+    final currentCompletedCount = _completedDrugTitles.length;
+
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Row(
+          children: [
+            if (widget.onGoBack != null) ...[
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: widget.onGoBack,
+              ),
+              const SizedBox(width: 8),
+            ],
+            const Text('우리아이 처방약 목록', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 14),
+
+        // Segmented Tab - 복용 중 / 복용 완료 (클릭 필터 전환 지원)
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(16)),
+          child: Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _tabFilter = 0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 9),
+                    decoration: BoxDecoration(
+                      color: _tabFilter == 0 ? const Color(0xFFFF6B8B) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '복용 중 ($currentActiveCount)',
+                        style: TextStyle(
+                          color: _tabFilter == 0 ? Colors.white : Colors.grey.shade700,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _tabFilter = 1),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 9),
+                    decoration: BoxDecoration(
+                      color: _tabFilter == 1 ? const Color(0xFFFF6B8B) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '복용 완료 ($currentCompletedCount)',
+                        style: TextStyle(
+                          color: _tabFilter == 1 ? Colors.white : Colors.grey.shade700,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Filtered Drug Cards
+        if (_tabFilter == 0) ...[
+          // 복용 중 약품 목록
+          if (!_completedDrugTitles.contains('코미시럽 (코감기약)'))
+            _buildDrugCard(
+              title: '코미시럽 (코감기약)',
+              prescriptionMeta: '소아과 1월 24일 처방',
+              dosage: '1일 3회, 1회 4ml',
+              remainingDays: '남은 복용 기간 2일',
+              statusBadge: '복용 중',
+              statusColor: const Color(0xFFFF6B8B),
+              onTap: () => setState(() {
+                _selectedDrug = '코미시럽 (코감기약)';
+                _selectedCategory = '권장대비: 상위 안심 1등급';
+                _selectedDesc = '코막힘, 콧물, 재채기 등 알레르기성 비염 증상 완화제';
+                _isDetailView = true;
+              }),
+            ),
+          if (!_completedDrugTitles.contains('코미시럽 (코감기약)'))
+            const SizedBox(height: 12),
+
+          if (!_completedDrugTitles.contains('아모클란듀오 시럽 (항생제)'))
+            _buildDrugCard(
+              title: '아모클란듀오 시럽 (항생제)',
+              prescriptionMeta: '이비인후과 1월 20일 처방',
+              dosage: '1일 2회, 1회 3ml',
+              remainingDays: '남은 복용 기간 5일',
+              statusBadge: '복용 중',
+              statusColor: const Color(0xFFFF6B8B),
+              onTap: () => setState(() {
+                _selectedDrug = '아모클란듀오 시럽 (항생제)';
+                _selectedCategory = '권장대비: 적정 항생 처방';
+                _selectedDesc = '중이염 및 호흡기 감염 치료용 복합 항생제';
+                _isDetailView = true;
+              }),
+            ),
+          if (!_completedDrugTitles.contains('아모클란듀오 시럽 (항생제)'))
+            const SizedBox(height: 12),
+
+          // 새로 스캔된 약품들 동적 반영 (복용 완료된 것은 제외)
+          ...widget.scannedDrugs
+              .where((scanned) => !_completedDrugTitles.contains(scanned.drugName))
+              .map((scanned) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildDrugCard(
+                      title: scanned.drugName,
+                      prescriptionMeta: '인식: ${scanned.originalScanned} · 유사도 ${(scanned.confidence * 100).toInt()}%',
+                      dosage: scanned.status == 'SAFE' ? '${widget.profile.name} ${widget.profile.weightKg}kg 적정 용량' : '소아 용량 주의 확인 필요',
+                      remainingDays: '안심 복약 진행 중',
+                      statusBadge: scanned.status == 'SAFE' ? '복용 중' : '⚠️ 주의',
+                      statusColor: scanned.status == 'SAFE' ? const Color(0xFFFF6B8B) : const Color(0xFFDC2626),
+                      onTap: () => setState(() {
+                        _selectedDrug = scanned.drugName;
+                        _selectedCategory = scanned.status == 'SAFE' ? '적정 소아 처방' : '⚠️ 용량 점검 요망';
+                        _selectedDesc = scanned.comment;
+                        _isDetailView = true;
+                      }),
+                    ),
+                  )),
+
+          if (currentActiveCount == 0)
+            Container(
+              padding: const EdgeInsets.all(32),
+              alignment: Alignment.center,
+              child: const Column(
+                children: [
+                  Text('🎉', style: TextStyle(fontSize: 40)),
+                  SizedBox(height: 12),
+                  Text('현재 복용 중인 모든 처방약을 완료했습니다!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  SizedBox(height: 4),
+                  Text('복약 완료 탭에서 이전 복용 기록을 확인하실 수 있습니다.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                ],
+              ),
+            ),
+        ] else ...[
+          // 복용 완료된 처방약 목록 (상단 기본약 중 완료된 것들 동적 표시)
+          if (_completedDrugTitles.contains('코미시럽 (코감기약)')) ...[
+            _buildDrugCard(
+              title: '코미시럽 (코감기약)',
+              prescriptionMeta: '소아과 1월 24일 처방',
+              dosage: '1일 3회, 1회 4ml',
+              remainingDays: '복용 완료',
+              statusBadge: '✓ 복용 완료',
+              statusColor: const Color(0xFF10B981),
+              onTap: () => setState(() {
+                _selectedDrug = '코미시럽 (코감기약)';
+                _selectedCategory = '완료 기록';
+                _selectedDesc = '코막힘, 콧물, 재채기 등 알레르기성 비염 증상 완화제';
+                _isDetailView = true;
+              }),
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (_completedDrugTitles.contains('아모클란듀오 시럽 (항생제)')) ...[
+            _buildDrugCard(
+              title: '아모클란듀오 시럽 (항생제)',
+              prescriptionMeta: '이비인후과 1월 20일 처방',
+              dosage: '1일 2회, 1회 3ml',
+              remainingDays: '복용 완료',
+              statusBadge: '✓ 복용 완료',
+              statusColor: const Color(0xFF10B981),
+              onTap: () => setState(() {
+                _selectedDrug = '아모클란듀오 시럽 (항생제)';
+                _selectedCategory = '완료 기록';
+                _selectedDesc = '중이염 및 호흡기 감염 치료용 복합 항생제';
+                _isDetailView = true;
+              }),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // 기본 과거 완료 처방약 히스토리
+          if (_completedDrugTitles.contains('비오플 250산 (유산균 정장제)')) ...[
+            _buildDrugCard(
+              title: '비오플 250산 (유산균 정장제)',
+              prescriptionMeta: '소아과 1월 5일 처방',
+              dosage: '1일 2회, 1회 1포',
+              remainingDays: '5일간 복용 완료',
+              statusBadge: '✓ 복용 완료',
+              statusColor: const Color(0xFF10B981),
+              onTap: () => setState(() {
+                _selectedDrug = '비오플 250산 (유산균 정장제)';
+                _selectedCategory = '완료 기록';
+                _selectedDesc = '장내 균총 정상화 및 설사 개선용 소아 정장 생균제';
+                _isDetailView = true;
+              }),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          if (_completedDrugTitles.contains('세파클러 건조시럽 (2세대 세파 항생제)')) ...[
+            _buildDrugCard(
+              title: '세파클러 건조시럽 (2세대 세파 항생제)',
+              prescriptionMeta: '소아과 12월 28일 처방',
+              dosage: '1일 3회, 1회 3.5ml',
+              remainingDays: '7일간 복용 완료',
+              statusBadge: '✓ 복용 완료',
+              statusColor: const Color(0xFF10B981),
+              onTap: () => setState(() {
+                _selectedDrug = '세파클러 건조시럽 (2세대 세파 항생제)';
+                _selectedCategory = '완료 기록';
+                _selectedDesc = '기관지염 및 편도염 치료용 소아용 세파계 항생제';
+                _isDetailView = true;
+              }),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          if (_completedDrugTitles.contains('맥시부펜 시럽 (덱시부프로펜 해열제)')) ...[
+            _buildDrugCard(
+              title: '맥시부펜 시럽 (덱시부프로펜 해열제)',
+              prescriptionMeta: '소아과 12월 15일 처방',
+              dosage: '발열 시 1회 4ml (4~6시간 간격)',
+              remainingDays: '3일간 복용 완료',
+              statusBadge: '✓ 복용 완료',
+              statusColor: const Color(0xFF10B981),
+              onTap: () => setState(() {
+                _selectedDrug = '맥시부펜 시럽 (덱시부프로펜 해열제)';
+                _selectedCategory = '완료 기록';
+                _selectedDesc = '유소아 급성 상기도 감염으로 인한 발열 완화 해열진통소염제';
+                _isDetailView = true;
+              }),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          if (_completedDrugTitles.contains('풀미코트 분무용 현탁액 (호흡기 흡입액)')) ...[
+            _buildDrugCard(
+              title: '풀미코트 분무용 현탁액 (호흡기 흡입액)',
+              prescriptionMeta: '이비인후과 11월 20일 처방',
+              dosage: '1일 2회, 네블라이저 흡입',
+              remainingDays: '4일간 복용 완료',
+              statusBadge: '✓ 복용 완료',
+              statusColor: const Color(0xFF10B981),
+              onTap: () => setState(() {
+                _selectedDrug = '풀미코트 분무용 현탁액 (호흡기 흡입액)';
+                _selectedCategory = '완료 기록';
+                _selectedDesc = '소아 후두염(크룹) 및 기관지 천식 증상 완화제';
+                _isDetailView = true;
+              }),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          if (_completedDrugTitles.contains('유시락스 시럽 (가려움/알레르기)')) ...[
+            _buildDrugCard(
+              title: '유시락스 시럽 (가려움/알레르기)',
+              prescriptionMeta: '피부과 11월 02일 처방',
+              dosage: '취침 전 1회 2ml',
+              remainingDays: '3일간 복용 완료',
+              statusBadge: '✓ 복용 완료',
+              statusColor: const Color(0xFF10B981),
+              onTap: () => setState(() {
+                _selectedDrug = '유시락스 시럽 (가려움/알레르기)';
+                _selectedCategory = '완료 기록';
+                _selectedDesc = '소아 알레르기성 피부염 및 가려움 완화 항히스타민제';
+                _isDetailView = true;
+              }),
+            ),
+          ],
+        ],
+      ],
+    );
+  }
+
+  Widget _buildDrugCard({
+    required String title,
+    required String prescriptionMeta,
+    required String dosage,
+    required String remainingDays,
+    String statusBadge = '복용 중',
+    Color statusColor = const Color(0xFFFF6B8B),
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    statusBadge,
+                    style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Colors.grey),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            Text(prescriptionMeta, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+            const Divider(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(dosage, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    remainingDays,
+                    style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrugDetailView() {
+    final isCompleted = _completedDrugTitles.contains(_selectedDrug);
+
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Row(
+          children: [
+            IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => setState(() => _isDetailView = false)),
+            const Text('처방약 상세 정보', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Top Grade Card
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: const Color(0xFFFFF0F3), borderRadius: BorderRadius.circular(12)),
+                child: Text(_selectedCategory, style: const TextStyle(color: Color(0xFFFF6B8B), fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 8),
+              Text(_selectedDrug, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(_selectedDesc, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Weight Dosage Verification Card
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('${widget.profile.name} 맞춤 용량 검증', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(color: const Color(0xFFECFDF5), borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFA7F3D0))),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('🟢 용량 적정치 일치 (검증 완료)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF047857))),
+                    const SizedBox(height: 4),
+                    Text('${widget.profile.name} 몸무게(${widget.profile.weightKg}kg) 대비 1회 적정 권장량은 ${(widget.profile.weightKg! * 0.4).toStringAsFixed(1)}ml ~ ${(widget.profile.weightKg! * 0.5).toStringAsFixed(1)}ml 입니다. 현재 처방 용량은 안전한 범위에 속합니다.',
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF065F46), height: 1.4)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Ingredients
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          child: const Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('주요 성분 & 안심 등급', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                SizedBox(height: 10),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('페닐레프린염산염', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  subtitle: Text('코막힘 완화 · 혈관 수축 작용', style: TextStyle(fontSize: 11)),
+                  trailing: Chip(label: Text('안심', style: TextStyle(fontSize: 10, color: Color(0xFF047857))), backgroundColor: Color(0xFFECFDF5)),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('클로르페니라민말레산염', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  subtitle: Text('항히스타민제 · 졸음 및 목마름 모니터링', style: TextStyle(fontSize: 11)),
+                  trailing: Chip(label: Text('주의', style: TextStyle(fontSize: 10, color: Color(0xFFB45309))), backgroundColor: Color(0xFFFFFBEB)),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Storage & Discard D-Day Guidance Card
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.inventory_2_outlined, color: Color(0xFF2563EB), size: 18),
+                  SizedBox(width: 8),
+                  Text('보관 방법 & 폐기 기한', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _selectedDrug.contains('아모클') || _selectedDrug.contains('아모크')
+                      ? const Color(0xFFEFF6FF)
+                      : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: _selectedDrug.contains('아모클') || _selectedDrug.contains('아모크')
+                        ? const Color(0xFFBFDBFE)
+                        : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          _selectedDrug.contains('아모클') || _selectedDrug.contains('아모크') ? '❄️' : '🌡️',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _selectedDrug.contains('아모클') || _selectedDrug.contains('아모크')
+                              ? '냉장 보관(2~8℃) 필수'
+                              : _selectedDrug.contains('클래리')
+                                  ? '실온 보관(1~30℃, 냉장보관 금지)'
+                                  : '실온 차광 보관(1~30℃)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: _selectedDrug.contains('아모클') || _selectedDrug.contains('아모크')
+                                ? const Color(0xFF1D4ED8)
+                                : const Color(0xFF334155),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _selectedDrug.contains('아모클') || _selectedDrug.contains('아모크')
+                          ? '• 개봉/조제 후 7일 이내 폐기 (상온 방치 시 역가가 급감하여 효과 없음)\n• 💊 항생제 완약 복용: 증상이 좋아져도 처방 일수를 끝까지 복용해야 내성균이 생기지 않습니다.'
+                          : _selectedDrug.contains('클래리')
+                              ? '• 조제 후 14일 이내 폐기\n• ⚠️ 주의: 냉장 보관 시 쓴맛이 심해져 아기가 복용을 거부할 수 있으므로 반드시 실온 보관하세요.'
+                              : '• 개봉 후 30일 이내 권장\n• 직사광선을 피해 서늘하고 건조한 실온에 보관하세요.',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: _selectedDrug.contains('아모클') || _selectedDrug.contains('아모크')
+                            ? const Color(0xFF1E40AF)
+                            : const Color(0xFF475569),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Toggle Active / Completed Button
+        ElevatedButton.icon(
+          icon: Icon(isCompleted ? Icons.undo : Icons.check_circle, size: 20),
+          label: Text(
+            isCompleted ? '🔄 다시 [복용 중]으로 변경' : '✓ [복용 완료]로 변경',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isCompleted ? const Color(0xFFFF6B8B) : const Color(0xFF10B981),
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(52),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          ),
+          onPressed: () {
+            _toggleDrugCompletion(_selectedDrug);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+// ----------------------------------------------------------------------
+// 3. SCAN SCREEN (OCR 카메라 스캔 화면)
+// ----------------------------------------------------------------------
+class ScanScreen extends StatefulWidget {
+  final MemberProfile profile;
+  final Function(int) onNavigateTab;
+  final Function(List<DoctorQnaItem>) onUpdateQuestions;
+  final Function(List<DrugAnalysisResult>)? onUpdateScannedDrugs;
+  final VoidCallback? onGoBack;
+
+  const ScanScreen({
+    super.key,
+    required this.profile,
+    required this.onNavigateTab,
+    required this.onUpdateQuestions,
+    this.onUpdateScannedDrugs,
+    this.onGoBack,
+  });
+
+  @override
+  State<ScanScreen> createState() => _ScanScreenState();
+}
+
+class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  bool _isAnalyzing = false;
+  String? _selectedImageName;
+  Uint8List? _previewImageBytes;
+  PrescriptionAnalysisResponse? _analysisResult;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _processScanWithDrugs(List<ScannedDrugItem> drugs) async {
+    setState(() => _isAnalyzing = true);
+
+    try {
+      final res = await ApiService.analyzePrescription(
+        profile: widget.profile,
+        scannedDrugs: drugs,
+      );
+
+      widget.onUpdateQuestions(res.doctorQna);
+      widget.onUpdateScannedDrugs?.call(res.analyzedDrugs);
+
+      if (mounted) {
+        setState(() {
+          _analysisResult = res;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('스캔 분석 실패: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isAnalyzing = false);
+      }
+    }
+  }
+
+  // 실제 업로드된 처방전 이미지 바이트를 Base64로 인코딩하여 백엔드 Gemini Vision OCR로 전달
+  Future<void> _processScanWithImage() async {
+    if (_previewImageBytes == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('⚠️ 분석할 처방전 사진을 먼저 촬영하거나 앨범에서 선택해 주세요.'),
+          backgroundColor: Color(0xFFF59E0B),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isAnalyzing = true);
+
+    try {
+      final base64Image = base64Encode(_previewImageBytes!);
+      final res = await ApiService.analyzePrescriptionImage(
+        profile: widget.profile,
+        imageBase64: base64Image,
+        mimeType: 'image/jpeg',
+      );
+
+      widget.onUpdateQuestions(res.doctorQna);
+      widget.onUpdateScannedDrugs?.call(res.analyzedDrugs);
+
+      if (mounted) {
+        setState(() {
+          _analysisResult = res;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        final errorMsg = e.toString().contains('OCR_EXTRACTION_FAILED')
+            ? '⚠️ 처방전 글씨를 정확히 인식하지 못했습니다. 약봉투를 밝은 곳에서 글씨가 선명하도록 다시 촬영하거나, 직접 입력해 주세요.'
+            : '처방전 이미지 분석 중 오류가 발생했습니다: $e';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: const Color(0xFFEF4444),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isAnalyzing = false);
+      }
+    }
+  }
+
+  // 1. 앨범/갤러리에서 사진 가져오기 (미리보기 단계로 진입)
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1920,
+      );
+
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        if (mounted) {
+          setState(() {
+            _previewImageBytes = bytes;
+            _selectedImageName = pickedFile.name;
+            _analysisResult = null; // 미리보기 화면 전환
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('앨범 사진 불러오기 실패: $e')),
+        );
+      }
+    }
+  }
+
+  // 2. 카메라 촬영 (미리보기 단계로 진입)
+  Future<void> _captureFromCamera() async {
+    try {
+      final XFile? captured = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1920,
+      );
+
+      if (captured != null) {
+        final bytes = await captured.readAsBytes();
+        if (mounted) {
+          setState(() {
+            _previewImageBytes = bytes;
+            _selectedImageName = captured.name;
+            _analysisResult = null; // 미리보기 화면 전환
+          });
+        }
+      }
+    } catch (_) {
+      // 카메라 하드웨어나 권한 문제 시 갤러리 선택으로 자연스럽게 Fallback
+      await _pickImageFromGallery();
+    }
+  }
+
+  // 2. 직접 수동 입력 모달 다이얼로그 오픈
+  void _openManualInputDialog() {
+    final nameCtrl = TextEditingController(text: '코미시럽');
+    final doseCtrl = TextEditingController(text: '4.0');
+    final freqCtrl = TextEditingController(text: '3');
+    final daysCtrl = TextEditingController(text: '3');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 24,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('✎ 처방약 직접 입력', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${widget.profile.name}(${widget.profile.weightKg}kg) 맞춤 용량 및 안전성 검증을 위해 약품 정보를 입력해 주세요.',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 18),
+
+              // 약품명
+              TextField(
+                controller: nameCtrl,
+                decoration: InputDecoration(
+                  labelText: '약품명 (처방전 또는 약봉투 이름)',
+                  hintText: '예: 코미시럽, 아모클란듀오',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                  prefixIcon: const Icon(Icons.medication, color: Color(0xFFFF6B8B)),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // 1회 투약량 & 1일 횟수
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: doseCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: '1회 투여량 (ml 또는 정)',
+                        hintText: '4.0',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                        prefixIcon: const Icon(Icons.science, color: Color(0xFF10B981)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: freqCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: '1일 복용 횟수',
+                        hintText: '3',
+                        suffixText: '회',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                        prefixIcon: const Icon(Icons.repeat, color: Colors.blue),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              TextField(
+                controller: daysCtrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: '처방/투약 일수',
+                  hintText: '3',
+                  suffixText: '일분',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                  prefixIcon: const Icon(Icons.calendar_today, color: Colors.orange),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6B8B),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                ),
+                onPressed: () {
+                  final drugName = nameCtrl.text.trim();
+                  final dose = double.tryParse(doseCtrl.text.trim()) ?? 4.0;
+                  final freq = int.tryParse(freqCtrl.text.trim()) ?? 3;
+                  final days = int.tryParse(daysCtrl.text.trim()) ?? 3;
+
+                  if (drugName.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('약품명을 입력해 주세요.')),
+                    );
+                    return;
+                  }
+
+                  Navigator.pop(ctx);
+
+                  _processScanWithDrugs([
+                    ScannedDrugItem(scannedName: drugName, doseUnit: dose, freqPerDay: freq, days: days),
+                  ]);
+                },
+                child: const Text('안심 분석 시작하기 ➔', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _applyAiDeduction(DrugAnalysisResult originalDrug, AiDeduction deduction) async {
+    if (_analysisResult == null) return;
+
+    setState(() => _isAnalyzing = true);
+    try {
+      final targetName = deduction.suggestedDbKey.isNotEmpty ? deduction.suggestedDbKey : deduction.deducedName;
+
+      final updatedList = <ScannedDrugItem>[];
+      for (final drug in _analysisResult!.analyzedDrugs) {
+        final origDose = drug.scannedDoseUnit ?? 1.0;
+        final origFreq = drug.scannedFreqPerDay ?? 3;
+        final origDays = drug.scannedDays ?? 3;
+
+        if (drug.drugName == originalDrug.drugName && drug.originalScanned == originalDrug.originalScanned) {
+          // MED-02: AI 자동 보정 시 원래 처방전의 1회 투여량, 1일 복용 횟수, 복용 일수를 100% 보존
+          updatedList.add(ScannedDrugItem(
+            scannedName: targetName,
+            doseUnit: origDose,
+            freqPerDay: origFreq,
+            days: origDays,
+          ));
+        } else {
+          updatedList.add(ScannedDrugItem(
+            scannedName: drug.drugName,
+            doseUnit: origDose,
+            freqPerDay: origFreq,
+            days: origDays,
+          ));
+        }
+      }
+
+      await _processScanWithDrugs(updatedList);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✓ AI 스마트 추천으로 "$targetName"(으)로 자동 보정하여 용량 분석을 완료했습니다!'),
+            backgroundColor: const Color(0xFF10B981),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('자동 보정 실패: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isAnalyzing = false);
+      }
+    }
+  }
+
+  Widget _buildAiDeductionCard(DrugAnalysisResult d) {
+    final deduction = d.aiDeduction;
+    if (deduction == null) return const SizedBox.shrink();
+
+    final deducedName = deduction.deducedName;
+    final ingredient = deduction.ingredient;
+    final category = deduction.category;
+    final reason = deduction.reason;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFAF5FF), Color(0xFFF3E8FF)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFD8B4FE)),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(color: const Color(0xFF8B5CF6), borderRadius: BorderRadius.circular(8)),
+                    child: const Text('🤖', style: TextStyle(fontSize: 14)),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    '혹시 이 약을 찾으셨나요? (AI 스마트 추천)',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF6B21A8)),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                child: const Text('Gemini AI', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF7C3AED))),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Text('추천 약품: ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF581C87))),
+              Expanded(
+                child: Text(
+                  deducedName,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF6B21A8)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Text('주요 성분: ', style: TextStyle(fontSize: 11, color: Color(0xFF4C1D95))),
+              Expanded(
+                child: Text(
+                  '$ingredient ($category)',
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF581C87)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            reason,
+            style: const TextStyle(fontSize: 11, color: Color(0xFF4C1D95), height: 1.35),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF7C3AED),
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(42),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            icon: _isAnalyzing
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                  )
+                : const Icon(Icons.auto_fix_high, size: 16),
+            label: Text(
+              _isAnalyzing ? 'AI 보정 및 용량 재검증 중...' : '✓ "$deducedName"(으)로 자동 보정하여 용량 검증',
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+            onPressed: _isAnalyzing
+                ? null
+                : () {
+                    _applyAiDeduction(d, deduction);
+                  },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnalysisResultView(PrescriptionAnalysisResponse result) {
+    final hasWarning = result.analyzedDrugs.any((d) => d.status == 'WARNING' || d.status == 'HIGH');
+    final hasUnknown = result.analyzedDrugs.any((d) => d.status == 'UNKNOWN');
+
+    return Stack(
+      children: [
+        ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    if (widget.onGoBack != null) ...[
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: widget.onGoBack,
+                        tooltip: '이전 화면으로',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    const Text('처방전 안심 분석 결과', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: Colors.grey),
+                  tooltip: '다시 스캔하기',
+                  onPressed: () => setState(() {
+                    _analysisResult = null;
+                    _selectedImageName = null;
+                  }),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // 실시간 동적 종합 상태 배너 (모순 없는 정확한 판정)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: hasWarning
+                    ? const Color(0xFFFEF2F2)
+                    : hasUnknown
+                        ? const Color(0xFFFFFBEB)
+                        : const Color(0xFFECFDF5),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: hasWarning
+                      ? const Color(0xFFFECACA)
+                      : hasUnknown
+                          ? const Color(0xFFFDE68A)
+                          : const Color(0xFFA7F3D0),
+                ),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: hasWarning
+                        ? const Color(0xFFDC2626)
+                        : hasUnknown
+                            ? const Color(0xFFD97706)
+                            : const Color(0xFF10B981),
+                    radius: 20,
+                    child: Icon(
+                      hasWarning
+                          ? Icons.warning_amber_rounded
+                          : hasUnknown
+                              ? Icons.help_outline
+                              : Icons.check,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          hasWarning
+                              ? '${widget.profile.name}(${widget.profile.weightKg}kg) 소아 체중 기준 용량 초과 주의'
+                              : hasUnknown
+                                  ? '${widget.profile.name}(${widget.profile.weightKg}kg) 소아 권장 용량 확인 필요'
+                                  : '${widget.profile.name}(${widget.profile.weightKg}kg) 전 약품 적정 용량 부합',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: hasWarning
+                                ? const Color(0xFF991B1B)
+                                : hasUnknown
+                                    ? const Color(0xFF92400E)
+                                    : const Color(0xFF065F46),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          hasWarning
+                              ? '처방된 약품 중 1일 또는 1회 최대 상한을 초과한 약품이 있습니다. 아래 주의 사유를 확인하고 반드시 감량 또는 의사 상담을 진행하세요.'
+                              : hasUnknown
+                                  ? '식약처 허가 의약품이나 소아 체중당 기준 정보가 미등록되어 용량 검증에 의사·약사의 복약 지도가 필요합니다.'
+                                  : '모든 처방약이 식약처 e-약은요 공공데이터 및 소아 체중 기준 안전 범위에 부합합니다.',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: hasWarning
+                                ? const Color(0xFFB91C1C)
+                                : hasUnknown
+                                    ? const Color(0xFFB45309)
+                                    : const Color(0xFF047857),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Analyzed Drugs Section
+            const Text('분석된 처방 의약품', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            const SizedBox(height: 10),
+            ...result.analyzedDrugs.map((d) {
+              final bool isSafe = d.status == 'SAFE';
+              final bool isModified = d.originalScanned.trim() != d.drugName.trim();
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isModified
+                        ? const Color(0xFFC084FC)
+                        : isSafe
+                            ? Colors.grey.shade200
+                            : const Color(0xFFFCA5A5),
+                    width: isModified ? 1.5 : 1.0,
+                  ),
+                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 헤더 Row: 약품명 + 우측 슬림 미니 배지 칩 모음
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.medication, color: isSafe ? const Color(0xFFFF6B8B) : const Color(0xFFDC2626), size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            d.drugName,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        // 우측 컴팩트 배지 Wrap (적정용량/주의 + 보관법 + 폐기일 + 완약복용 칩)
+                        Wrap(
+                          spacing: 4,
+                          runSpacing: 4,
+                          alignment: WrapAlignment.end,
+                          children: [
+                            // 1. 용량 판정 뱃지
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: isSafe
+                                    ? const Color(0xFFECFDF5)
+                                    : d.status == 'UNKNOWN'
+                                        ? const Color(0xFFFFFBEB)
+                                        : const Color(0xFFFEF2F2),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isSafe
+                                      ? const Color(0xFFA7F3D0)
+                                      : d.status == 'UNKNOWN'
+                                          ? const Color(0xFFFDE68A)
+                                          : const Color(0xFFFECACA),
+                                ),
+                              ),
+                              child: Text(
+                                isSafe
+                                    ? '🟢 적정 용량'
+                                    : d.status == 'UNKNOWN'
+                                        ? '확인 필요'
+                                        : '⚠️ 주의',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: isSafe
+                                      ? const Color(0xFF047857)
+                                      : d.status == 'UNKNOWN'
+                                          ? const Color(0xFFB45309)
+                                          : const Color(0xFFDC2626),
+                                ),
+                              ),
+                            ),
+                            // 2. 보관법 미니 배지 (실온/냉장)
+                            if (d.storageMethod != null && d.storageMethod!.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: d.storageMethod!.contains('냉장')
+                                      ? const Color(0xFFEFF6FF)
+                                      : const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: d.storageMethod!.contains('냉장')
+                                        ? const Color(0xFFBFDBFE)
+                                        : const Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                child: Text(
+                                  d.storageMethod!.contains('냉장') ? '❄️ 냉장' : '🌡️ 실온',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: d.storageMethod!.contains('냉장')
+                                        ? const Color(0xFF1D4ED8)
+                                        : const Color(0xFF475569),
+                                  ),
+                                ),
+                              ),
+                            // 3. 폐기일 미니 배지
+                            if (d.discardDays != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFF7ED),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: const Color(0xFFFED7AA)),
+                                ),
+                                child: Text(
+                                  '⏳ ${d.discardDays}일 폐기',
+                                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFC2410C)),
+                                ),
+                              ),
+                            // 4. 항생제 완약 복용 미니 배지
+                            if (d.isAntibiotic == true)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFF1F2),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: const Color(0xFFFECDD3)),
+                                ),
+                                child: const Text(
+                                  '💊 완약 복용',
+                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFBE123C)),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      isSafe
+                          ? 'OCR 인식: "${d.originalScanned}" · 유사도: ${(d.confidence * 100).toInt()}% · ${widget.profile.weightKg}kg 권장 용량 부합'
+                          : 'OCR 인식: "${d.originalScanned}" · 유사도: ${(d.confidence * 100).toInt()}%',
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+
+                    // AI 자동 보정 완료 배지 (사용자가 무엇이 바뀌었는지 바로 확인 가능)
+                    if (isModified) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFAF5FF),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFD8B4FE)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.auto_fix_high, size: 13, color: Color(0xFF7C3AED)),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                '✨ AI 자동 보정 적용됨 (원래: "${d.originalScanned}" ➔ 현재: "${d.drugName}")',
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF6B21A8)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    if (d.purpose != null && d.purpose!.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline, size: 14, color: Color(0xFF2563EB)),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                '용도: ${d.purpose}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF1E40AF),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    // 항생제 완약 복용 안내 팁 (심플한 정보 텍스트)
+                    if (d.complianceNote != null) ...[
+                      const SizedBox(height: 6),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.check_circle_outline, size: 13, color: Color(0xFF0284C7)),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                d.complianceNote!,
+                                style: const TextStyle(fontSize: 11, color: Color(0xFF475569), height: 1.3),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    // 주의/확인 필요 시에만 컴팩트한 안내 박스 노출 (적정 용량일 때는 거대한 박스 제거)
+                    if (!isSafe) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: d.status == 'UNKNOWN' ? const Color(0xFFFFFBEB) : const Color(0xFFFFF1F2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: d.status == 'UNKNOWN' ? const Color(0xFFFDE68A) : const Color(0xFFFECACA),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              d.status == 'UNKNOWN' ? Icons.info_outline : Icons.warning_amber_rounded,
+                              color: d.status == 'UNKNOWN' ? const Color(0xFFD97706) : const Color(0xFFDC2626),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                d.comment,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: d.status == 'UNKNOWN' ? const Color(0xFF92400E) : const Color(0xFF991B1B),
+                                  height: 1.35,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    // AI 스마트 추천 ("혹시 이 약을 찾으셨나요?") 카드
+                    // 엄격한 조건: 추천 약품명이 현재 분석된 약품명과 명확히 다를 때만 노출 (동일 약품명 오표기 방지)
+                    if (d.aiDeduction != null &&
+                        d.aiDeduction!.deducedName.trim().isNotEmpty &&
+                        d.aiDeduction!.deducedName.trim() != d.drugName.trim() &&
+                        d.aiDeduction!.deducedName.trim() != d.originalScanned.trim()) ...[
+                      const SizedBox(height: 10),
+                      _buildAiDeductionCard(d),
+                    ],
+                  ],
+                ),
+              );
+            }),
+
+            // DUR Warnings or Safety Check
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: result.durWarnings.isEmpty ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: result.durWarnings.isEmpty ? const Color(0xFFBBF7D0) : const Color(0xFFFECACA)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                result.durWarnings.isEmpty ? Icons.security : Icons.warning_amber_rounded,
+                color: result.durWarnings.isEmpty ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  result.durWarnings.isEmpty
+                      ? '🛡️ 중복 성분 및 병용 금기 상호작용 없음 (안전)'
+                      : result.durWarnings.map((w) => w.message).join('\n'),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: result.durWarnings.isEmpty ? const Color(0xFF15803D) : const Color(0xFFB91C1C),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // AI 안심 복약 3줄 핵심 요약
+        if (result.safetyReport.isNotEmpty) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0F9FF),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFFBAE6FD)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.auto_awesome, color: Color(0xFF0284C7), size: 15),
+                    SizedBox(width: 6),
+                    Text('AI 핵심 안심 요약 (3줄 브리핑)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0369A1))),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  result.safetyReport,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF0C4A6E), height: 1.5, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        // AI Doctor Q&A notification banner
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF0F3),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFFFD6DF)),
+          ),
+          child: Row(
+            children: [
+              const Text('✨', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('소아과 의사용 안심 질문지 준비 완료',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFFFF6B8B))),
+                    const SizedBox(height: 2),
+                    Text('처방 약품을 바탕으로 소아과 진료 시 의사 선생님께 확인할 맞춤 질문 ${result.doctorQna.length}건이 준비되었습니다.',
+                        style: const TextStyle(fontSize: 11, color: Colors.black87)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 20),
+        // 2 Action Buttons
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFF6B8B),
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(52),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            elevation: 2,
+          ),
+          icon: const Icon(Icons.assignment, size: 18),
+          label: Text('📋 의사용 안심 Q&A 보러가기 (${result.doctorQna.length}건) ➔',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          onPressed: () => widget.onNavigateTab(3),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+            minimumSize: const Size.fromHeight(50),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+          icon: const Icon(Icons.medication, color: Color(0xFF10B981)),
+          label: const Text('처방약 복용 정보 목록 보기',
+              style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 14)),
+          onPressed: () => widget.onNavigateTab(1),
+        ),
+        const SizedBox(height: 8),
+        Center(
+          child: TextButton(
+            onPressed: () => setState(() {
+              _analysisResult = null;
+              _previewImageBytes = null;
+              _selectedImageName = null;
+            }),
+            child: const Text('다른 처방전 다시 스캔하기', style: TextStyle(color: Colors.grey, fontSize: 12)),
+          ),
+        ),
+      ],
+    ),
+    if (_isAnalyzing)
+      Positioned.fill(
+        child: Container(
+          color: Colors.black.withValues(alpha: 0.45),
+          child: Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 36),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 16, offset: Offset(0, 4))],
+              ),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3.5,
+                      color: Color(0xFF7C3AED),
+                    ),
+                  ),
+                  SizedBox(height: 18),
+                  Text(
+                    'AI 맞춤 용량 재검증 중...',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1E293B)),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    '소아 체중 기준 적정 복용량을 다시 계산하고 있습니다.',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+  Widget _buildPhotoPreviewConfirmView() {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                if (widget.onGoBack != null) ...[
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: widget.onGoBack,
+                    tooltip: '이전 화면으로',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                const Text('처방전 사진 확인', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            TextButton.icon(
+              icon: const Icon(Icons.refresh, size: 16, color: Colors.grey),
+              label: const Text('다시 선택', style: TextStyle(color: Colors.grey, fontSize: 12)),
+              onPressed: () => setState(() {
+                _previewImageBytes = null;
+                _selectedImageName = null;
+              }),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text('촬영하거나 업로드한 처방전/약봉투 사진이 맞는지 확인해 주세요. 글씨가 선명할수록 정확하게 분석됩니다.',
+            style: TextStyle(color: Colors.grey, fontSize: 12)),
+        const SizedBox(height: 16),
+
+        // Photo Preview Card
+        Container(
+          height: 340,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
+            border: Border.all(color: const Color(0xFFFF6B8B), width: 2),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (_previewImageBytes != null)
+                Image.memory(
+                  _previewImageBytes!,
+                  fit: BoxFit.contain,
+                )
+              else
+                const Center(
+                  child: Icon(Icons.receipt_long, size: 64, color: Colors.white54),
+                ),
+              // File tag overlay at the top
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.65),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 14),
+                      const SizedBox(width: 6),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 220),
+                        child: Text(
+                          _selectedImageName ?? '처방전 이미지',
+                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Checklist Banner
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFBEB),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFFDE68A)),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.info_outline, size: 16, color: Color(0xFFD97706)),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text('약품명, 1회 투약량(ml/정), 1일 복용 횟수가 사진 안에 잘 담겨있는지 확인해 주세요.',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF92400E), height: 1.3)),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+
+        // 1. Analyze Button (Trigger)
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFF6B8B),
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(54),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+            elevation: 2,
+          ),
+          icon: _isAnalyzing
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                )
+              : const Icon(Icons.psychology, size: 22),
+          label: Text(
+            _isAnalyzing ? '${widget.profile.name} 맞춤 용량 및 안전성 분석 중...' : '🔍 처방전 안심 분석 시작하기 ➔',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          onPressed: _isAnalyzing ? null : _processScanWithImage,
+        ),
+        const SizedBox(height: 10),
+
+        // 2. Pre-Review / Direct Edit Button
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Color(0xFFFF6B8B), width: 1.2),
+            minimumSize: const Size.fromHeight(48),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+          icon: const Icon(Icons.edit_note, color: Color(0xFFFF6B8B), size: 20),
+          label: const Text('약품명 직접 확인 & 보정해서 분석하기',
+              style: TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 13)),
+          onPressed: _openManualInputDialog,
+        ),
+        const SizedBox(height: 10),
+
+        // 3. Reselect / Retake Button
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+            minimumSize: const Size.fromHeight(50),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+          icon: const Icon(Icons.photo_library, color: Colors.grey, size: 18),
+          label: const Text('다른 사진으로 다시 선택하기',
+              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
+          onPressed: _isAnalyzing ? null : _pickImageFromGallery,
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    if (_analysisResult != null) {
+      return _buildAnalysisResultView(_analysisResult!);
+    }
+
+    if (_previewImageBytes != null) {
+      return _buildPhotoPreviewConfirmView();
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Row(
+          children: [
+            if (widget.onGoBack != null) ...[
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: widget.onGoBack,
+                tooltip: '이전 화면으로',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: 8),
+            ],
+            const Text('처방전 / 약봉투 스캔', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Camera Viewfinder Box
+        Container(
+          height: 320,
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: const Color(0xFFFF6B8B), width: 2),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                margin: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white30, width: 2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(20)),
+                    child: const Text('🔍 텍스트를 자동으로 감지하는 중', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('처방전이나 약봉투 글씨가 밝고 명확하게 보이도록 넣어주세요.',
+                      style: TextStyle(color: Colors.white70, fontSize: 11), textAlign: TextAlign.center),
+                ],
+              ),
+              Positioned(
+                bottom: 24,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // 앨범 선택 아이콘 버튼
+                    IconButton(
+                      iconSize: 32,
+                      icon: const Icon(Icons.photo_library, color: Colors.white),
+                      tooltip: '앨범에서 선택',
+                      onPressed: _isAnalyzing ? null : _pickImageFromGallery,
+                    ),
+                    // 카메라 촬영 셔터 버튼
+                    GestureDetector(
+                      onTap: _isAnalyzing ? null : _captureFromCamera,
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF6B8B),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 4),
+                        ),
+                        child: _isAnalyzing
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Icon(Icons.camera_alt, color: Colors.white, size: 28),
+                      ),
+                    ),
+                    // 플래시 토글 버튼
+                    IconButton(
+                      iconSize: 28,
+                      icon: const Icon(Icons.flash_auto, color: Colors.white),
+                      tooltip: '플래시',
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        if (_selectedImageName != null) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.image, size: 18, color: Color(0xFFFF6B8B)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('선택된 이미지: $_selectedImageName',
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
+                      overflow: TextOverflow.ellipsis),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // 1. 앨범/갤러리에서 사진 가져오기 버튼
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Color(0xFFFF6B8B), width: 1.5),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            minimumSize: const Size.fromHeight(50),
+          ),
+          icon: const Icon(Icons.photo_library, color: Color(0xFFFF6B8B)),
+          label: const Text('🖼️ 앨범 / 갤러리에서 사진 가져오기',
+              style: TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 14)),
+          onPressed: _isAnalyzing ? null : _pickImageFromGallery,
+        ),
+        const SizedBox(height: 10),
+
+        // 2. 약품 직접 수동 입력 모달 버튼
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFFF0F3),
+            foregroundColor: const Color(0xFFFF6B8B),
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            minimumSize: const Size.fromHeight(50),
+          ),
+          icon: const Icon(Icons.edit_note, color: Color(0xFFFF6B8B)),
+          label: const Text('✎ 약품 직접 입력해서 등록하기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          onPressed: _openManualInputDialog,
+        ),
+        const SizedBox(height: 16),
+
+        // 3. Quick Sample Presets (소아과 대표 처방전 1-Tap 불러오기)
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.auto_awesome, size: 16, color: Color(0xFFFF6B8B)),
+                  SizedBox(width: 6),
+                  Text('소아과 대표 처방전 1-Tap 샘플 분석',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text('처방전 사진이 없으셔도 실제 소아과 다빈도 처방 세트로 즉시 분석 체험이 가능합니다.',
+                  style: TextStyle(fontSize: 11, color: Colors.grey)),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                        side: const BorderSide(color: Color(0xFFFF6B8B)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      onPressed: _isAnalyzing
+                          ? null
+                          : () {
+                              _processScanWithDrugs([
+                                ScannedDrugItem(scannedName: '코미시럽', doseUnit: 4.0, freqPerDay: 3, days: 3),
+                                ScannedDrugItem(scannedName: '암브로콜시럽', doseUnit: 3.0, freqPerDay: 3, days: 3),
+                                ScannedDrugItem(scannedName: '시네츄라시럽', doseUnit: 3.5, freqPerDay: 3, days: 3),
+                                ScannedDrugItem(scannedName: '메디락베베산', doseUnit: 1.0, freqPerDay: 2, days: 3),
+                                ScannedDrugItem(scannedName: '삼아아토크건조시럽', doseUnit: 1.0, freqPerDay: 2, days: 3),
+                                ScannedDrugItem(scannedName: '챔프시럽', doseUnit: 3.6, freqPerDay: 3, days: 3),
+                              ]);
+                            },
+                      child: const Column(
+                        children: [
+                          Text('🏥 감기약 6종 세트', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFFFF6B8B))),
+                          SizedBox(height: 2),
+                          Text('코미·암브로콜·챔프 등', style: TextStyle(fontSize: 10, color: Colors.black54)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                        side: const BorderSide(color: Color(0xFF10B981)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      onPressed: _isAnalyzing
+                          ? null
+                          : () {
+                              _processScanWithDrugs([
+                                ScannedDrugItem(scannedName: '아모클란듀오 시럽', doseUnit: 3.0, freqPerDay: 2, days: 7),
+                                ScannedDrugItem(scannedName: '비오플 250산', doseUnit: 1.0, freqPerDay: 2, days: 7),
+                                ScannedDrugItem(scannedName: '맥시부펜 시럽', doseUnit: 4.6, freqPerDay: 3, days: 3),
+                              ]);
+                            },
+                      child: const Column(
+                        children: [
+                          Text('💊 중이염 항생제 세트', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF10B981))),
+                          SizedBox(height: 2),
+                          Text('아모클란·비오플 등', style: TextStyle(fontSize: 10, color: Colors.black54)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ----------------------------------------------------------------------
+// 4. DOCTOR Q&A SCREEN (소아과 의사용 안심 Q&A 화면)
+// ----------------------------------------------------------------------
+class DoctorQnaScreen extends StatefulWidget {
+  final MemberProfile profile;
+  final List<DoctorQnaItem> questions;
+  final VoidCallback? onGoBack;
+
+  const DoctorQnaScreen({
+    super.key,
+    required this.profile,
+    required this.questions,
+    this.onGoBack,
+  });
+
+  @override
+  State<DoctorQnaScreen> createState() => _DoctorQnaScreenState();
+}
+
+class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
+  late List<DoctorQnaItem> _localQuestions;
+
+  @override
+  void initState() {
+    super.initState();
+    _localQuestions = List.from(widget.questions);
+  }
+
+  @override
+  void didUpdateWidget(DoctorQnaScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 스캔 후 새 질문 목록이 들어오면 업데이트 (커스텀 질문은 유지)
+    if (oldWidget.questions != widget.questions) {
+      final customQuestions = _localQuestions.where((q) => q.id.startsWith('custom_')).toList();
+      _localQuestions = List.from(widget.questions)..addAll(customQuestions);
+    }
+  }
+
+  void _openAddQuestionDialog() {
+    final catCtrl = TextEditingController(text: '보호자 직접 질문');
+    final questionCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        title: const Row(
+          children: [
+            Icon(Icons.edit_note, color: Color(0xFFFF6B8B)),
+            SizedBox(width: 8),
+            Text('나만의 질문 추가', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: catCtrl,
+              decoration: InputDecoration(
+                labelText: '질문 분류',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: questionCtrl,
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: '의사 선생님께 여쭤볼 내용',
+                hintText: '예: 열이 38.5도 넘으면 응급실로 가야 하나요?',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6B8B),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              final text = questionCtrl.text.trim();
+              if (text.isEmpty) return;
+              setState(() {
+                _localQuestions.add(
+                  DoctorQnaItem(
+                    id: 'custom_${DateTime.now().millisecondsSinceEpoch}',
+                    category: catCtrl.text.trim().isEmpty ? '보호자 질문' : catCtrl.text.trim(),
+                    question: text,
+                    isSelected: true,
+                  ),
+                );
+              });
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('질문이 추가되었습니다!')),
+              );
+            },
+            child: const Text('추가하기'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _shareDoctorQuestions() async {
+    final selected = _localQuestions.where((q) => q.isSelected).toList();
+    if (selected.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('공유할 질문을 1개 이상 선택해 주세요.')),
+      );
+      return;
+    }
+
+    final buffer = StringBuffer();
+    buffer.writeln('📋 [My 약 - 소아과 진료 안심 질문지]');
+    buffer.writeln('• 아기 이름: ${widget.profile.name} (${widget.profile.gender}, ${widget.profile.age})');
+    buffer.writeln('• 현재 체중: ${widget.profile.weightKg}kg');
+    if (widget.profile.allergyNotes.isNotEmpty) {
+      buffer.writeln('• 특이사항/알레르기: ${widget.profile.allergyNotes}');
+    }
+    buffer.writeln('');
+    buffer.writeln('[의사 선생님 상담 질문]');
+    for (var i = 0; i < selected.length; i++) {
+      final q = selected[i];
+      buffer.writeln('${i + 1}. [${q.category}] ${q.question}');
+    }
+    buffer.writeln('');
+    final shareText = buffer.toString();
+    try {
+      Clipboard.setData(ClipboardData(text: shareText));
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Color(0xFF10B981), size: 24),
+                    SizedBox(width: 8),
+                    Text('클립보드 복사 완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            const Text('카카오톡, 문자 메시지 또는 병원 접수 메모에 붙여넣어 진료 시 바로 활용하세요.',
+                style: TextStyle(fontSize: 12, color: Colors.grey)),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              constraints: const BoxConstraints(maxHeight: 220),
+              child: SingleChildScrollView(
+                child: Text(shareText, style: const TextStyle(fontSize: 11, height: 1.5, fontFamily: 'monospace')),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.copy, size: 18),
+              label: const Text('다시 복사하기', style: TextStyle(fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6B8B),
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: shareText));
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('질문지가 클립보드에 다시 복사되었습니다.')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Row(
+          children: [
+            if (widget.onGoBack != null) ...[
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: widget.onGoBack,
+                tooltip: '이전 화면으로',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: 8),
+            ],
+            const Text('소아과 의사용 안심 Q&A', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: const Color(0xFFFFF0F3), borderRadius: BorderRadius.circular(24)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text('✨ 스마트 AI 질문지 생성기', style: TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 13)),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFFFCCD5)),
+                    ),
+                    child: const Text('포털·맘카페 다빈도 FAQ 기반', style: TextStyle(fontSize: 10, color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text('${widget.profile.name}(${widget.profile.weightKg}kg)의 처방 의약품 성분과 포털(네이버·맘카페·구글)에서 부모들이 가장 많이 묻는 소아 다빈도 실전 질문들을 선별하여 의사 상담 질문지로 추천해 드립니다.',
+                  style: const TextStyle(fontSize: 11, color: Colors.black87, height: 1.4)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('선택된 질문 목록', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            TextButton.icon(
+              icon: const Icon(Icons.add, size: 16, color: Color(0xFFFF6B8B)),
+              label: const Text('직접 질문 추가', style: TextStyle(color: Color(0xFFFF6B8B), fontSize: 12, fontWeight: FontWeight.bold)),
+              onPressed: _openAddQuestionDialog,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        ..._localQuestions.map((q) => Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: (q.isSelected == true) ? const Color(0xFFFF6B8B) : Colors.transparent),
+          ),
+          child: Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            child: CheckboxListTile(
+              activeColor: const Color(0xFFFF6B8B),
+              value: q.isSelected == true,
+              onChanged: (val) => setState(() => q.isSelected = (val == true)),
+              title: Text(q.question, style: const TextStyle(fontSize: 12, height: 1.4)),
+              subtitle: Text(q.category, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+            ),
+          ),
+        )),
+
+        const SizedBox(height: 16),
+        ElevatedButton.icon(
+          icon: const Icon(Icons.share, color: Colors.white, size: 18),
+          label: const Text('의사 질문지 저장 및 공유하기', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFF6B8B),
+            minimumSize: const Size.fromHeight(52),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+          onPressed: _shareDoctorQuestions,
+        ),
+      ],
+    );
+  }
+}
+
+// ----------------------------------------------------------------------
+// 5. BABY PROFILE & HISTORY SCREEN (아기 프로필 & 이력 화면)
+// ----------------------------------------------------------------------
+class BabyProfileScreen extends StatelessWidget {
+  final MemberProfile profile;
+  final VoidCallback? onSwitchChild;
+  final Function(MemberProfile)? onProfileUpdated;
+  final VoidCallback? onGoBack;
+
+  const BabyProfileScreen({
+    super.key,
+    required this.profile,
+    this.onSwitchChild,
+    this.onProfileUpdated,
+    this.onGoBack,
+  });
+
+  void _openEditProfileDialog(BuildContext context) {
+    final nameCtrl = TextEditingController(text: profile.name);
+    final ageCtrl = TextEditingController(text: profile.age);
+    final weightCtrl = TextEditingController(text: profile.weightKg?.toString() ?? '9.2');
+    final allergyCtrl = TextEditingController(text: profile.allergyNotes);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 24,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('✎ 아기 정보 및 체중 수정', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text('체중 변경 시 소아 용량 검증 및 해열제 계산기가 실시간으로 업데이트됩니다.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey)),
+              const SizedBox(height: 18),
+
+              TextField(
+                controller: nameCtrl,
+                decoration: InputDecoration(
+                  labelText: '아기 이름',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                  prefixIcon: const Icon(Icons.person, color: Color(0xFFFF6B8B)),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: ageCtrl,
+                      decoration: InputDecoration(
+                        labelText: '월령 / 나이',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                        prefixIcon: const Icon(Icons.cake, color: Colors.blue),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: weightCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: '현재 몸무게',
+                        suffixText: 'kg',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                        prefixIcon: const Icon(Icons.monitor_weight, color: Color(0xFF10B981)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              TextField(
+                controller: allergyCtrl,
+                maxLines: 2,
+                decoration: InputDecoration(
+                  labelText: '특이사항 및 알레르기',
+                  hintText: '예: 페니실린 계열 항생제 발진 이력',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                  prefixIcon: const Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626)),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6B8B),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                ),
+                onPressed: () {
+                  final parsedWeight = double.tryParse(weightCtrl.text.trim()) ?? (profile.weightKg ?? 9.2);
+                  final updated = profile.copyWith(
+                    name: nameCtrl.text.trim().isEmpty ? profile.name : nameCtrl.text.trim(),
+                    age: ageCtrl.text.trim().isEmpty ? profile.age : ageCtrl.text.trim(),
+                    weightKg: parsedWeight,
+                    allergyNotes: allergyCtrl.text.trim(),
+                  );
+                  onProfileUpdated?.call(updated);
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('🎉 ${updated.name}의 정보 및 몸무게(${updated.weightKg}kg)가 업데이트되었습니다!')),
+                  );
+                },
+                child: const Text('수정 내용 저장하기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                if (onGoBack != null) ...[
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: onGoBack,
+                    tooltip: '이전 화면으로',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                const Text('아기 프로필 & 이력', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            Row(
+              children: [
+                if (onSwitchChild != null) ...[
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.swap_horiz, size: 14, color: Color(0xFFFF6B8B)),
+                    label: const Text('아이 전환', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFFF6B8B))),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFFFD6DF)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    ),
+                    onPressed: onSwitchChild,
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.edit, size: 14, color: Color(0xFFFF6B8B)),
+                  label: const Text('정보 수정', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFFF6B8B))),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFFFD6DF)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  ),
+                  onPressed: () => _openEditProfileDialog(context),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+          child: Row(
+            children: [
+              const CircleAvatar(
+                radius: 28,
+                backgroundColor: Color(0xFFFFF0F3),
+                child: Text('👶', style: TextStyle(fontSize: 26)),
+              ),
+              const SizedBox(width: 14),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${profile.name} (${profile.gender})', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text('생년월일: ${profile.birthDate}', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                child: Column(
+                  children: [
+                    const Text('월령', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text(profile.age, style: const TextStyle(color: Color(0xFFFF6B8B), fontSize: 15, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                child: Column(
+                  children: [
+                    const Text('현재 몸무게', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text('${profile.weightKg} kg', style: const TextStyle(color: Color(0xFF10B981), fontSize: 15, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+
+        // Allergy Warning Box
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(color: const Color(0xFFFEF2F2), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFFECACA))),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('🚨 특이사항 및 알레르기', style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.bold, fontSize: 12)),
+              const SizedBox(height: 4),
+              Text(profile.allergyNotes, style: const TextStyle(color: Color(0xFFB91C1C), fontSize: 11, height: 1.4)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+
+        const Text('복약 히스토리', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 10),
+
+        ...profile.history.map((h) => Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(h.dateStr, style: const TextStyle(color: Colors.grey, fontSize: 10)),
+              const SizedBox(height: 2),
+              Text(h.drugName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              Text('${h.durationStr} · ${h.clinicName}', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+            ],
+          ),
+        )),
+      ],
+    );
+  }
+}
