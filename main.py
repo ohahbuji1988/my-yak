@@ -61,8 +61,16 @@ class PrescriptionAnalyzeResponse(BaseModel):
     safety_report: str = Field(..., description="Stage 2 안심 복약 가이드 리포트")
     disclaimer: str
 
+from fastapi.responses import FileResponse
+import os
+
+WEB_BUILD_DIR = os.path.join(os.path.dirname(__file__), "build", "web")
+
 @app.get("/")
 def read_root():
+    index_file = os.path.join(WEB_BUILD_DIR, "index.html")
+    if os.path.exists(index_file):
+        return FileResponse(index_file)
     return {
         "service": "My 약 (My Yak) API",
         "status": "running",
@@ -229,18 +237,7 @@ async def analyze_prescription_image(request: PrescriptionAnalyzeImageRequest):
 # Flutter Web 올인원 단일 서빙 (PWA 배포 모드)
 # build/web 디렉터리가 존재하면 FastAPI가 웹 화면과 PWA를 메인 주소에서 직접 서빙
 # ==============================================================================
-import os
 from fastapi.staticfiles import StaticFiles
 
-WEB_BUILD_DIR = os.path.join(os.path.dirname(__file__), "build", "web")
 if os.path.exists(WEB_BUILD_DIR):
     app.mount("/", StaticFiles(directory=WEB_BUILD_DIR, html=True), name="flutter_web")
-else:
-    @app.get("/", summary="API 헬스체크 및 안내 (Web 빌드 전)")
-    def root_info():
-        return {
-            "app": "My 약 (My Yak) API",
-            "status": "online",
-            "docs": "/docs",
-            "message": "Flutter Web 빌드본(build/web)이 감지되면 자동으로 웹 앱 화면이 서빙됩니다."
-        }
