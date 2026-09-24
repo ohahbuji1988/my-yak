@@ -1642,13 +1642,27 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
 
+      String formatDrugsTitle(List<String> list) {
+        if (list.isEmpty) return '';
+        if (list.length == 1) return list.first;
+        if (list.length == 2) return '${list[0]} + ${list[1]}';
+        return '${list.first} 외 ${list.length - 1}종';
+      }
+
+      String formatDrugsSubtitle(List<String> list, String defaultSub) {
+        if (list.length > 2) {
+          return '${list.join(", ")} · $defaultSub';
+        }
+        return '$defaultSub · 스캔 처방전 자동 편성';
+      }
+
       if (morningDrugs.isNotEmpty) {
         final key = '${profile.id}_scanned_morn';
         items.add(_TodayDoseItem(
           id: 'scanned_morn',
           timeTag: '아침 08:30',
-          title: morningDrugs.join(' + '),
-          subtitle: '식후 30분 · 스캔 처방전 자동 편성',
+          title: formatDrugsTitle(morningDrugs),
+          subtitle: formatDrugsSubtitle(morningDrugs, '식후 30분'),
           isCompleted: _completionState[key] ?? false,
         ));
       }
@@ -1657,8 +1671,8 @@ class _HomeScreenState extends State<HomeScreen> {
         items.add(_TodayDoseItem(
           id: 'scanned_lunch',
           timeTag: '점심 13:00',
-          title: lunchDrugs.join(' + '),
-          subtitle: '식사 직후 · 스캔 처방전 자동 편성',
+          title: formatDrugsTitle(lunchDrugs),
+          subtitle: formatDrugsSubtitle(lunchDrugs, '식사 직후'),
           isCompleted: _completionState[key] ?? false,
         ));
       }
@@ -1667,8 +1681,8 @@ class _HomeScreenState extends State<HomeScreen> {
         items.add(_TodayDoseItem(
           id: 'scanned_dinner',
           timeTag: '저녁 19:00',
-          title: dinnerDrugs.join(' + '),
-          subtitle: '식후 30분 · 스캔 처방전 자동 편성',
+          title: formatDrugsTitle(dinnerDrugs),
+          subtitle: formatDrugsSubtitle(dinnerDrugs, '식후 30분'),
           isCompleted: _completionState[key] ?? false,
         ));
       }
@@ -1677,8 +1691,8 @@ class _HomeScreenState extends State<HomeScreen> {
         items.add(_TodayDoseItem(
           id: 'scanned_night',
           timeTag: '취침전 21:30',
-          title: nightDrugs.join(' + '),
-          subtitle: '필요 시/발열 시 복용',
+          title: formatDrugsTitle(nightDrugs),
+          subtitle: formatDrugsSubtitle(nightDrugs, '필요 시/발열 시 복용'),
           isCompleted: _completionState[key] ?? false,
         ));
       }
@@ -1799,9 +1813,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFECFDF5),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFA7F3D0)),
+                color: const Color(0xFFFAFAFA),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1810,17 +1824,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: const Color(0xFF059669), borderRadius: BorderRadius.circular(8)),
-                        child: const Text('⏱️ 10분 이내 토함', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                        decoration: BoxDecoration(color: const Color(0xFFECFDF5), borderRadius: BorderRadius.circular(8)),
+                        child: const Text('⏱️ 10분 이내 토함', style: TextStyle(color: Color(0xFF047857), fontSize: 11, fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(width: 8),
-                      const Text('동일 정량 즉시 재투약', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF065F46))),
+                      const Text('동일 정량 즉시 재투약', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E293B))),
                     ],
                   ),
                   const SizedBox(height: 8),
                   const Text(
                     '위에서 약물이 거의 흡수되지 않고 그대로 배출된 상태입니다.\n아기를 안아 진정시키고 입안을 헹군 뒤, 1회 정량을 그대로 다시 먹이셔도 안전합니다.',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF047857), height: 1.4),
+                    style: TextStyle(fontSize: 12, color: Color(0xFF475569), height: 1.45),
                   ),
                 ],
               ),
@@ -1831,9 +1845,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFFBEB),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFFDE68A)),
+                color: const Color(0xFFFAFAFA),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1842,17 +1856,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: const Color(0xFFD97706), borderRadius: BorderRadius.circular(8)),
-                        child: const Text('⏱️ 10 ~ 30분 사이', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                        decoration: BoxDecoration(color: const Color(0xFFFFFBEB), borderRadius: BorderRadius.circular(8)),
+                        child: const Text('⏱️ 10 ~ 30분 사이', style: TextStyle(color: Color(0xFFB45309), fontSize: 11, fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(width: 8),
-                      const Text('추가 투약 보류 및 관찰', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF92400E))),
+                      const Text('추가 투약 보류 및 관찰', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E293B))),
                     ],
                   ),
                   const SizedBox(height: 8),
                   const Text(
                     '약물의 상당 부분이 십이지장으로 넘어가 흡수 중일 가능성이 큽니다.\n지금 바로 다시 먹이면 과량 투약 위험이 있으므로, 30분~1시간 동안 아기 체온과 증상을 지켜보세요.',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4),
+                    style: TextStyle(fontSize: 12, color: Color(0xFF475569), height: 1.45),
                   ),
                 ],
               ),
@@ -1863,9 +1877,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFBFDBFE)),
+                color: const Color(0xFFFAFAFA),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1874,17 +1888,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(8)),
-                        child: const Text('⏱️ 30분 이후 토함', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                        decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(8)),
+                        child: const Text('⏱️ 30분 이후 토함', style: TextStyle(color: Color(0xFF1D4ED8), fontSize: 11, fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(width: 8),
-                      const Text('재투약 절대 금지 (흡수 완료)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E40AF))),
+                      const Text('재투약 절대 금지 (흡수 완료)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E293B))),
                     ],
                   ),
                   const SizedBox(height: 8),
                   const Text(
                     '약의 유효 성분이 이미 체내에 대부분 흡수되었습니다.\n토사물에 약 냄새나 색이 섞여 보여도 절대로 다시 먹이지 마시고, 다음 정규 복용 시간까지 대기하세요.',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF1E3A8A), height: 1.4),
+                    style: TextStyle(fontSize: 12, color: Color(0xFF475569), height: 1.45),
                   ),
                 ],
               ),
@@ -1895,9 +1909,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF2F2),
+                color: const Color(0xFFFFF1F2),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFFECACA)),
+                border: Border.all(color: const Color(0xFFFECDD3)),
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1906,12 +1920,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626), size: 18),
                       SizedBox(width: 6),
-                      Text('🚨 즉시 소아응급실 내원이 필요한 경우', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFB91C1C))),
+                      Text('🚨 즉시 소아응급실 내원이 필요한 경우', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF991B1B))),
                     ],
                   ),
                   SizedBox(height: 6),
                   Text('• 초록색(담즙) 또는 피가 섞인 토를 할 때\n• 약과 상관없이 물만 마셔도 3회 이상 분수토를 할 때\n• 처지거나 눈이 쑥 들어가고 소변을 6시간 이상 보지 않을 때(탈수)',
-                      style: TextStyle(fontSize: 11, color: Color(0xFF991B1B), height: 1.4)),
+                      style: TextStyle(fontSize: 11.5, color: Color(0xFF7F1D1D), height: 1.4)),
                 ],
               ),
             ),
@@ -2115,9 +2129,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF1F2),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFFECDD3)),
+                    color: const Color(0xFFFAFAFA),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2127,27 +2141,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           const Text(
                             '아세트아미노펜 계열 (1계열)',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFE11D48)),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E293B)),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                            decoration: BoxDecoration(color: const Color(0xFFFFF1F2), borderRadius: BorderRadius.circular(6)),
                             child: const Text('생후 4개월 이상', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFE11D48))),
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text('대표 약품: 챔프시럽(빨강), 어린이 타이레놀 현탁액, 세토펜', style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
+                      Text('대표 약품: 챔프시럽(빨강), 어린이 타이레놀 현탁액, 세토펜', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
                       const Divider(height: 18),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('1회 권장 투약량', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          const Text('1회 권장 투약량', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155))),
                           Text('$acetaDose ml', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFE11D48))),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      const Text('• 같은 계열 투약 시: 최소 4~6시간 간격 (1일 최대 5회 이내)', style: TextStyle(fontSize: 11, color: Color(0xFF9F1239))),
+                      const Text('• 같은 계열 투약 시: 최소 4~6시간 간격 (1일 최대 5회 이내)', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
                     ],
                   ),
                 ),
@@ -2157,9 +2171,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isNsaidContraindicated ? const Color(0xFFFEF2F2) : const Color(0xFFEFF6FF),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: isNsaidContraindicated ? const Color(0xFFFCA5A5) : const Color(0xFFBFDBFE)),
+                    color: const Color(0xFFFAFAFA),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2172,33 +2186,33 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: isNsaidContraindicated ? const Color(0xFFDC2626) : const Color(0xFF2563EB),
+                              color: isNsaidContraindicated ? const Color(0xFFDC2626) : const Color(0xFF1E293B),
                             ),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: isNsaidContraindicated ? const Color(0xFFDC2626) : Colors.white,
-                              borderRadius: BorderRadius.circular(8),
+                              color: isNsaidContraindicated ? const Color(0xFFFEF2F2) : const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               isNsaidContraindicated ? '⛔ 6개월 미만 금기' : '생후 6개월 이상',
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: isNsaidContraindicated ? Colors.white : const Color(0xFF2563EB),
+                                color: isNsaidContraindicated ? const Color(0xFFDC2626) : const Color(0xFF2563EB),
                               ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text('대표 약품: 맥시부펜 시럽, 챔프 이부펜(파랑), 어린이 부루펜', style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
+                      Text('대표 약품: 맥시부펜 시럽, 챔프 이부펜(파랑), 어린이 부루펜', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
                       const Divider(height: 18),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('1회 권장 투약량', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          const Text('1회 권장 투약량', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155))),
                           Text(
                             isNsaidContraindicated ? '투약 금기 (의사 상담)' : '$dexiDose ml',
                             style: TextStyle(
@@ -2214,43 +2228,43 @@ class _HomeScreenState extends State<HomeScreen> {
                         isNsaidContraindicated
                             ? '• 생후 6개월 미만 영아는 신기능 미숙으로 덱시부프로펜 복용이 금기됩니다.'
                             : '• 같은 계열 투약 시: 최소 4~6시간 간격 (1일 최대 4회 이내)',
-                        style: TextStyle(fontSize: 11, color: isNsaidContraindicated ? const Color(0xFFB91C1C) : const Color(0xFF1E40AF)),
+                        style: TextStyle(fontSize: 11, color: isNsaidContraindicated ? const Color(0xFFDC2626) : const Color(0xFF64748B)),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
                 // 3. 교차복용 필수 황금 수칙
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFFBEB),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFFDE68A)),
+                    color: const Color(0xFFFAFAFA),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.rule, color: Color(0xFFD97706), size: 18),
+                          Icon(Icons.rule, color: Color(0xFF475569), size: 18),
                           SizedBox(width: 8),
-                          Text('소아과 전문의 교차복용 황금 수칙', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF92400E))),
+                          Text('소아과 전문의 교차복용 황금 수칙', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B))),
                         ],
                       ),
                       SizedBox(height: 10),
                       Text('1. 서로 다른 계열(아세트아미노펜 ↔ 덱시부프로펜) 교차 투약 시: 최소 2시간 간격을 둡니다.',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4)),
+                          style: TextStyle(fontSize: 12, color: Color(0xFF475569), height: 1.45)),
                       SizedBox(height: 4),
                       Text('2. 같은 계열을 다시 먹일 때는: 반드시 4~6시간 이상 간격을 유지해야 합니다.',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4)),
+                          style: TextStyle(fontSize: 12, color: Color(0xFF475569), height: 1.45)),
                       SizedBox(height: 4),
                       Text('3. 38도 미만의 미열이거나 아기 컨디션이 좋을 때는 투약보다 수분 섭취와 휴식을 권장합니다.',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4)),
+                          style: TextStyle(fontSize: 12, color: Color(0xFF475569), height: 1.45)),
                       SizedBox(height: 4),
                       Text('4. 생후 3개월 미만 신생아 발열(38.0℃ 이상) 시에는 해열제를 먹이지 말고 즉시 소아응급실로 가셔야 합니다.',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFB91C1C), height: 1.4)),
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFB91C1C), height: 1.45)),
                     ],
                   ),
                 ),
@@ -2513,9 +2527,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: cardBg,
+        color: const Color(0xFFFAFAFA),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cardBorder),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2524,17 +2538,20 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(color: badgeColor, borderRadius: BorderRadius.circular(6)),
-                child: Text(badge, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                decoration: BoxDecoration(
+                  color: badgeColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(badge, style: TextStyle(color: badgeColor, fontSize: 10, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: badgeColor)),
+                child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B))),
               ),
             ],
           ),
           const SizedBox(height: 6),
-          Text(content, style: TextStyle(fontSize: 11.5, color: Colors.grey.shade800, height: 1.4)),
+          Text(content, style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569), height: 1.45)),
         ],
       ),
     );
@@ -2613,21 +2630,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFEF2F2), Color(0xFFFEE2E2)],
-                    ),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFFCA5A5)),
+                    color: const Color(0xFFFAFAFA),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFDC2626),
-                          borderRadius: BorderRadius.circular(14),
+                          color: const Color(0xFFFFF1F2),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.phone_in_talk, color: Colors.white, size: 24),
+                        child: const Icon(Icons.phone_in_talk, color: Color(0xFFE11D48), size: 20),
                       ),
                       const SizedBox(width: 12),
                       const Expanded(
@@ -2635,20 +2650,21 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('야간 119 소아응급의료 상담 (무료)',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF991B1B))),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B))),
                             SizedBox(height: 2),
                             Text('24시간 전문의·간호사 상주! 응급처치 지도 및 실시간 진료 가능 병원 안내',
-                                style: TextStyle(fontSize: 11, color: Color(0xFFB91C1C), height: 1.35)),
+                                style: TextStyle(fontSize: 11, color: Color(0xFF64748B), height: 1.35)),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFDC2626),
+                          backgroundColor: const Color(0xFFFF6B8B),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
                         ),
                         onPressed: () {
                           Clipboard.setData(const ClipboardData(text: '119'));
@@ -2835,8 +2851,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: h.is24Hours ? const Color(0xFFFECACA) : const Color(0xFFE9D5FF)),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
                       boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))],
                     ),
                     child: Column(
@@ -2848,12 +2864,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                               decoration: BoxDecoration(
-                                color: h.is24Hours ? const Color(0xFFDC2626) : const Color(0xFF7C3AED),
+                                color: h.is24Hours ? const Color(0xFFFFF1F2) : const Color(0xFFF5F3FF),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 h.is24Hours ? '🚨 24시간 소아전문응급' : '🌙 달빛어린이병원',
-                                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  color: h.is24Hours ? const Color(0xFFE11D48) : const Color(0xFF7C3AED),
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             Container(
@@ -3695,37 +3715,49 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    dose.timeTag,
-                    style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      dose.title,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        decoration: dose.isCompleted ? TextDecoration.lineThrough : null,
-                        color: dose.isCompleted ? Colors.grey.shade600 : Colors.black87,
-                      ),
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    Text(dose.subtitle, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                  ],
-                ),
-              ],
+                    child: Text(
+                      dose.timeTag,
+                      style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          dose.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            decoration: dose.isCompleted ? TextDecoration.lineThrough : null,
+                            color: dose.isCompleted ? Colors.grey.shade600 : Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          dose.subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
@@ -3808,10 +3840,6 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
 
   final Set<String> _completedDrugTitles = {};
   final Set<String> _deletedDrugTitles = {};
-
-  bool get _isSampleProfile =>
-      (widget.profile.id == 'child_1' || widget.profile.name == '하준이') ||
-      (widget.profile.id == 'child_2' || widget.profile.name == '서아');
 
   void _toggleDrugCompletion(String drugTitle) {
     setState(() {
@@ -3912,29 +3940,6 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
       }
     }
 
-    // 2. 기본 예시 프로필(하준이)에만 스캔 전 예시 1건을 제공하고, 새로 추가된 아이는 완전히 빈 상태로 시작
-    if (_isSampleProfile && widget.scannedDrugs.isEmpty) {
-      const sampleTitle = '코미시럽 (코감기약)';
-      if (!_deletedDrugTitles.contains(sampleTitle)) {
-        final isDone = _completedDrugTitles.contains(sampleTitle);
-        final item = _DisplayDrugItem(
-          title: sampleTitle,
-          prescriptionMeta: '소아과 1월 24일 처방 (예시)',
-          dosage: '1일 3회, 1회 4ml',
-          remainingDays: isDone ? '복용 완료' : '남은 복용 기간 2일',
-          statusBadge: isDone ? '✓ 복용 완료' : '복용 중',
-          statusColor: isDone ? const Color(0xFF10B981) : const Color(0xFFFF6B8B),
-          category: '권장대비: 상위 안심 1등급',
-          desc: '코막힘, 콧물, 재채기 등 알레르기성 비염 증상 완화제',
-          isCompleted: isDone,
-        );
-        if (isDone) {
-          completedDrugs.add(item);
-        } else {
-          activeDrugs.add(item);
-        }
-      }
-    }
 
     final currentActiveCount = activeDrugs.length;
     final currentCompletedCount = completedDrugs.length;
@@ -4865,6 +4870,94 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
     );
   }
 
+  Widget _buildFormattedAiSafetyReport(String safetyReport) {
+    if (safetyReport.trim().isEmpty) return const SizedBox.shrink();
+
+    final rawLines = safetyReport.split(RegExp(r'\n+')).map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    final items = <MapEntry<String, String>>[];
+
+    for (final line in rawLines) {
+      final subMatches = RegExp(r'\*\*([^*]+?)\*\*[:\s]*([^\*]*)').allMatches(line);
+      if (subMatches.isNotEmpty) {
+        for (final sm in subMatches) {
+          final title = sm.group(1)?.trim() ?? '';
+          final desc = sm.group(2)?.replaceAll(RegExp(r'^\s*:\s*'), '').trim() ?? '';
+          if (title.isNotEmpty || desc.isNotEmpty) {
+            items.add(MapEntry(title, desc));
+          }
+        }
+      } else {
+        final match = RegExp(r'^\*?\*?([^*:]+?)\*?\*?\s*[:\-]\s*(.*)$').firstMatch(line);
+        if (match != null) {
+          final title = match.group(1)?.replaceAll('*', '').trim() ?? '';
+          final desc = match.group(2)?.replaceAll('*', '').trim() ?? '';
+          items.add(MapEntry(title, desc));
+        } else {
+          final cleaned = line.replaceAll('*', '').replaceAll(RegExp(r'^[-•\d\.]+\s*'), '').trim();
+          if (cleaned.isNotEmpty) {
+            items.add(MapEntry('', cleaned));
+          }
+        }
+      }
+    }
+
+    if (items.isEmpty) {
+      items.add(MapEntry('', safetyReport.replaceAll('*', '').trim()));
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.auto_awesome, color: Color(0xFF6366F1), size: 15),
+              SizedBox(width: 6),
+              Text(
+                'AI 핵심 안심 요약 (3줄 브리핑)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ...items.map((entry) => Padding(
+            padding: const EdgeInsets.only(bottom: 7),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 5, right: 6),
+                  child: Icon(Icons.circle, size: 4, color: Color(0xFF64748B)),
+                ),
+                Expanded(
+                  child: RichText(
+                    text: TextSpan(
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.45),
+                      children: [
+                        if (entry.key.isNotEmpty)
+                          TextSpan(
+                            text: '${entry.key}: ',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                          ),
+                        TextSpan(text: entry.value),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAnalysisResultView(PrescriptionAnalysisResponse result) {
     final hasWarning = result.analyzedDrugs.any((d) => d.status == 'WARNING' || d.status == 'HIGH');
     final hasUnknown = result.analyzedDrugs.any((d) => d.status == 'UNKNOWN');
@@ -4984,6 +5077,39 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                 ],
               ),
             ),
+            const SizedBox(height: 8),
+
+            // DUR 안심 검토 배너 (상단 종합 안전성 카테고리로 통일)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              decoration: BoxDecoration(
+                color: result.durWarnings.isEmpty ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: result.durWarnings.isEmpty ? const Color(0xFFBBF7D0) : const Color(0xFFFECACA)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    result.durWarnings.isEmpty ? Icons.security : Icons.warning_amber_rounded,
+                    color: result.durWarnings.isEmpty ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      result.durWarnings.isEmpty
+                          ? '🛡️ 중복 성분 및 병용 금기 상호작용 없음 (안전)'
+                          : result.durWarnings.map((w) => w.message).join('\n'),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: result.durWarnings.isEmpty ? const Color(0xFF15803D) : const Color(0xFFB91C1C),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
 
             // Analyzed Drugs Section
@@ -5019,9 +5145,25 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                         Icon(Icons.medication, color: isSafe ? const Color(0xFFFF6B8B) : const Color(0xFFDC2626), size: 20),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            d.drugName,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                d.drugName,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              ),
+                              if (d.purpose != null && d.purpose!.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  '용도: ${d.purpose}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF64748B),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -5158,34 +5300,6 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                       ),
                     ],
 
-                    if (d.purpose != null && d.purpose!.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFFBFDBFE)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.info_outline, size: 14, color: Color(0xFF2563EB)),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                '용도: ${d.purpose}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF1E40AF),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
 
                     // 항생제 완약 복용 안내 팁 (심플한 정보 텍스트)
                     if (d.complianceNote != null) ...[
@@ -5260,109 +5374,24 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
               );
             }),
 
-            // DUR Warnings or Safety Check
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: result.durWarnings.isEmpty ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: result.durWarnings.isEmpty ? const Color(0xFFBBF7D0) : const Color(0xFFFECACA)),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                result.durWarnings.isEmpty ? Icons.security : Icons.warning_amber_rounded,
-                color: result.durWarnings.isEmpty ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
-                size: 20,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  result.durWarnings.isEmpty
-                      ? '🛡️ 중복 성분 및 병용 금기 상호작용 없음 (안전)'
-                      : result.durWarnings.map((w) => w.message).join('\n'),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: result.durWarnings.isEmpty ? const Color(0xFF15803D) : const Color(0xFFB91C1C),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // AI 안심 복약 3줄 핵심 요약
+        // AI 안심 복약 3줄 핵심 요약 (정돈된 리포트 카드)
         if (result.safetyReport.isNotEmpty) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F9FF),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFFBAE6FD)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.auto_awesome, color: Color(0xFF0284C7), size: 15),
-                    SizedBox(width: 6),
-                    Text('AI 핵심 안심 요약 (3줄 브리핑)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0369A1))),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  result.safetyReport,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF0C4A6E), height: 1.5, fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
+          _buildFormattedAiSafetyReport(result.safetyReport),
+          const SizedBox(height: 14),
         ],
-        // AI Doctor Q&A notification banner
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFF0F3),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFFFD6DF)),
-          ),
-          child: Row(
-            children: [
-              const Text('✨', style: TextStyle(fontSize: 20)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('소아과 의사용 안심 질문지 준비 완료',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFFFF6B8B))),
-                    const SizedBox(height: 2),
-                    Text('처방 약품을 바탕으로 소아과 진료 시 의사 선생님께 확인할 맞춤 질문 ${result.doctorQna.length}건이 준비되었습니다.',
-                        style: const TextStyle(fontSize: 11, color: Colors.black87)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
 
-        const SizedBox(height: 20),
         // 2 Action Buttons
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFFF6B8B),
             foregroundColor: Colors.white,
-            minimumSize: const Size.fromHeight(52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            elevation: 2,
+            minimumSize: const Size.fromHeight(50),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 1,
           ),
           icon: const Icon(Icons.assignment, size: 18),
-          label: Text('📋 의사용 안심 Q&A 보러가기 (${result.doctorQna.length}건) ➔',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          label: Text('📋 의사용 안심 Q&A 보러가기 (맞춤 질문 ${result.doctorQna.length}건 준비 완료) ➔',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
           onPressed: () => widget.onNavigateTab(3),
         ),
         const SizedBox(height: 10),
