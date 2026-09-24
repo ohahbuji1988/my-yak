@@ -517,7 +517,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                       fit: BoxFit.contain, // 사진 전체를 선명하게 100% 노출
                       filterQuality: FilterQuality.high,
                       errorBuilder: (ctx, err, stack) => Image.asset(
-                        'kidipedia_logo.png',
+                        'assets/images/kidipedia_logo.png',
                         fit: BoxFit.contain,
                         filterQuality: FilterQuality.high,
                         errorBuilder: (ctx2, err2, stack2) => Container(
@@ -6786,7 +6786,7 @@ class BabyProfileScreen extends StatelessWidget {
               controller: controller,
               decoration: InputDecoration(
                 labelText: '서버 주소',
-                hintText: 'https://my-yak.onrender.com',
+                hintText: 'https://my-yak.onrender.com (Kidipedia 서버)',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),

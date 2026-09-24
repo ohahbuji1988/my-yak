@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:my_yak/main.dart';
-import 'package:my_yak/models/prescription.dart';
+import 'package:kidipedia/main.dart';
+import 'package:kidipedia/models/prescription.dart';
 
 void main() {
-  testWidgets('MyYakFigmaApp launches welcome cover, navigates tabs, and toggles medication filters', (WidgetTester tester) async {
+  testWidgets('KidipediaApp launches welcome cover, navigates tabs, and toggles medication filters', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
-    // 1. App starts with Welcome Cover Screen (Nano Banana design)
-    await tester.pumpWidget(const MyYakFigmaApp());
+    // 1. App starts with Welcome Cover Screen
+    await tester.pumpWidget(const KidipediaApp());
     await tester.pumpAndSettle();
 
     expect(find.textContaining('우리아이 안심 복약 시작하기'), findsOneWidget);
-    expect(find.textContaining('My 약 (My Yak)'), findsOneWidget);
+    expect(find.textContaining('Kidipedia (키디피디아)'), findsOneWidget);
 
     // Tap to enter Main App
     await tester.tap(find.textContaining('우리아이 안심 복약 시작하기'));
@@ -24,7 +24,6 @@ void main() {
     // 2. Verify Home screen profile greeting & child name
     expect(find.textContaining('하준이'), findsWidgets);
     expect(find.textContaining('오늘도 건강하게 자라는 중'), findsOneWidget);
-    expect(find.textContaining('나노바나나 안심 복약 커버 페이지'), findsOneWidget);
 
     // Verify Bottom Navigation Bar tabs
     expect(find.text('홈'), findsOneWidget);
@@ -69,7 +68,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(const MyYakFigmaApp(initialShowCover: false));
+    await tester.pumpWidget(const KidipediaApp(initialShowCover: false));
     await tester.pumpAndSettle();
 
     // 1. Check initial dose progress (1/3 완료 (33%))
@@ -99,7 +98,7 @@ void main() {
   });
 
   testWidgets('BabyProfileScreen edit profile and weight update test', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyYakFigmaApp(initialShowCover: false));
+    await tester.pumpWidget(const KidipediaApp(initialShowCover: false));
     await tester.pumpAndSettle();
 
     // Navigate to '내 아이' tab
@@ -138,7 +137,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(const MyYakFigmaApp(initialShowCover: false));
+    await tester.pumpWidget(const KidipediaApp(initialShowCover: false));
     await tester.pumpAndSettle();
 
     // Navigate to '의사 Q&A' tab
@@ -178,7 +177,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(const MyYakFigmaApp(initialShowCover: false));
+    await tester.pumpWidget(const KidipediaApp(initialShowCover: false));
     await tester.pumpAndSettle();
 
     // Navigate to '복용 정보' tab
@@ -216,7 +215,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     // 1. Launch app with Welcome Cover Screen
-    await tester.pumpWidget(const MyYakFigmaApp(initialShowCover: true));
+    await tester.pumpWidget(const KidipediaApp(initialShowCover: true));
     await tester.pumpAndSettle();
 
     // Verify both children are listed in multi-child selector
@@ -287,7 +286,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(const MyYakFigmaApp(initialShowCover: false));
+    await tester.pumpWidget(const KidipediaApp(initialShowCover: false));
     await tester.pumpAndSettle();
 
     // 1. Toggle 하준이 second dose (기관지 패치) -> 2/3 완료
@@ -348,7 +347,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(const MyYakFigmaApp(initialShowCover: false));
+    await tester.pumpWidget(const KidipediaApp(initialShowCover: false));
     await tester.pumpAndSettle();
 
     // 1. Tap Vomit Guidance Card (from bottom compact TIP cards)
