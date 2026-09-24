@@ -1492,6 +1492,33 @@ final List<_EmergencyHospitalItem> _emergencyHospitals = [
     phone: '032-656-7582',
     is24Hours: false,
   ),
+  const _EmergencyHospitalItem(
+    name: '한림대학교성심병원 권역응급의료센터 (소아응급진료)',
+    region: '경기/인천',
+    type: '소아전문응급센터',
+    address: '경기 안양시 동안구 관평로170번길 22 (평촌동)',
+    hours: '24시간 365일 연중무휴 (안양·만안·동안·군포·의왕 권역 소아응급)',
+    phone: '031-380-1500',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '안양 한솔어린이병원 달빛어린이병원',
+    region: '경기/인천',
+    type: '달빛어린이병원',
+    address: '경기 안양시 만안구 안양로 314번길 18 (안양동)',
+    hours: '평일 09:00~23:00 / 토·일·공휴일 09:00~18:00 (만안구 365 야간진료)',
+    phone: '031-469-7582',
+    is24Hours: false,
+  ),
+  const _EmergencyHospitalItem(
+    name: '안양 센트럴아동병원 달빛어린이병원',
+    region: '경기/인천',
+    type: '달빛어린이병원',
+    address: '경기 안양시 동안구 시민대로 214 (호계동)',
+    hours: '평일 08:30~23:00 / 토·일·공휴일 09:00~18:00',
+    phone: '031-381-8275',
+    is24Hours: false,
+  ),
 
   // 충청 / 대전 / 세종
   const _EmergencyHospitalItem(
@@ -2605,6 +2632,8 @@ class _HomeScreenState extends State<HomeScreen> {
     String selectedRegion = '전체';
     String selectedType = '전체 병원';
     String searchQuery = '';
+    String currentLocationName = '인천 송도';
+    String currentSearchKeyword = '송도';
     final searchCtrl = TextEditingController();
 
     final regions = ['전체', '서울', '경기/인천', '충청/대전', '영남/부산/대구', '호남/광주', '강원/제주'];
@@ -2791,58 +2820,128 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // Quick Location Bar (Songdo / Local focus)
+                // Quick Location Bar (내 위치 기반 스마트 추천)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF0FDF4),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: const Color(0xFFBBF7D0)),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.my_location, size: 16, color: Color(0xFF16A34A)),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          '📍 내 위치(인천 송도) 추천',
-                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF15803D)),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          setModalState(() {
-                            selectedRegion = '경기/인천';
-                            searchCtrl.text = '송도';
-                            searchQuery = '송도';
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF16A34A),
-                            borderRadius: BorderRadius.circular(8),
+                      Row(
+                        children: [
+                          const Icon(Icons.my_location, size: 16, color: Color(0xFF16A34A)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(fontSize: 12, color: Color(0xFF15803D)),
+                                children: [
+                                  const TextSpan(text: '📍 내 위치: '),
+                                  TextSpan(
+                                    text: currentLocationName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF166534)),
+                                  ),
+                                  const TextSpan(text: ' 추천'),
+                                ],
+                              ),
+                            ),
                           ),
-                          child: const Text('송도 VIC 등 보기', style: TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold)),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      InkWell(
-                        onTap: () {
-                          setModalState(() {
-                            selectedRegion = '전체';
-                            searchCtrl.clear();
-                            searchQuery = '';
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF86EFAC)),
+                          InkWell(
+                            onTap: () {
+                              setModalState(() {
+                                selectedRegion = currentLocationName.contains('서울') ? '서울' : '경기/인천';
+                                searchCtrl.text = currentSearchKeyword;
+                                searchQuery = currentSearchKeyword;
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF16A34A),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '$currentLocationName 병원 보기',
+                                style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ),
-                          child: const Text('초기화', style: TextStyle(fontSize: 11, color: Color(0xFF15803D))),
+                          const SizedBox(width: 6),
+                          InkWell(
+                            onTap: () {
+                              setModalState(() {
+                                selectedRegion = '전체';
+                                searchCtrl.clear();
+                                searchQuery = '';
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFF86EFAC)),
+                              ),
+                              child: const Text('초기화', style: TextStyle(fontSize: 11, color: Color(0xFF15803D))),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // 빠른 동네 변경 칩 바
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            const Text('동네 변경: ', style: TextStyle(fontSize: 10.5, color: Color(0xFF166534), fontWeight: FontWeight.w600)),
+                            const SizedBox(width: 4),
+                            ...[
+                              {'name': '인천 송도', 'kw': '송도', 'region': '경기/인천'},
+                              {'name': '안양시 만안구', 'kw': '안양', 'region': '경기/인천'},
+                              {'name': '서울 구로/신도림', 'kw': '구로', 'region': '서울'},
+                              {'name': '경기 성남/분당', 'kw': '분당', 'region': '경기/인천'},
+                              {'name': '경기 수원/영통', 'kw': '수원', 'region': '경기/인천'},
+                            ].map((loc) {
+                              final isCurrent = currentLocationName == loc['name'];
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 5),
+                                child: InkWell(
+                                  onTap: () {
+                                    setModalState(() {
+                                      currentLocationName = loc['name']!;
+                                      currentSearchKeyword = loc['kw']!;
+                                      selectedRegion = loc['region']!;
+                                      searchCtrl.text = loc['kw']!;
+                                      searchQuery = loc['kw']!;
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: isCurrent ? const Color(0xFF15803D) : Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: isCurrent ? const Color(0xFF15803D) : const Color(0xFFA7F3D0),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      loc['name']!,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                                        color: isCurrent ? Colors.white : const Color(0xFF166534),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
                         ),
                       ),
                     ],
@@ -3065,7 +3164,30 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
+
+                // 🏛️ 정부 공공데이터 공식 출처 안내 배너
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.verified, size: 16, color: Color(0xFF6366F1)),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '자료 출처: 보건복지부 지정 전국 달빛어린이병원 & 국립중앙의료원 중앙응급의료센터 E-Gen 공공포털 최신 데이터',
+                          style: TextStyle(fontSize: 10.5, color: Color(0xFF64748B), height: 1.35),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
 
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
