@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/profile.dart';
 
@@ -79,6 +79,42 @@ class StorageService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keyCustomServerUrl, url.trim());
+    } catch (_) {}
+  }
+
+  /// 접종/검진 완료 목록 로드
+  static Future<List<String>> loadCompletedVaccines(String profileId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getStringList('vaccine_completed_$profileId') ?? [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// 접종/검진 완료 목록 저장
+  static Future<void> saveCompletedVaccines(String profileId, List<String> completedIds) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('vaccine_completed_$profileId', completedIds);
+    } catch (_) {}
+  }
+
+  /// 접종/검진 다가오는 알림 활성화 여부 로드 (기본 true)
+  static Future<bool> loadVaccineAlarmEnabled(String profileId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool('vaccine_alarm_$profileId') ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// 접종/검진 다가오는 알림 활성화 여부 저장
+  static Future<void> saveVaccineAlarmEnabled(String profileId, bool enabled) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('vaccine_alarm_$profileId', enabled);
     } catch (_) {}
   }
 }

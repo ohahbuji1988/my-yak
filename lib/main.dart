@@ -7,6 +7,8 @@ import 'models/profile.dart';
 import 'models/prescription.dart';
 import 'services/api_service.dart';
 import 'services/storage_service.dart';
+import 'models/vaccine_schedule.dart';
+import 'screens/vaccine_scheduler_sheet.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -268,6 +270,10 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
   }
 
   void _openAddChildModal(BuildContext context) {
+    DateTime selectedBirthDate = DateTime.now().subtract(const Duration(days: 365));
+    final birthDateCtrl = TextEditingController(
+      text: '${selectedBirthDate.year}년 ${selectedBirthDate.month.toString().padLeft(2, '0')}월 ${selectedBirthDate.day.toString().padLeft(2, '0')}일',
+    );
     final nameCtrl = TextEditingController();
     final ageCtrl = TextEditingController(text: '생후 12개월');
     final weightCtrl = TextEditingController(text: '10.0');
@@ -305,6 +311,36 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                   hintText: '예: 도윤이',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: birthDateCtrl,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: '생년월일 (예방접종·검진 기준)',
+                  hintText: '생년월일을 선택해주세요',
+                  prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFFFF6B8B), size: 20),
+                  suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: ctx,
+                    initialDate: selectedBirthDate,
+                    firstDate: DateTime.now().subtract(const Duration(days: 365 * 12)),
+                    lastDate: DateTime.now(),
+                  );
+                  if (picked != null) {
+                    setModalState(() {
+                      selectedBirthDate = picked;
+                      birthDateCtrl.text = '${picked.year}년 ${picked.month.toString().padLeft(2, '0')}월 ${picked.day.toString().padLeft(2, '0')}일';
+                      int months = (DateTime.now().year - picked.year) * 12 + (DateTime.now().month - picked.month);
+                      if (DateTime.now().day < picked.day) months--;
+                      if (months < 0) months = 0;
+                      ageCtrl.text = '생후 $months개월';
+                    });
+                  }
+                },
               ),
               const SizedBox(height: 10),
               Row(
@@ -367,7 +403,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                     name: name,
                     memberType: MemberType.child,
                     age: ageCtrl.text.trim(),
-                    birthDate: '2025년 등록',
+                    birthDate: birthDateCtrl.text.trim(),
                     gender: gender,
                     weightKg: w,
                   );
@@ -861,6 +897,10 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
   }
 
   void _openAddNewChildDialog(BuildContext context) {
+    DateTime selectedBirthDate = DateTime.now().subtract(const Duration(days: 365));
+    final birthDateCtrl = TextEditingController(
+      text: '${selectedBirthDate.year}년 ${selectedBirthDate.month.toString().padLeft(2, '0')}월 ${selectedBirthDate.day.toString().padLeft(2, '0')}일',
+    );
     final nameCtrl = TextEditingController();
     final ageCtrl = TextEditingController(text: '생후 12개월');
     final weightCtrl = TextEditingController(text: '10.0');
@@ -898,6 +938,36 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
                   hintText: '예: 도윤이',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: birthDateCtrl,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: '생년월일 (예방접종·검진 기준)',
+                  hintText: '생년월일을 선택해주세요',
+                  prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFFFF6B8B), size: 20),
+                  suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: ctx,
+                    initialDate: selectedBirthDate,
+                    firstDate: DateTime.now().subtract(const Duration(days: 365 * 12)),
+                    lastDate: DateTime.now(),
+                  );
+                  if (picked != null) {
+                    setModalState(() {
+                      selectedBirthDate = picked;
+                      birthDateCtrl.text = '${picked.year}년 ${picked.month.toString().padLeft(2, '0')}월 ${picked.day.toString().padLeft(2, '0')}일';
+                      int months = (DateTime.now().year - picked.year) * 12 + (DateTime.now().month - picked.month);
+                      if (DateTime.now().day < picked.day) months--;
+                      if (months < 0) months = 0;
+                      ageCtrl.text = '생후 $months개월';
+                    });
+                  }
+                },
               ),
               const SizedBox(height: 10),
               Row(
@@ -960,7 +1030,7 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
                     name: name,
                     memberType: MemberType.child,
                     age: ageCtrl.text.trim(),
-                    birthDate: '2025년 등록',
+                    birthDate: birthDateCtrl.text.trim(),
                     gender: gender,
                     weightKg: w,
                   );
@@ -1881,8 +1951,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: widget.onSwitchChild,
                   ),
                 IconButton(
-                  icon: const Icon(Icons.notifications_none, color: Colors.grey),
-                  onPressed: () {},
+                  icon: const Icon(Icons.notifications_active_outlined, color: Color(0xFFFF6B8B)),
+                  tooltip: '접종 및 검진 알림',
+                  onPressed: () => VaccineSchedulerSheet.show(context, widget.profile),
                 ),
               ],
             ),
@@ -1940,6 +2011,142 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+
+        // 💉 우리 아이 필수 예방접종 & 영유아검진 알림 D-Day 카드
+        Builder(
+          builder: (ctx) {
+            final birthDate = parseBabyBirthDate(widget.profile.birthDate, ageStr: widget.profile.age);
+            // 90일 경과 미접종 항목은 자동 제외
+            final upcomingList = standardSchedules.where((s) => s.getDDay(birthDate) >= -90).toList();
+            if (upcomingList.isEmpty) return const SizedBox.shrink();
+            final nextItem = upcomingList.first;
+            final dday = nextItem.getDDay(birthDate);
+            final overdue = -dday;
+
+            Color badgeBg = const Color(0xFF059669);
+            Color badgeFg = Colors.white;
+            Gradient? badgeGradient;
+            String ddayStr;
+            Color cardBorder = const Color(0xFF86EFAC);
+
+            if (dday == 0) {
+              badgeBg = const Color(0xFFDC2626);
+              badgeFg = Colors.white;
+              ddayStr = '🔥 오늘 권장';
+              cardBorder = const Color(0xFFDC2626);
+            } else if (dday > 0) {
+              if (dday <= 14) {
+                badgeBg = const Color(0xFFFF6B8B);
+                ddayStr = 'D-$dday (임박)';
+                cardBorder = const Color(0xFFFF6B8B);
+              } else {
+                badgeBg = const Color(0xFF059669);
+                ddayStr = 'D-$dday';
+              }
+            } else {
+              // dday < 0 (지연)
+              if (overdue > 30) {
+                // 60일 지연 (31~90일): 빨간색 + 검은색 + 보라색 조합
+                badgeGradient = const LinearGradient(
+                  colors: [Color(0xFF7C3AED), Color(0xFF111827), Color(0xFFDC2626)],
+                );
+                badgeFg = Colors.white;
+                ddayStr = '⚠️ 60일 지연 (+$overdue일)';
+                cardBorder = const Color(0xFF7C3AED);
+              } else if (overdue > 15) {
+                // 30일 지연 (16~30일): 빨간색
+                badgeBg = const Color(0xFFDC2626);
+                badgeFg = Colors.white;
+                ddayStr = '🚨 30일 지연 (+$overdue일)';
+                cardBorder = const Color(0xFFDC2626);
+              } else {
+                // 15일 지연 (1~15일): 노란색
+                badgeBg = const Color(0xFFF59E0B);
+                badgeFg = Colors.white;
+                ddayStr = '⏰ 15일 지연 (+$overdue일)';
+                cardBorder = const Color(0xFFF59E0B);
+              }
+            }
+
+            return GestureDetector(
+              onTap: () => VaccineSchedulerSheet.show(context, widget.profile),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: dday < 0 && overdue > 30
+                        ? [const Color(0xFFFAF5FF), const Color(0xFFF3E8FF)]
+                        : (dday < 0 && overdue > 15
+                            ? [const Color(0xFFFFF5F5), const Color(0xFFFEE2E2)]
+                            : (dday < 0
+                                ? [const Color(0xFFFFFBEB), const Color(0xFFFEF3C7)]
+                                : [const Color(0xFFF0FDF4), const Color(0xFFDCFCE7)])),
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: cardBorder, width: dday < 0 ? 1.5 : 1.0),
+                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(nextItem.isCheckup ? '🩺' : '💉', style: const TextStyle(fontSize: 22)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: badgeGradient == null ? badgeBg : null,
+                                  gradient: badgeGradient,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(ddayStr, style: TextStyle(color: badgeFg, fontSize: 10, fontWeight: FontWeight.bold)),
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  nextItem.isCheckup ? '다가오는 영유아 검진' : '다음 권장 예방접종',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                    color: dday < 0 && overdue > 30
+                                        ? const Color(0xFF6B21A8)
+                                        : (dday < 0 && overdue > 15
+                                            ? const Color(0xFF991B1B)
+                                            : (dday < 0 ? const Color(0xFF92400E) : const Color(0xFF065F46))),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text('${nextItem.name} (${nextItem.monthRangeLabel})',
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
+                          const SizedBox(height: 1),
+                          const Text('일정 확인 및 D-Day 알림 설정하기 >',
+                              style: TextStyle(fontSize: 10, color: Color(0xFF059669), fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF059669)),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
 
         // 2 Big Quick Action Buttons
         Row(
@@ -4739,6 +4946,10 @@ class BabyProfileScreen extends StatelessWidget {
   }
 
   void _openEditProfileDialog(BuildContext context) {
+    DateTime selectedBirthDate = parseBabyBirthDate(profile.birthDate, ageStr: profile.age);
+    final birthDateCtrl = TextEditingController(
+      text: '${selectedBirthDate.year}년 ${selectedBirthDate.month.toString().padLeft(2, '0')}월 ${selectedBirthDate.day.toString().padLeft(2, '0')}일',
+    );
     final nameCtrl = TextEditingController(text: profile.name);
     final ageCtrl = TextEditingController(text: profile.age);
     final weightCtrl = TextEditingController(text: profile.weightKg?.toString() ?? '9.2');
@@ -4751,105 +4962,139 @@ class BabyProfileScreen extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 24,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('✎ 아기 정보 및 체중 수정', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
-                ],
-              ),
-              const SizedBox(height: 4),
-              const Text('체중 변경 시 소아 용량 검증 및 해열제 계산기가 실시간으로 업데이트됩니다.',
-                  style: TextStyle(fontSize: 12, color: Colors.grey)),
-              const SizedBox(height: 18),
-
-              TextField(
-                controller: nameCtrl,
-                decoration: InputDecoration(
-                  labelText: '아기 이름',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-                  prefixIcon: const Icon(Icons.person, color: Color(0xFFFF6B8B)),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 24,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('✎ 아기 정보 및 체중 수정', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 12),
+                const SizedBox(height: 4),
+                const Text('생년월일 및 체중 변경 시 예방접종 플래너, 소아 용량 검증이 실시간 업데이트됩니다.',
+                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+                const SizedBox(height: 18),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: ageCtrl,
-                      decoration: InputDecoration(
-                        labelText: '월령 / 나이',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-                        prefixIcon: const Icon(Icons.cake, color: Colors.blue),
+                TextField(
+                  controller: nameCtrl,
+                  decoration: InputDecoration(
+                    labelText: '아기 이름',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                    prefixIcon: const Icon(Icons.person, color: Color(0xFFFF6B8B)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                TextField(
+                  controller: birthDateCtrl,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: '생년월일 (예방접종·검진 기준)',
+                    hintText: '생년월일을 선택해주세요',
+                    prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFFFF6B8B)),
+                    suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: ctx,
+                      initialDate: selectedBirthDate,
+                      firstDate: DateTime.now().subtract(const Duration(days: 365 * 12)),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) {
+                      setModalState(() {
+                        selectedBirthDate = picked;
+                        birthDateCtrl.text = '${picked.year}년 ${picked.month.toString().padLeft(2, '0')}월 ${picked.day.toString().padLeft(2, '0')}일';
+                        int months = (DateTime.now().year - picked.year) * 12 + (DateTime.now().month - picked.month);
+                        if (DateTime.now().day < picked.day) months--;
+                        if (months < 0) months = 0;
+                        ageCtrl.text = '생후 $months개월';
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: ageCtrl,
+                        decoration: InputDecoration(
+                          labelText: '월령 / 나이',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                          prefixIcon: const Icon(Icons.cake, color: Colors.blue),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      controller: weightCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: InputDecoration(
-                        labelText: '현재 몸무게',
-                        suffixText: 'kg',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-                        prefixIcon: const Icon(Icons.monitor_weight, color: Color(0xFF10B981)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: weightCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          labelText: '현재 몸무게',
+                          suffixText: 'kg',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                          prefixIcon: const Icon(Icons.monitor_weight, color: Color(0xFF10B981)),
+                        ),
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                TextField(
+                  controller: allergyCtrl,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    labelText: '특이사항 및 알레르기',
+                    hintText: '예: 페니실린 계열 항생제 발진 이력',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                    prefixIcon: const Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626)),
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              TextField(
-                controller: allergyCtrl,
-                maxLines: 2,
-                decoration: InputDecoration(
-                  labelText: '특이사항 및 알레르기',
-                  hintText: '예: 페니실린 계열 항생제 발진 이력',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-                  prefixIcon: const Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626)),
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6B8B),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(52),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF6B8B),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  ),
+                  onPressed: () {
+                    final parsedWeight = double.tryParse(weightCtrl.text.trim()) ?? (profile.weightKg ?? 9.2);
+                    final updated = profile.copyWith(
+                      name: nameCtrl.text.trim().isEmpty ? profile.name : nameCtrl.text.trim(),
+                      age: ageCtrl.text.trim().isEmpty ? profile.age : ageCtrl.text.trim(),
+                      birthDate: birthDateCtrl.text.trim(),
+                      weightKg: parsedWeight,
+                      allergyNotes: allergyCtrl.text.trim(),
+                    );
+                    onProfileUpdated?.call(updated);
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('🎉 ${updated.name}의 정보 및 몸무게(${updated.weightKg}kg)가 업데이트되었습니다!')),
+                    );
+                  },
+                  child: const Text('수정 내용 저장하기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                 ),
-                onPressed: () {
-                  final parsedWeight = double.tryParse(weightCtrl.text.trim()) ?? (profile.weightKg ?? 9.2);
-                  final updated = profile.copyWith(
-                    name: nameCtrl.text.trim().isEmpty ? profile.name : nameCtrl.text.trim(),
-                    age: ageCtrl.text.trim().isEmpty ? profile.age : ageCtrl.text.trim(),
-                    weightKg: parsedWeight,
-                    allergyNotes: allergyCtrl.text.trim(),
-                  );
-                  onProfileUpdated?.call(updated);
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('🎉 ${updated.name}의 정보 및 몸무게(${updated.weightKg}kg)가 업데이트되었습니다!')),
-                  );
-                },
-                child: const Text('수정 내용 저장하기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -4973,6 +5218,49 @@ class BabyProfileScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
+
+        // 💉 예방접종 & 영유아 검진 플래너 바로가기 배너
+        GestureDetector(
+          onTap: () => VaccineSchedulerSheet.show(context, profile),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFFF0F3), Color(0xFFFFE4E8)],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFFFD6DF)),
+              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Text('💉', style: TextStyle(fontSize: 22)),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('우리아이 접종 & 검진 플래너',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFFF6B8B))),
+                      SizedBox(height: 2),
+                      Text('질병관리청 필수 접종 16종 & 검진 D-Day 알림',
+                          style: TextStyle(fontSize: 11, color: Colors.black87)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFFFF6B8B)),
+              ],
+            ),
+          ),
+        ),
 
         // Allergy Warning Box
         Container(
