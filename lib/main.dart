@@ -1119,6 +1119,12 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
         profile: _babyProfile,
         scannedDrugs: _scannedDrugsList,
         onGoBack: _handleGoBack,
+        onNavigateScan: () => _onTabChanged(2),
+        onDeleteDrug: (drugName) {
+          setState(() {
+            _scannedDrugsList.removeWhere((d) => d.drugName == drugName);
+          });
+        },
       ),
       ScanScreen(
         profile: _babyProfile,
@@ -3538,13 +3544,77 @@ class _HomeScreenState extends State<HomeScreen> {
               desc: '약 뱉는 아이 달래기 및 안전 투약 노하우',
               onTap: () => _openRefusalGuidanceModal(context),
             ),
-            _buildCareTipDivider(),
-            _buildCareTipTextRow(
-              icon: '🚨',
-              title: '야간 소아응급실 & 달빛병원',
-              desc: '전국 24h 소아전문응급센터 및 심야 진료 병원 찾기',
-              isEmergency: true,
+            const SizedBox(height: 14),
+
+            // 🚨 야간 소아응급실 & 달빛병원 (테두리와 가시성을 강화한 전용 긴급 카드)
+            InkWell(
               onTap: () => _openNightPediatricEmergencyModal(context),
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFFCA5A5), width: 1.5),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x1ADC2626), blurRadius: 6, offset: Offset(0, 2)),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDC2626),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.emergency, color: Colors.white, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                '야간 소아응급실 & 달빛병원',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF991B1B)),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                '24h',
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFDC2626)),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            '전국 소아전문응급의료센터 · 심야 진료 달빛병원 찾기',
+                            style: TextStyle(fontSize: 11, color: Color(0xFFB91C1C), height: 1.25),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFFECACA)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('병원 찾기', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFFDC2626))),
+                          SizedBox(width: 2),
+                          Icon(Icons.arrow_forward_ios, size: 9, color: Color(0xFFDC2626)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -3685,16 +3755,44 @@ class _HomeScreenState extends State<HomeScreen> {
 // ----------------------------------------------------------------------
 // 2. DRUGS LIST SCREEN (처방약 목록 및 상세 화면)
 // ----------------------------------------------------------------------
+class _DisplayDrugItem {
+  final String title;
+  final String prescriptionMeta;
+  final String dosage;
+  final String remainingDays;
+  final String statusBadge;
+  final Color statusColor;
+  final String category;
+  final String desc;
+  final bool isCompleted;
+
+  const _DisplayDrugItem({
+    required this.title,
+    required this.prescriptionMeta,
+    required this.dosage,
+    required this.remainingDays,
+    required this.statusBadge,
+    required this.statusColor,
+    required this.category,
+    required this.desc,
+    required this.isCompleted,
+  });
+}
+
 class DrugsListScreen extends StatefulWidget {
   final MemberProfile profile;
   final List<DrugAnalysisResult> scannedDrugs;
   final VoidCallback? onGoBack;
+  final VoidCallback? onNavigateScan;
+  final Function(String)? onDeleteDrug;
 
   const DrugsListScreen({
     super.key,
     required this.profile,
     this.scannedDrugs = const [],
     this.onGoBack,
+    this.onNavigateScan,
+    this.onDeleteDrug,
   });
 
   @override
@@ -3704,17 +3802,16 @@ class DrugsListScreen extends StatefulWidget {
 class _DrugsListScreenState extends State<DrugsListScreen> {
   bool _isDetailView = false;
   int _tabFilter = 0; // 0: 복용 중, 1: 복용 완료
-  String _selectedDrug = '코미시럽 (코감기약)';
-  String _selectedCategory = '권장대비: 상위 안심 1등급';
-  String _selectedDesc = '코막힘, 콧물, 재채기 등 알레르기성 비염 증상 완화제';
+  String _selectedDrug = '';
+  String _selectedCategory = '';
+  String _selectedDesc = '';
 
-  final Set<String> _completedDrugTitles = {
-    '비오플 250산 (유산균 정장제)',
-    '세파클러 건조시럽 (2세대 세파 항생제)',
-    '맥시부펜 시럽 (덱시부프로펜 해열제)',
-    '풀미코트 분무용 현탁액 (호흡기 흡입액)',
-    '유시락스 시럽 (가려움/알레르기)',
-  };
+  final Set<String> _completedDrugTitles = {};
+  final Set<String> _deletedDrugTitles = {};
+
+  bool get _isSampleProfile =>
+      (widget.profile.id == 'child_1' || widget.profile.name == '하준이') ||
+      (widget.profile.id == 'child_2' || widget.profile.name == '서아');
 
   void _toggleDrugCompletion(String drugTitle) {
     setState(() {
@@ -3739,22 +3836,108 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
     );
   }
 
+  void _confirmDeleteDrug(String title) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.delete_outline, color: Color(0xFFFF6B8B)),
+            SizedBox(width: 8),
+            Text('처방약 삭제', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+          ],
+        ),
+        content: Text('\'$title\'(을)를 목록에서 삭제하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6B8B),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() {
+                _deletedDrugTitles.add(title);
+                _completedDrugTitles.remove(title);
+                if (_isDetailView && _selectedDrug == title) {
+                  _isDetailView = false;
+                }
+              });
+              widget.onDeleteDrug?.call(title);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('\'$title\'이(가) 삭제되었습니다.')),
+              );
+            },
+            child: const Text('삭제', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isDetailView) {
       return _buildDrugDetailView();
     }
 
-    final baseActiveList = [
-      '코미시럽 (코감기약)',
-      '아모클란듀오 시럽 (항생제)',
-    ];
+    final List<_DisplayDrugItem> activeDrugs = [];
+    final List<_DisplayDrugItem> completedDrugs = [];
 
-    final scannedActiveList = widget.scannedDrugs.map((d) => d.drugName).toList();
-    final allPossibleActive = [...baseActiveList, ...scannedActiveList];
+    // 1. 실제 스캔된 처방약 반영
+    for (final scanned in widget.scannedDrugs) {
+      if (_deletedDrugTitles.contains(scanned.drugName)) continue;
+      final isDone = _completedDrugTitles.contains(scanned.drugName);
+      final item = _DisplayDrugItem(
+        title: scanned.drugName,
+        prescriptionMeta: '인식: ${scanned.originalScanned} · 유사도 ${(scanned.confidence * 100).toInt()}%',
+        dosage: scanned.status == 'SAFE' ? '${widget.profile.name} ${widget.profile.weightKg}kg 적정 용량' : '소아 용량 주의 확인 필요',
+        remainingDays: isDone ? '복용 완료' : '안심 복약 진행 중',
+        statusBadge: isDone ? '✓ 복용 완료' : (scanned.status == 'SAFE' ? '복용 중' : '⚠️ 주의'),
+        statusColor: isDone ? const Color(0xFF10B981) : (scanned.status == 'SAFE' ? const Color(0xFFFF6B8B) : const Color(0xFFDC2626)),
+        category: scanned.status == 'SAFE' ? '적정 소아 처방' : '⚠️ 용량 점검 요망',
+        desc: scanned.comment,
+        isCompleted: isDone,
+      );
+      if (isDone) {
+        completedDrugs.add(item);
+      } else {
+        activeDrugs.add(item);
+      }
+    }
 
-    final currentActiveCount = allPossibleActive.where((d) => !_completedDrugTitles.contains(d)).length;
-    final currentCompletedCount = _completedDrugTitles.length;
+    // 2. 기본 예시 프로필(하준이)에만 스캔 전 예시 1건을 제공하고, 새로 추가된 아이는 완전히 빈 상태로 시작
+    if (_isSampleProfile && widget.scannedDrugs.isEmpty) {
+      const sampleTitle = '코미시럽 (코감기약)';
+      if (!_deletedDrugTitles.contains(sampleTitle)) {
+        final isDone = _completedDrugTitles.contains(sampleTitle);
+        final item = _DisplayDrugItem(
+          title: sampleTitle,
+          prescriptionMeta: '소아과 1월 24일 처방 (예시)',
+          dosage: '1일 3회, 1회 4ml',
+          remainingDays: isDone ? '복용 완료' : '남은 복용 기간 2일',
+          statusBadge: isDone ? '✓ 복용 완료' : '복용 중',
+          statusColor: isDone ? const Color(0xFF10B981) : const Color(0xFFFF6B8B),
+          category: '권장대비: 상위 안심 1등급',
+          desc: '코막힘, 콧물, 재채기 등 알레르기성 비염 증상 완화제',
+          isCompleted: isDone,
+        );
+        if (isDone) {
+          completedDrugs.add(item);
+        } else {
+          activeDrugs.add(item);
+        }
+      }
+    }
+
+    final currentActiveCount = activeDrugs.length;
+    final currentCompletedCount = completedDrugs.length;
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -3775,7 +3958,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
         ),
         const SizedBox(height: 14),
 
-        // Segmented Tab - 복용 중 / 복용 완료 (클릭 필터 전환 지원)
+        // Segmented Tab - 복용 중 / 복용 완료
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(16)),
@@ -3833,203 +4016,105 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
         // Filtered Drug Cards
         if (_tabFilter == 0) ...[
           // 복용 중 약품 목록
-          if (!_completedDrugTitles.contains('코미시럽 (코감기약)'))
-            _buildDrugCard(
-              title: '코미시럽 (코감기약)',
-              prescriptionMeta: '소아과 1월 24일 처방',
-              dosage: '1일 3회, 1회 4ml',
-              remainingDays: '남은 복용 기간 2일',
-              statusBadge: '복용 중',
-              statusColor: const Color(0xFFFF6B8B),
-              onTap: () => setState(() {
-                _selectedDrug = '코미시럽 (코감기약)';
-                _selectedCategory = '권장대비: 상위 안심 1등급';
-                _selectedDesc = '코막힘, 콧물, 재채기 등 알레르기성 비염 증상 완화제';
-                _isDetailView = true;
-              }),
-            ),
-          if (!_completedDrugTitles.contains('코미시럽 (코감기약)'))
-            const SizedBox(height: 12),
-
-          if (!_completedDrugTitles.contains('아모클란듀오 시럽 (항생제)'))
-            _buildDrugCard(
-              title: '아모클란듀오 시럽 (항생제)',
-              prescriptionMeta: '이비인후과 1월 20일 처방',
-              dosage: '1일 2회, 1회 3ml',
-              remainingDays: '남은 복용 기간 5일',
-              statusBadge: '복용 중',
-              statusColor: const Color(0xFFFF6B8B),
-              onTap: () => setState(() {
-                _selectedDrug = '아모클란듀오 시럽 (항생제)';
-                _selectedCategory = '권장대비: 적정 항생 처방';
-                _selectedDesc = '중이염 및 호흡기 감염 치료용 복합 항생제';
-                _isDetailView = true;
-              }),
-            ),
-          if (!_completedDrugTitles.contains('아모클란듀오 시럽 (항생제)'))
-            const SizedBox(height: 12),
-
-          // 새로 스캔된 약품들 동적 반영 (복용 완료된 것은 제외)
-          ...widget.scannedDrugs
-              .where((scanned) => !_completedDrugTitles.contains(scanned.drugName))
-              .map((scanned) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _buildDrugCard(
-                      title: scanned.drugName,
-                      prescriptionMeta: '인식: ${scanned.originalScanned} · 유사도 ${(scanned.confidence * 100).toInt()}%',
-                      dosage: scanned.status == 'SAFE' ? '${widget.profile.name} ${widget.profile.weightKg}kg 적정 용량' : '소아 용량 주의 확인 필요',
-                      remainingDays: '안심 복약 진행 중',
-                      statusBadge: scanned.status == 'SAFE' ? '복용 중' : '⚠️ 주의',
-                      statusColor: scanned.status == 'SAFE' ? const Color(0xFFFF6B8B) : const Color(0xFFDC2626),
-                      onTap: () => setState(() {
-                        _selectedDrug = scanned.drugName;
-                        _selectedCategory = scanned.status == 'SAFE' ? '적정 소아 처방' : '⚠️ 용량 점검 요망';
-                        _selectedDesc = scanned.comment;
-                        _isDetailView = true;
-                      }),
-                    ),
-                  )),
+          ...activeDrugs.map((drug) => _buildDrugCard(
+                title: drug.title,
+                prescriptionMeta: drug.prescriptionMeta,
+                dosage: drug.dosage,
+                remainingDays: drug.remainingDays,
+                statusBadge: drug.statusBadge,
+                statusColor: drug.statusColor,
+                onTap: () => setState(() {
+                  _selectedDrug = drug.title;
+                  _selectedCategory = drug.category;
+                  _selectedDesc = drug.desc;
+                  _isDetailView = true;
+                }),
+                onDelete: () => _confirmDeleteDrug(drug.title),
+              )),
 
           if (currentActiveCount == 0)
             Container(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
               alignment: Alignment.center,
-              child: const Column(
+              child: Column(
                 children: [
-                  Text('🎉', style: TextStyle(fontSize: 40)),
-                  SizedBox(height: 12),
-                  Text('현재 복용 중인 모든 처방약을 완료했습니다!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  SizedBox(height: 4),
-                  Text('복약 완료 탭에서 이전 복용 기록을 확인하실 수 있습니다.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF3F4F6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.medication_outlined, size: 40, color: Color(0xFF9CA3AF)),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    widget.scannedDrugs.isNotEmpty
+                        ? '현재 복용 중인 모든 처방약을 완료했습니다! 🎉'
+                        : '${widget.profile.name}의 등록된 처방약이 없습니다',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.scannedDrugs.isNotEmpty
+                        ? '[복용 완료] 탭에서 이전 복용 기록을 확인하실 수 있습니다.'
+                        : '병원 처방전이나 약봉투를 스캔하면\n복약 일정과 안전 복용 정보가 자동으로 등록됩니다.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey, height: 1.45),
+                  ),
+                  if (widget.scannedDrugs.isEmpty) ...[
+                    const SizedBox(height: 18),
+                    ElevatedButton.icon(
+                      onPressed: widget.onNavigateScan,
+                      icon: const Icon(Icons.crop_free, size: 16),
+                      label: const Text('첫 처방전 스캔하기', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF6B8B),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
         ] else ...[
-          // 복용 완료된 처방약 목록 (상단 기본약 중 완료된 것들 동적 표시)
-          if (_completedDrugTitles.contains('코미시럽 (코감기약)')) ...[
-            _buildDrugCard(
-              title: '코미시럽 (코감기약)',
-              prescriptionMeta: '소아과 1월 24일 처방',
-              dosage: '1일 3회, 1회 4ml',
-              remainingDays: '복용 완료',
-              statusBadge: '✓ 복용 완료',
-              statusColor: const Color(0xFF10B981),
-              onTap: () => setState(() {
-                _selectedDrug = '코미시럽 (코감기약)';
-                _selectedCategory = '완료 기록';
-                _selectedDesc = '코막힘, 콧물, 재채기 등 알레르기성 비염 증상 완화제';
-                _isDetailView = true;
-              }),
-            ),
-            const SizedBox(height: 12),
-          ],
-          if (_completedDrugTitles.contains('아모클란듀오 시럽 (항생제)')) ...[
-            _buildDrugCard(
-              title: '아모클란듀오 시럽 (항생제)',
-              prescriptionMeta: '이비인후과 1월 20일 처방',
-              dosage: '1일 2회, 1회 3ml',
-              remainingDays: '복용 완료',
-              statusBadge: '✓ 복용 완료',
-              statusColor: const Color(0xFF10B981),
-              onTap: () => setState(() {
-                _selectedDrug = '아모클란듀오 시럽 (항생제)';
-                _selectedCategory = '완료 기록';
-                _selectedDesc = '중이염 및 호흡기 감염 치료용 복합 항생제';
-                _isDetailView = true;
-              }),
-            ),
-            const SizedBox(height: 12),
-          ],
+          // 복용 완료된 처방약 목록
+          ...completedDrugs.map((drug) => _buildDrugCard(
+                title: drug.title,
+                prescriptionMeta: drug.prescriptionMeta,
+                dosage: drug.dosage,
+                remainingDays: drug.remainingDays,
+                statusBadge: drug.statusBadge,
+                statusColor: drug.statusColor,
+                onTap: () => setState(() {
+                  _selectedDrug = drug.title;
+                  _selectedCategory = drug.category;
+                  _selectedDesc = drug.desc;
+                  _isDetailView = true;
+                }),
+                onDelete: () => _confirmDeleteDrug(drug.title),
+              )),
 
-          // 기본 과거 완료 처방약 히스토리
-          if (_completedDrugTitles.contains('비오플 250산 (유산균 정장제)')) ...[
-            _buildDrugCard(
-              title: '비오플 250산 (유산균 정장제)',
-              prescriptionMeta: '소아과 1월 5일 처방',
-              dosage: '1일 2회, 1회 1포',
-              remainingDays: '5일간 복용 완료',
-              statusBadge: '✓ 복용 완료',
-              statusColor: const Color(0xFF10B981),
-              onTap: () => setState(() {
-                _selectedDrug = '비오플 250산 (유산균 정장제)';
-                _selectedCategory = '완료 기록';
-                _selectedDesc = '장내 균총 정상화 및 설사 개선용 소아 정장 생균제';
-                _isDetailView = true;
-              }),
+          if (currentCompletedCount == 0)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+              alignment: Alignment.center,
+              child: const Column(
+                children: [
+                  Icon(Icons.assignment_turned_in_outlined, size: 40, color: Color(0xFF9CA3AF)),
+                  SizedBox(height: 14),
+                  Text('복용 완료된 처방약이 없습니다',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
+                  SizedBox(height: 6),
+                  Text(
+                    '복용 중인 약을 끝까지 복용하고 [복용 완료] 처리하면\n이곳에 안전 복약 기록으로 보관됩니다.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: Colors.grey, height: 1.45),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-          ],
-
-          if (_completedDrugTitles.contains('세파클러 건조시럽 (2세대 세파 항생제)')) ...[
-            _buildDrugCard(
-              title: '세파클러 건조시럽 (2세대 세파 항생제)',
-              prescriptionMeta: '소아과 12월 28일 처방',
-              dosage: '1일 3회, 1회 3.5ml',
-              remainingDays: '7일간 복용 완료',
-              statusBadge: '✓ 복용 완료',
-              statusColor: const Color(0xFF10B981),
-              onTap: () => setState(() {
-                _selectedDrug = '세파클러 건조시럽 (2세대 세파 항생제)';
-                _selectedCategory = '완료 기록';
-                _selectedDesc = '기관지염 및 편도염 치료용 소아용 세파계 항생제';
-                _isDetailView = true;
-              }),
-            ),
-            const SizedBox(height: 12),
-          ],
-
-          if (_completedDrugTitles.contains('맥시부펜 시럽 (덱시부프로펜 해열제)')) ...[
-            _buildDrugCard(
-              title: '맥시부펜 시럽 (덱시부프로펜 해열제)',
-              prescriptionMeta: '소아과 12월 15일 처방',
-              dosage: '발열 시 1회 4ml (4~6시간 간격)',
-              remainingDays: '3일간 복용 완료',
-              statusBadge: '✓ 복용 완료',
-              statusColor: const Color(0xFF10B981),
-              onTap: () => setState(() {
-                _selectedDrug = '맥시부펜 시럽 (덱시부프로펜 해열제)';
-                _selectedCategory = '완료 기록';
-                _selectedDesc = '유소아 급성 상기도 감염으로 인한 발열 완화 해열진통소염제';
-                _isDetailView = true;
-              }),
-            ),
-            const SizedBox(height: 12),
-          ],
-
-          if (_completedDrugTitles.contains('풀미코트 분무용 현탁액 (호흡기 흡입액)')) ...[
-            _buildDrugCard(
-              title: '풀미코트 분무용 현탁액 (호흡기 흡입액)',
-              prescriptionMeta: '이비인후과 11월 20일 처방',
-              dosage: '1일 2회, 네블라이저 흡입',
-              remainingDays: '4일간 복용 완료',
-              statusBadge: '✓ 복용 완료',
-              statusColor: const Color(0xFF10B981),
-              onTap: () => setState(() {
-                _selectedDrug = '풀미코트 분무용 현탁액 (호흡기 흡입액)';
-                _selectedCategory = '완료 기록';
-                _selectedDesc = '소아 후두염(크룹) 및 기관지 천식 증상 완화제';
-                _isDetailView = true;
-              }),
-            ),
-            const SizedBox(height: 12),
-          ],
-
-          if (_completedDrugTitles.contains('유시락스 시럽 (가려움/알레르기)')) ...[
-            _buildDrugCard(
-              title: '유시락스 시럽 (가려움/알레르기)',
-              prescriptionMeta: '피부과 11월 02일 처방',
-              dosage: '취침 전 1회 2ml',
-              remainingDays: '3일간 복용 완료',
-              statusBadge: '✓ 복용 완료',
-              statusColor: const Color(0xFF10B981),
-              onTap: () => setState(() {
-                _selectedDrug = '유시락스 시럽 (가려움/알레르기)';
-                _selectedCategory = '완료 기록';
-                _selectedDesc = '소아 알레르기성 피부염 및 가려움 완화 항히스타민제';
-                _isDetailView = true;
-              }),
-            ),
-          ],
         ],
       ],
     );
@@ -4043,14 +4128,16 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
     String statusBadge = '복용 중',
     Color statusColor = const Color(0xFFFF6B8B),
     required VoidCallback onTap,
+    VoidCallback? onDelete,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
         ),
         child: Column(
@@ -4070,7 +4157,21 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                     style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: Colors.grey),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (onDelete != null)
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, size: 18, color: Colors.grey),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        tooltip: '처방약 삭제',
+                        onPressed: onDelete,
+                      ),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.chevron_right, color: Colors.grey),
+                  ],
+                ),
               ],
             ),
             const SizedBox(height: 6),
@@ -4107,9 +4208,19 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
       padding: const EdgeInsets.all(20),
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => setState(() => _isDetailView = false)),
-            const Text('처방약 상세 정보', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Row(
+              children: [
+                IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => setState(() => _isDetailView = false)),
+                const Text('처방약 상세 정보', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.grey),
+              tooltip: '처방약 삭제',
+              onPressed: () => _confirmDeleteDrug(_selectedDrug),
+            ),
           ],
         ),
         const SizedBox(height: 12),
