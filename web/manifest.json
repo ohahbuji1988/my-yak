@@ -1,11 +1,11 @@
 {
-    "name": "My 약 - 우리 아이 안심 복약 가이드",
-    "short_name": "My 약",
+    "name": "my_yak",
+    "short_name": "my_yak",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FFFFFF",
-    "theme_color": "#FF6B8B",
-    "description": "우리 아이 안심 복약 가이드 및 처방전 안심 분석 서비스",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
