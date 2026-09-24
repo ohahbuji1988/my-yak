@@ -39,7 +39,8 @@ DRUG_DATABASE = {
     "코싹엘정": DrugInfo("200806456", "코싹엘정", "비염/알레르기", 5.0, 10.0, warning_note="졸림 주의, 슈도에페드린 복합제", storage_method="실온 보관", purpose="코막힘 뚫림 및 알레르기 비염 증상 완화"),
     "웅스코민정": DrugInfo("200003058", "웅스코민정", "진경제/위장관운동", 10.0, 30.0, warning_note="복통 및 경련 완화", storage_method="실온 보관", purpose="복통 및 배앓이·위장관 경련 완화"),
     "슈클래리정250밀리그램": DrugInfo("200000001", "슈클래리정250밀리그램", "항생제", 250.0, 1000.0, 7.5, 15.0, 30.0, warning_note="마크로라이드계 항생제. 1일 2회 복용. 소아는 정제 분쇄 또는 시럽 제형 확인 권장", storage_method="실온 보관", is_antibiotic=True, compliance_note="처방 일수 끝까지 완복용하세요.", purpose="기도·기관지염 및 세균성 호흡기 감염 치료 (항생제)"),
-    "클래리시드건조시럽": DrugInfo("199500001", "클래리시드건조시럽", "항생제", 25.0, 1000.0, 7.5, 15.0, 30.0, warning_note="마크로라이드계 소아 시럽. 1일 2회 복용 권장", storage_method="🌡️ 실온 보관(15~30°C) (냉장 보관 시 쓴맛 증가 및 침전 주의)", discard_days=14, is_antibiotic=True, compliance_note="처방 일수 끝까지 완복용하세요.", purpose="급성 기관지염·폐렴 등 소아 호흡기 감염 치료 (항생제)")
+    "클래리시드건조시럽": DrugInfo("199500001", "클래리시드건조시럽", "항생제", 25.0, 1000.0, 7.5, 15.0, 30.0, warning_note="마크로라이드계 소아 시럽. 1일 2회 복용 권장", storage_method="🌡️ 실온 보관(15~30°C) (냉장 보관 시 쓴맛 증가 및 침전 주의)", discard_days=14, is_antibiotic=True, compliance_note="처방 일수 끝까지 완복용하세요.", purpose="급성 기관지염·폐렴 등 소아 호흡기 감염 치료 (항생제)"),
+    "엘코스텐캡슐": DrugInfo("200401825", "엘코스텐캡슐", "진해거담제", 300.0, 900.0, warning_note="에르도스테인 300mg. 급·만성 호흡기 질환의 점액 용해 및 가래 배출 촉진", storage_method="실온 보관 (1~30°C)", purpose="기관지 가래 용해 및 기침 배출 촉진 (진해거담제)")
 }
 
 # 공공데이터 API 조회 결과 메모리 캐시
@@ -261,6 +262,18 @@ async def evaluate_dosage_async(profile: MemberProfile, drug_name: str, dose_uni
         matched_or_scanned = match_result.best_matched_name or drug_name
         candidates_list = get_similar_candidates(matched_or_scanned, base_candidates=raw_candidates)
         ai_deduction = await deduce_drug_with_gemini(drug_name)
+        from drug_matcher import normalize_drug_name
+
+        # 추론된 약품명이 원본과 동일 약품인 경우 중복 추천 팝업 방지
+        if ai_deduction:
+            deduced_name = ai_deduction.get("deduced_name", "")
+            norm_deduced = normalize_drug_name(deduced_name)
+            norm_scanned = normalize_drug_name(drug_name)
+            norm_matched = normalize_drug_name(matched_or_scanned)
+            if (norm_deduced and (norm_deduced == norm_scanned or norm_deduced == norm_matched or 
+                                  norm_scanned in norm_deduced or norm_deduced in norm_scanned)):
+                ai_deduction = None
+
         # 가능하면 로컬 DB 매칭 약품의 보관법 정보도 포함
         local_drug = DRUG_DATABASE.get(match_result.best_matched_name or "") if match_result.best_matched_name else None
         return {
@@ -268,15 +281,15 @@ async def evaluate_dosage_async(profile: MemberProfile, drug_name: str, dose_uni
             "original_scanned": drug_name,
             "match_status": "AMBIGUOUS",
             "confidence": match_result.confidence,
-            "status": "UNKNOWN",
-            "comment": f"약품명 '{drug_name}'의 인식이 모호합니다. 아래 AI 추천 정보를 확인해 주세요.",
+            "status": "SAFE" if ai_deduction is None and local_drug else "UNKNOWN",
+            "comment": f"약품명 '{drug_name}'({local_drug.category if local_drug else '의약품'})과(와) 일치합니다." if ai_deduction is None and local_drug else f"약품명 '{drug_name}'의 인식이 모호합니다. 아래 AI 추천 정보를 확인해 주세요.",
             "candidates": candidates_list,
             "ai_deduction": ai_deduction,
             "storage_method": local_drug.storage_method if local_drug else None,
             "discard_days": local_drug.discard_days if local_drug else None,
             "is_antibiotic": local_drug.is_antibiotic if local_drug else False,
             "compliance_note": local_drug.compliance_note if local_drug and local_drug.compliance_note else None,
-            "purpose": ai_deduction.get("category", "용도 확인 필요") if ai_deduction else "용도 확인 필요"
+            "purpose": local_drug.purpose if local_drug else (ai_deduction.get("category", "용도 확인 필요") if ai_deduction else "용도 확인 필요")
         }
 
     # 3. 로컬에 없는 경우: 식약처 공공데이터포털(e약은요) 실시간 조회 시도
@@ -310,6 +323,26 @@ async def evaluate_dosage_async(profile: MemberProfile, drug_name: str, dose_uni
 
     # 4. 공공데이터에도 검색되지 않거나 UNKNOWN인 경우 -> Gemini AI 스마트 추론 실행
     ai_deduction = await deduce_drug_with_gemini(drug_name)
+    from drug_matcher import normalize_drug_name
+
+    # AI가 추론한 약품명이 사실상 같은 약품인 경우 (예: '엘코스텐캡슐' vs '엘코스텐캡슐(에르도스테인)')
+    # 굳이 오타 추천 카드를 띄우지 않고 공식 명칭과 효능으로 자연스럽게 확정 처리
+    if ai_deduction:
+        deduced_name = ai_deduction.get("deduced_name", "")
+        if normalize_drug_name(deduced_name) == normalize_drug_name(drug_name) or normalize_drug_name(drug_name) in normalize_drug_name(deduced_name):
+            return {
+                "drug_name": deduced_name,
+                "original_scanned": drug_name,
+                "match_status": "HIGH",
+                "confidence": 0.95,
+                "status": "SAFE",
+                "comment": f"식약처 허가 의약품 '{deduced_name}'({ai_deduction.get('ingredient', '')})과(와) 일치합니다.",
+                "safety_guide": ai_deduction.get("reason", "처방된 1회 복용량과 횟수를 준수하여 복용하세요."),
+                "candidates": candidates_list,
+                "ai_deduction": None, # 이미 동일 약품이므로 중복 추천 팝업 불필요
+                "purpose": ai_deduction.get("category", "용도 확인 필요")
+            }
+
     return {
         "drug_name": drug_name,
         "original_scanned": drug_name,

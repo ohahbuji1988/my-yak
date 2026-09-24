@@ -3640,32 +3640,48 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
 
-            _buildCareTipTextRow(
-              icon: '🌡️',
-              title: '해열제 교차계산',
-              desc: '체온별 적정 용량 및 교차 복용 간격',
-              onTap: () => _openAntipyreticCalculatorModal(context),
-            ),
-            _buildCareTipDivider(),
-            _buildCareTipTextRow(
-              icon: '🤢',
-              title: '토했을 때 가이드',
-              desc: '10분/30분 이내 구토 시 재투약 수칙',
-              onTap: () => _openVomitGuidanceModal(context),
-            ),
-            _buildCareTipDivider(),
-            _buildCareTipTextRow(
-              icon: '💊',
-              title: '항생제 복용 수칙',
-              desc: '증상 호전 시에도 임의중단 금지 · 냉장보관',
-              onTap: () => _openAntibioticsGuidanceModal(context),
-            ),
-            _buildCareTipDivider(),
-            _buildCareTipTextRow(
-              icon: '🍯',
-              title: '약 거부 대처 팁',
-              desc: '약 뱉는 아이 달래기 및 안전 투약 노하우',
-              onTap: () => _openRefusalGuidanceModal(context),
+            // 4개 안심 케어 항목을 하나의 깔끔한 테두리 카드로 통합
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x06000000), blurRadius: 6, offset: Offset(0, 2)),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              child: Column(
+                children: [
+                  _buildCareTipTextRow(
+                    icon: '🌡️',
+                    title: '해열제 교차계산',
+                    desc: '체온별 적정 용량 및 교차 복용 간격',
+                    onTap: () => _openAntipyreticCalculatorModal(context),
+                  ),
+                  _buildCareTipDivider(),
+                  _buildCareTipTextRow(
+                    icon: '🤢',
+                    title: '토했을 때 가이드',
+                    desc: '10분/30분 이내 구토 시 재투약 수칙',
+                    onTap: () => _openVomitGuidanceModal(context),
+                  ),
+                  _buildCareTipDivider(),
+                  _buildCareTipTextRow(
+                    icon: '💊',
+                    title: '항생제 복용 수칙',
+                    desc: '증상 호전 시에도 임의중단 금지 · 냉장보관',
+                    onTap: () => _openAntibioticsGuidanceModal(context),
+                  ),
+                  _buildCareTipDivider(),
+                  _buildCareTipTextRow(
+                    icon: '🍯',
+                    title: '약 거부 대처 팁',
+                    desc: '약 뱉는 아이 달래기 및 안전 투약 노하우',
+                    onTap: () => _openRefusalGuidanceModal(context),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 14),
 
@@ -3743,7 +3759,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 24),
 
-        // 📢 최신 보건 소식 (제일 아래 위치, 제목만 3개 표시)
+        // 📢 최신 보건 소식 (단일 테두리 카드로 감싼 업그레이드 디자인)
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -3764,33 +3780,58 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
-            ..._getPediatricNewsList(widget.profile).map((news) => InkWell(
-              onTap: () => _showPediatricNewsDetail(context, news),
-              borderRadius: BorderRadius.circular(6),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
-                child: Row(
-                  children: [
-                    const Text('•', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13, fontWeight: FontWeight.bold)),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        news.title,
-                        style: const TextStyle(fontSize: 12, color: Colors.black87),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      news.date,
-                      style: const TextStyle(fontSize: 10.5, color: Color(0xFF9CA3AF)),
-                    ),
-                  ],
-                ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x06000000), blurRadius: 6, offset: Offset(0, 2)),
+                ],
               ),
-            )),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              child: Column(
+                children: [
+                  ..._getPediatricNewsList(widget.profile).asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final news = entry.value;
+                    return Column(
+                      children: [
+                        if (index > 0)
+                          const Divider(height: 1, thickness: 0.5, color: Color(0xFFF3F4F6)),
+                        InkWell(
+                          onTap: () => _showPediatricNewsDetail(context, news),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 2),
+                            child: Row(
+                              children: [
+                                const Text('•', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13, fontWeight: FontWeight.bold)),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    news.title,
+                                    style: const TextStyle(fontSize: 12, color: Colors.black87, fontWeight: FontWeight.w500),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  news.date,
+                                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF9CA3AF)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -4952,6 +4993,20 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
     }
   }
 
+  bool _isSameDrugBaseName(String a, String b) {
+    String clean(String s) {
+      return s
+          .replaceAll(RegExp(r'\(.*?\)|\[.*?\]'), '')
+          .replaceAll(RegExp(r'[^가-힣a-zA-Z0-9]'), '')
+          .toLowerCase()
+          .trim();
+    }
+    final ca = clean(a);
+    final cb = clean(b);
+    if (ca.isEmpty || cb.isEmpty) return false;
+    return ca == cb || ca.contains(cb) || cb.contains(ca);
+  }
+
   Widget _buildAiDeductionCard(DrugAnalysisResult d) {
     final deduction = d.aiDeduction;
     if (deduction == null) return const SizedBox.shrink();
@@ -5061,89 +5116,193 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
   Widget _buildFormattedAiSafetyReport(String safetyReport) {
     if (safetyReport.trim().isEmpty) return const SizedBox.shrink();
 
-    final rawLines = safetyReport.split(RegExp(r'\n+')).map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
-    final items = <MapEntry<String, String>>[];
+    final rawLines = safetyReport
+        .split(RegExp(r'\n+'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+
+    String? disclaimer;
+    final parsedCards = <_AiReportCardData>[];
 
     for (final line in rawLines) {
-      final subMatches = RegExp(r'\*\*([^*]+?)\*\*[:\s]*([^\*]*)').allMatches(line);
-      if (subMatches.isNotEmpty) {
-        for (final sm in subMatches) {
-          final title = sm.group(1)?.trim() ?? '';
-          final desc = sm.group(2)?.replaceAll(RegExp(r'^\s*:\s*'), '').trim() ?? '';
-          if (title.isNotEmpty || desc.isNotEmpty) {
-            items.add(MapEntry(title, desc));
-          }
-        }
+      if (line.startsWith('※') || (line.contains('의료진') && line.contains('상의'))) {
+        disclaimer = line.replaceAll('*', '').trim();
+        continue;
+      }
+
+      String tag = '';
+      String body = '';
+
+      // Pattern 1: [태그] 내용
+      final bracketMatch = RegExp(r'^\[([^\]]+)\]\s*(.*)$').firstMatch(line);
+      if (bracketMatch != null) {
+        tag = bracketMatch.group(1)?.trim() ?? '';
+        body = bracketMatch.group(2)?.trim() ?? '';
       } else {
-        final match = RegExp(r'^\*?\*?([^*:]+?)\*?\*?\s*[:\-]\s*(.*)$').firstMatch(line);
-        if (match != null) {
-          final title = match.group(1)?.replaceAll('*', '').trim() ?? '';
-          final desc = match.group(2)?.replaceAll('*', '').trim() ?? '';
-          items.add(MapEntry(title, desc));
+        // Pattern 2: • or 1. **제목**: 내용
+        final boldMatch = RegExp(r'^(?:[-•\d\.]+\s*)?\*\*([^*]+)\*\*[:\s]*(.*)$').firstMatch(line);
+        if (boldMatch != null) {
+          tag = boldMatch.group(1)?.trim() ?? '';
+          body = boldMatch.group(2)?.trim() ?? '';
         } else {
-          final cleaned = line.replaceAll('*', '').replaceAll(RegExp(r'^[-•\d\.]+\s*'), '').trim();
-          if (cleaned.isNotEmpty) {
-            items.add(MapEntry('', cleaned));
+          // Pattern 3: • 아이콘 제목: 내용
+          final colonMatch = RegExp(r'^(?:[-•\d\.]+\s*)?([^:：]+)[:：]\s*(.*)$').firstMatch(line);
+          if (colonMatch != null && colonMatch.group(1)!.length < 25) {
+            tag = colonMatch.group(1)?.replaceAll('*', '').trim() ?? '';
+            body = colonMatch.group(2)?.replaceAll('*', '').trim() ?? '';
+          } else {
+            // General text
+            body = line.replaceAll('*', '').replaceAll(RegExp(r'^[-•\d\.]+\s*'), '').trim();
           }
         }
       }
+
+      body = body.replaceAll('*', '').trim();
+      if (tag.isEmpty && body.isNotEmpty) {
+        if (parsedCards.isEmpty) {
+          tag = '⚖️ 안심 용량';
+        } else if (parsedCards.length == 1) {
+          tag = '💊 핵심 복약 수칙';
+        } else {
+          tag = '⏱️ 돌봄 TIP';
+        }
+      }
+
+      if (body.isNotEmpty || tag.isNotEmpty) {
+        parsedCards.add(_AiReportCardData(tag: tag, body: body.isEmpty ? tag : body));
+      }
     }
 
-    if (items.isEmpty) {
-      items.add(MapEntry('', safetyReport.replaceAll('*', '').trim()));
+    if (parsedCards.isEmpty && (disclaimer == null || disclaimer.isEmpty)) {
+      return const SizedBox.shrink();
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(18),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: const [
+          BoxShadow(color: Color(0x0A000000), blurRadius: 10, offset: Offset(0, 3)),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(Icons.auto_awesome, color: Color(0xFF6366F1), size: 15),
-              SizedBox(width: 6),
-              Text(
-                'AI 핵심 안심 요약 (3줄 브리핑)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B)),
+              const Row(
+                children: [
+                  Icon(Icons.auto_awesome, color: Color(0xFF6366F1), size: 18),
+                  SizedBox(width: 8),
+                  Text(
+                    'AI 안심 복약 가이드',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEEF2FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  '3줄 핵심 요약',
+                  style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFF4F46E5)),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          ...items.map((entry) => Padding(
-            padding: const EdgeInsets.only(bottom: 7),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 5, right: 6),
-                  child: Icon(Icons.circle, size: 4, color: Color(0xFF64748B)),
-                ),
-                Flexible(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 520),
-                    child: RichText(
-                      text: TextSpan(
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.55),
-                        children: [
-                          if (entry.key.isNotEmpty)
-                            TextSpan(
-                              text: '${entry.key}: ',
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-                            ),
-                          TextSpan(text: entry.value),
-                        ],
+          const SizedBox(height: 12),
+          ...parsedCards.map((card) {
+            Color badgeBg;
+            Color badgeText;
+            Color cardBorder;
+            Color cardBg;
+
+            if (card.tag.contains('주의') || card.tag.contains('확인') || card.tag.contains('경고')) {
+              badgeBg = const Color(0xFFFEF3C7);
+              badgeText = const Color(0xFFB45309);
+              cardBorder = const Color(0xFFFDE68A);
+              cardBg = const Color(0xFFFFFBEB);
+            } else if (card.tag.contains('용량') || card.tag.contains('적정') || card.tag.contains('안심 용량')) {
+              badgeBg = const Color(0xFFDCFCE7);
+              badgeText = const Color(0xFF15803D);
+              cardBorder = const Color(0xFFBBF7D0);
+              cardBg = const Color(0xFFF0FDF4);
+            } else if (card.tag.contains('항생제') || card.tag.contains('수칙') || card.tag.contains('처방')) {
+              badgeBg = const Color(0xFFEEF2FF);
+              badgeText = const Color(0xFF4338CA);
+              cardBorder = const Color(0xFFC7D2FE);
+              cardBg = const Color(0xFFF8FAFC);
+            } else {
+              badgeBg = const Color(0xFFFFE4E6);
+              badgeText = const Color(0xFFBE123C);
+              cardBorder = const Color(0xFFFECDD3);
+              cardBg = const Color(0xFFFFF1F2);
+            }
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: cardBorder, width: 1),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (card.tag.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                      decoration: BoxDecoration(
+                        color: badgeBg,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        card.tag,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: badgeText,
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 6),
+                  ],
+                  Text(
+                    card.body,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1E293B),
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          if (disclaimer != null) ...[
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.info_outline, size: 12, color: Color(0xFF94A3B8)),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    disclaimer,
+                    style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
                   ),
                 ),
               ],
             ),
-          )),
+          ],
         ],
       ),
     );
@@ -5552,11 +5711,11 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                     ],
 
                     // AI 스마트 추천 ("혹시 이 약을 찾으셨나요?") 카드
-                    // 엄격한 조건: 추천 약품명이 현재 분석된 약품명과 명확히 다를 때만 노출 (동일 약품명 오표기 방지)
+                    // 엄격한 조건: 추천 약품명이 현재 분석된 약품명과 명확히 다를 때만 노출 (괄호 성분명 표기 등 동일 약품명 오표기 방지)
                     if (d.aiDeduction != null &&
                         d.aiDeduction!.deducedName.trim().isNotEmpty &&
-                        d.aiDeduction!.deducedName.trim() != d.drugName.trim() &&
-                        d.aiDeduction!.deducedName.trim() != d.originalScanned.trim()) ...[
+                        !_isSameDrugBaseName(d.aiDeduction!.deducedName, d.drugName) &&
+                        !_isSameDrugBaseName(d.aiDeduction!.deducedName, d.originalScanned)) ...[
                       const SizedBox(height: 10),
                       _buildAiDeductionCard(d),
                     ],
@@ -6869,4 +7028,10 @@ class BabyProfileScreen extends StatelessWidget {
       ],
     );
   }
+}
+
+class _AiReportCardData {
+  final String tag;
+  final String body;
+  _AiReportCardData({required this.tag, required this.body});
 }
