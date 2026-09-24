@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 
@@ -7,8 +6,17 @@ import '../models/profile.dart';
 import '../models/prescription.dart';
 
 class ApiService {
-  // Dynamic host determination: uses current origin in production/all-in-one web, 8000 in debug
+  // 모바일 앱 및 원격 클라우드 연결용 커스텀 서버 주소 (미설정 시 기본 도메인 또는 로컬)
+  static String? customBaseUrl;
+  static const String defaultCloudServer = 'https://my-yak.onrender.com';
+
   static String get baseUrl {
+    if (customBaseUrl != null && customBaseUrl!.isNotEmpty) {
+      String clean = customBaseUrl!.trim();
+      if (clean.endsWith('/')) clean = clean.substring(0, clean.length - 1);
+      return clean.endsWith('/api/v1') ? clean : '$clean/api/v1';
+    }
+
     if (kIsWeb) {
       final origin = Uri.base.origin;
       // 로컬 Flutter 디버그(5000번 포트)일 때는 8000번 FastAPI를 바라보고,
@@ -18,12 +26,9 @@ class ApiService {
       }
       return 'http://127.0.0.1:8000/api/v1';
     }
-    try {
-      if (Platform.isAndroid) {
-        return 'http://10.0.2.2:8000/api/v1';
-      }
-    } catch (_) {}
-    return 'http://127.0.0.1:8000/api/v1';
+
+    // 모바일(갤럭시/Android) 앱 환경: 기본 배포 클라우드 주소 사용 (로컬 에뮬레이터가 아닌 실기기 배포)
+    return '$defaultCloudServer/api/v1';
   }
 
   static Future<PrescriptionAnalysisResponse> analyzePrescription({

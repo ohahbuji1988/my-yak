@@ -35,6 +35,39 @@ class MemberProfile {
     };
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'member_type': memberType == MemberType.child ? 'child' : 'adult',
+      'age': age,
+      'birth_date': birthDate,
+      'gender': gender,
+      'weight_kg': weightKg,
+      'is_pregnant': isPregnant,
+      'allergy_notes': allergyNotes,
+      'history': history.map((item) => item.toMap()).toList(),
+    };
+  }
+
+  factory MemberProfile.fromMap(Map<String, dynamic> map) {
+    return MemberProfile(
+      id: map['id'] ?? 'child_${DateTime.now().millisecondsSinceEpoch}',
+      name: map['name'] ?? '우리 아이',
+      memberType: map['member_type'] == 'adult' ? MemberType.adult : MemberType.child,
+      age: map['age'] ?? '생후 12개월',
+      birthDate: map['birth_date'] ?? '2025년 등록',
+      gender: map['gender'] ?? '남아',
+      weightKg: (map['weight_kg'] as num?)?.toDouble() ?? 10.0,
+      isPregnant: map['is_pregnant'] ?? false,
+      allergyNotes: map['allergy_notes'] ?? '',
+      history: (map['history'] as List<dynamic>?)
+              ?.map((item) => PrescriptionHistoryItem.fromMap(item as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+
   int? get ageMonths {
     final match = RegExp(r'(\d+)\s*개월').firstMatch(age);
     if (match != null) {
@@ -88,6 +121,26 @@ class PrescriptionHistoryItem {
     required this.durationStr,
     required this.clinicName,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'date_str': dateStr,
+      'drug_name': drugName,
+      'indication': indication,
+      'duration_str': durationStr,
+      'clinic_name': clinicName,
+    };
+  }
+
+  factory PrescriptionHistoryItem.fromMap(Map<String, dynamic> map) {
+    return PrescriptionHistoryItem(
+      dateStr: map['date_str'] ?? '',
+      drugName: map['drug_name'] ?? '',
+      indication: map['indication'] ?? '',
+      durationStr: map['duration_str'] ?? '',
+      clinicName: map['clinic_name'] ?? '',
+    );
+  }
 }
 
 // 다자녀(다둥이) 기본 등록 프로필 목록

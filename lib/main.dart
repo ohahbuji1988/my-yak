@@ -6,8 +6,10 @@ import 'package:image_picker/image_picker.dart';
 import 'models/profile.dart';
 import 'models/prescription.dart';
 import 'services/api_service.dart';
+import 'services/storage_service.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyYakFigmaApp());
 }
 
@@ -46,18 +48,112 @@ class AppRootScreen extends StatefulWidget {
 
 class _AppRootScreenState extends State<AppRootScreen> {
   bool _showCover = true;
-  final List<MemberProfile> _familyProfiles = List.from(defaultFamilyProfiles);
+  bool _isLoading = true;
+  List<MemberProfile> _familyProfiles = [];
   late MemberProfile _selectedChild;
 
   @override
   void initState() {
     super.initState();
     _showCover = widget.initialShowCover;
-    _selectedChild = _familyProfiles.first;
+    _initStorageAndProfiles();
+  }
+
+  Future<void> _initStorageAndProfiles() async {
+    final customUrl = await StorageService.loadCustomServerUrl();
+    if (customUrl != null && customUrl.isNotEmpty) {
+      ApiService.customBaseUrl = customUrl;
+    }
+
+    final loadedProfiles = await StorageService.loadProfiles();
+    final savedId = await StorageService.loadSelectedProfileId();
+
+    MemberProfile initial;
+    if (loadedProfiles.isNotEmpty) {
+      final found = loadedProfiles.where((p) => p.id == savedId);
+      initial = found.isNotEmpty ? found.first : loadedProfiles.first;
+    } else {
+      initial = MemberProfile(
+        id: 'child_',
+        name: '우리 아이',
+        memberType: MemberType.child,
+        age: '생후 12개월',
+        weightKg: 10.0,
+      );
+      loadedProfiles.add(initial);
+      await StorageService.saveProfiles(loadedProfiles);
+    }
+
+    if (mounted) {
+      setState(() {
+        _familyProfiles = loadedProfiles;
+        _selectedChild = initial;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _handleAddNewChild(MemberProfile newChild) {
+    setState(() {
+      _familyProfiles.add(newChild);
+      _selectedChild = newChild;
+    });
+    StorageService.saveProfiles(_familyProfiles);
+    StorageService.saveSelectedProfileId(newChild.id);
+  }
+
+  void _handleDeleteChild(String childId) {
+    setState(() {
+      _familyProfiles.removeWhere((p) => p.id == childId);
+      if (_familyProfiles.isEmpty) {
+        final fallback = MemberProfile(
+          id: 'child_',
+          name: '우리 아이',
+          memberType: MemberType.child,
+          age: '생후 12개월',
+          weightKg: 10.0,
+        );
+        _familyProfiles.add(fallback);
+        _selectedChild = fallback;
+      } else if (_selectedChild.id == childId) {
+        _selectedChild = _familyProfiles.first;
+      }
+    });
+    StorageService.saveProfiles(_familyProfiles);
+    StorageService.saveSelectedProfileId(_selectedChild.id);
+  }
+
+  void _handleProfileUpdated(MemberProfile updated) {
+    setState(() {
+      final index = _familyProfiles.indexWhere((p) => p.id == updated.id);
+      if (index != -1) {
+        _familyProfiles[index] = updated;
+      }
+      if (_selectedChild.id == updated.id) {
+        _selectedChild = updated;
+      }
+    });
+    StorageService.saveProfiles(_familyProfiles);
+  }
+
+  void _handleChildChanged(MemberProfile child) {
+    setState(() {
+      _selectedChild = child;
+    });
+    StorageService.saveSelectedProfileId(child.id);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFFAF9F6),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFFFF6B8B)),
+        ),
+      );
+    }
+
     if (_showCover == true) {
       return WelcomeCoverScreen(
         profiles: _familyProfiles,
@@ -67,20 +163,17 @@ class _AppRootScreenState extends State<AppRootScreen> {
           _showCover = false;
         }),
         onStart: () => setState(() => _showCover = false),
-        onAddNewChild: (newChild) => setState(() {
-          _familyProfiles.add(newChild);
-          _selectedChild = newChild;
-        }),
+        onAddNewChild: _handleAddNewChild,
+        onDeleteChild: _handleDeleteChild,
       );
     }
     return MainFigmaScreen(
       initialProfile: _selectedChild,
       familyProfiles: _familyProfiles,
-      onChildChanged: (child) => setState(() => _selectedChild = child),
-      onAddNewChild: (newChild) => setState(() {
-        _familyProfiles.add(newChild);
-        _selectedChild = newChild;
-      }),
+      onChildChanged: _handleChildChanged,
+      onAddNewChild: _handleAddNewChild,
+      onDeleteChild: _handleDeleteChild,
+      onProfileUpdated: _handleProfileUpdated,
       onOpenCover: () => setState(() => _showCover = true),
     );
   }
@@ -95,6 +188,7 @@ class WelcomeCoverScreen extends StatefulWidget {
   final List<MemberProfile> profiles;
   final MemberProfile? initialSelectedChild;
   final Function(MemberProfile)? onAddNewChild;
+  final Function(String)? onDeleteChild;
 
   const WelcomeCoverScreen({
     super.key,
@@ -103,6 +197,7 @@ class WelcomeCoverScreen extends StatefulWidget {
     this.profiles = const [],
     this.initialSelectedChild,
     this.onAddNewChild,
+    this.onDeleteChild,
   });
 
   @override
@@ -115,15 +210,61 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialSelectedChild != null) {
+    _syncCurrentChild();
+  }
+
+  @override
+  void didUpdateWidget(WelcomeCoverScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncCurrentChild();
+  }
+
+  void _syncCurrentChild() {
+    if (widget.initialSelectedChild != null && widget.profiles.any((p) => p.id == widget.initialSelectedChild!.id)) {
       _currentChild = widget.initialSelectedChild!;
     } else if (widget.profiles.isNotEmpty) {
-      _currentChild = widget.profiles.first;
-    } else if (defaultFamilyProfiles.isNotEmpty) {
-      _currentChild = defaultFamilyProfiles.first;
+      if (!widget.profiles.any((p) => p.id == _currentChild.id)) {
+        _currentChild = widget.profiles.first;
+      }
     } else {
-      _currentChild = MemberProfile(id: '1', name: '하준이', memberType: MemberType.child, weightKg: 9.2);
+      _currentChild = MemberProfile(id: '1', name: '우리 아이', memberType: MemberType.child, weightKg: 10.0);
     }
+  }
+
+  void _confirmDeleteProfile(BuildContext context, MemberProfile profile) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.delete_outline, color: Color(0xFFFF6B8B)),
+            const SizedBox(width: 8),
+            Text('${profile.name} 삭제', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ],
+        ),
+        content: Text('\'${profile.name}\'의 프로필을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.',
+            style: const TextStyle(fontSize: 14, height: 1.4)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6B8B),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              widget.onDeleteChild?.call(profile.id);
+            },
+            child: const Text('삭제', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _openAddChildModal(BuildContext context) {
@@ -247,7 +388,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final availableProfiles = widget.profiles.isNotEmpty ? widget.profiles : defaultFamilyProfiles;
+    final availableProfiles = widget.profiles;
 
     return Scaffold(
       body: Stack(
@@ -419,6 +560,19 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                                                 const SizedBox(width: 6),
                                                 const Icon(Icons.check_circle, color: Colors.white, size: 14),
                                               ],
+                                              const SizedBox(width: 8),
+                                              GestureDetector(
+                                                behavior: HitTestBehavior.opaque,
+                                                onTap: () => _confirmDeleteProfile(context, p),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(3),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black.withValues(alpha: 0.35),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: const Icon(Icons.close, size: 12, color: Colors.white),
+                                                ),
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -521,6 +675,8 @@ class MainFigmaScreen extends StatefulWidget {
   final List<MemberProfile>? familyProfiles;
   final Function(MemberProfile)? onChildChanged;
   final Function(MemberProfile)? onAddNewChild;
+  final Function(String)? onDeleteChild;
+  final Function(MemberProfile)? onProfileUpdated;
   final VoidCallback? onOpenCover;
 
   const MainFigmaScreen({
@@ -529,6 +685,8 @@ class MainFigmaScreen extends StatefulWidget {
     this.familyProfiles,
     this.onChildChanged,
     this.onAddNewChild,
+    this.onDeleteChild,
+    this.onProfileUpdated,
     this.onOpenCover,
   });
 
@@ -550,8 +708,8 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
     super.initState();
     _familyProfiles = widget.familyProfiles != null && widget.familyProfiles!.isNotEmpty
         ? List.from(widget.familyProfiles!)
-        : List.from(defaultFamilyProfiles);
-    _babyProfile = widget.initialProfile ?? _familyProfiles.first;
+        : (widget.familyProfiles ?? []);
+    _babyProfile = widget.initialProfile ?? (_familyProfiles.isNotEmpty ? _familyProfiles.first : MemberProfile(id: '1', name: '우리 아이', memberType: MemberType.child, weightKg: 10.0));
   }
 
   @override
@@ -562,6 +720,9 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
     }
     if (widget.familyProfiles != null) {
       _familyProfiles = List.from(widget.familyProfiles!);
+      if (!_familyProfiles.any((p) => p.id == _babyProfile.id) && _familyProfiles.isNotEmpty) {
+        _babyProfile = _familyProfiles.first;
+      }
     }
   }
 
@@ -570,6 +731,42 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
       _babyProfile = newChild;
     });
     widget.onChildChanged?.call(newChild);
+  }
+
+  void _confirmDeleteChild(BuildContext context, MemberProfile profile) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.delete_outline, color: Color(0xFFFF6B8B)),
+            const SizedBox(width: 8),
+            Text('${profile.name} 삭제', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ],
+        ),
+        content: Text('\'${profile.name}\'의 프로필을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.',
+            style: const TextStyle(fontSize: 14, height: 1.4)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6B8B),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              widget.onDeleteChild?.call(profile.id);
+            },
+            child: const Text('삭제', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _openChildSwitcherModal(BuildContext context) {
@@ -619,7 +816,21 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
                     ),
                     title: Text(p.name, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? const Color(0xFFFF6B8B) : Colors.black87)),
                     subtitle: Text('${p.gender} · ${p.age} · ${p.weightKg}kg'),
-                    trailing: isSelected ? const Icon(Icons.check_circle, color: Color(0xFFFF6B8B)) : null,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isSelected) const Icon(Icons.check_circle, color: Color(0xFFFF6B8B), size: 18),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.grey, size: 18),
+                          tooltip: '프로필 삭제',
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            _confirmDeleteChild(context, p);
+                          },
+                        ),
+                      ],
+                    ),
                     onTap: () {
                       Navigator.pop(ctx);
                       _switchChild(p);
@@ -863,7 +1074,9 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
           setState(() {
             _babyProfile = newProfile;
           });
+          widget.onProfileUpdated?.call(newProfile);
         },
+        onDeleteProfile: () => _confirmDeleteChild(context, _babyProfile),
       ),
     ];
 
@@ -4448,6 +4661,7 @@ class BabyProfileScreen extends StatelessWidget {
   final MemberProfile profile;
   final VoidCallback? onSwitchChild;
   final Function(MemberProfile)? onProfileUpdated;
+  final VoidCallback? onDeleteProfile;
   final VoidCallback? onGoBack;
 
   const BabyProfileScreen({
@@ -4455,8 +4669,74 @@ class BabyProfileScreen extends StatelessWidget {
     required this.profile,
     this.onSwitchChild,
     this.onProfileUpdated,
+    this.onDeleteProfile,
     this.onGoBack,
   });
+
+  void _openServerConfigDialog(BuildContext context) {
+    final controller = TextEditingController(
+      text: ApiService.customBaseUrl ?? ApiService.baseUrl.replaceAll('/api/v1', ''),
+    );
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.dns, color: Color(0xFFFF6B8B)),
+            SizedBox(width: 8),
+            Text('백엔드 서버 설정', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '모바일 앱(APK)에서 통신할 서버 URL입니다.\nRender 배포 주소 또는 커스텀 클라우드 주소를 지정하세요.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: '서버 주소',
+                hintText: 'https://my-yak.onrender.com',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6B8B),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () async {
+              final newUrl = controller.text.trim();
+              if (newUrl.isNotEmpty) {
+                ApiService.customBaseUrl = newUrl;
+                await StorageService.saveCustomServerUrl(newUrl);
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('서버 주소가 설정되었습니다: $newUrl')),
+                  );
+                }
+              }
+            },
+            child: const Text('저장'),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _openEditProfileDialog(BuildContext context) {
     final nameCtrl = TextEditingController(text: profile.name);
@@ -4624,6 +4904,14 @@ class BabyProfileScreen extends StatelessWidget {
                   ),
                   onPressed: () => _openEditProfileDialog(context),
                 ),
+                if (onDeleteProfile != null) ...[
+                  const SizedBox(width: 6),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 20, color: Color(0xFFFF6B8B)),
+                    tooltip: '프로필 삭제',
+                    onPressed: onDeleteProfile,
+                  ),
+                ],
               ],
             ),
           ],
@@ -4718,6 +5006,15 @@ class BabyProfileScreen extends StatelessWidget {
             ],
           ),
         )),
+        const SizedBox(height: 16),
+        Center(
+          child: TextButton.icon(
+            icon: const Icon(Icons.settings, size: 14, color: Colors.grey),
+            label: const Text('클라우드 서버 주소 설정 (모바일 앱)', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            onPressed: () => _openServerConfigDialog(context),
+          ),
+        ),
+        const SizedBox(height: 24),
       ],
     );
   }
