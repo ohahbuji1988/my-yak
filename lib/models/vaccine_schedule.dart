@@ -1,4 +1,4 @@
-﻿class VaccineItem {
+class VaccineItem {
   final String id;
   final String name;
   final String category; // "필수접종", "영유아검진", "선택접종"
@@ -275,7 +275,14 @@ DateTime parseBabyBirthDate(String birthDateStr, {String ageStr = ''}) {
   if (monthMatch != null) {
     final months = int.tryParse(monthMatch.group(1)!) ?? 0;
     final now = DateTime.now();
-    return DateTime(now.year, now.month - months, 15);
+    // 월 언더플로우 방지: 연도를 함께 감소시켜 계산
+    int year = now.year;
+    int month = now.month - months;
+    while (month <= 0) {
+      month += 12;
+      year -= 1;
+    }
+    return DateTime(year, month, 15);
   }
 
   // 기본 fallback: 1년 전

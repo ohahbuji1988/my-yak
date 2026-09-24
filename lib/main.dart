@@ -207,7 +207,9 @@ class WelcomeCoverScreen extends StatefulWidget {
 }
 
 class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
-  late MemberProfile _currentChild;
+  // nullable 로 선언해 초기화 전 접근 방지
+  MemberProfile? _currentChildNullable;
+  MemberProfile get _currentChild => _currentChildNullable!;
 
   @override
   void initState() {
@@ -222,14 +224,22 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
   }
 
   void _syncCurrentChild() {
-    if (widget.initialSelectedChild != null && widget.profiles.any((p) => p.id == widget.initialSelectedChild!.id)) {
-      _currentChild = widget.initialSelectedChild!;
+    if (widget.initialSelectedChild != null &&
+        widget.profiles.any((p) => p.id == widget.initialSelectedChild!.id)) {
+      _currentChildNullable = widget.initialSelectedChild!;
     } else if (widget.profiles.isNotEmpty) {
-      if (!widget.profiles.any((p) => p.id == _currentChild.id)) {
-        _currentChild = widget.profiles.first;
+      // _currentChildNullable이 아직 null이거나 목록에 없으면 첫 번째로 교체
+      final currentId = _currentChildNullable?.id;
+      if (currentId == null || !widget.profiles.any((p) => p.id == currentId)) {
+        _currentChildNullable = widget.profiles.first;
       }
     } else {
-      _currentChild = MemberProfile(id: '1', name: '우리 아이', memberType: MemberType.child, weightKg: 10.0);
+      _currentChildNullable = MemberProfile(
+        id: '1',
+        name: '우리 아이',
+        memberType: MemberType.child,
+        weightKg: 10.0,
+      );
     }
   }
 
@@ -411,7 +421,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                   );
                   widget.onAddNewChild?.call(newProfile);
                   setState(() {
-                    _currentChild = newProfile;
+                    _currentChildNullable = newProfile;
                   });
                   Navigator.pop(ctx);
                 },
@@ -563,7 +573,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                                     ...availableProfiles.map((p) {
                                       final isSelected = p.id == _currentChild.id;
                                       return GestureDetector(
-                                        onTap: () => setState(() => _currentChild = p),
+                                        onTap: () => setState(() => _currentChildNullable = p),
                                         child: AnimatedContainer(
                                           duration: const Duration(milliseconds: 200),
                                           margin: const EdgeInsets.only(right: 8),

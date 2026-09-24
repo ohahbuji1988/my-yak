@@ -177,7 +177,7 @@ class PrescriptionAnalysisResponse {
 
   factory PrescriptionAnalysisResponse.fromJson(Map<String, dynamic> json) {
     return PrescriptionAnalysisResponse(
-      analyzedDrugs: (json['analyzed_drugs'] as List)
+      analyzedDrugs: (json['analyzed_drugs'] as List? ?? [])
           .map((item) => DrugAnalysisResult.fromJson(item))
           .toList(),
       durWarnings: (json['dur_warnings'] as List? ?? [])

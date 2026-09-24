@@ -42,11 +42,13 @@ class ApiService {
       'scanned_drugs': scannedDrugs.map((d) => d.toJson()).toList(),
     };
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      body: jsonEncode(payload),
-    );
+    final response = await http
+        .post(
+          url,
+          headers: {'Content-Type': 'application/json; charset=UTF-8'},
+          body: jsonEncode(payload),
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -69,11 +71,13 @@ class ApiService {
       'mime_type': mimeType,
     };
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      body: jsonEncode(payload),
-    );
+    final response = await http
+        .post(
+          url,
+          headers: {'Content-Type': 'application/json; charset=UTF-8'},
+          body: jsonEncode(payload),
+        )
+        .timeout(const Duration(seconds: 60)); // 이미지 분석은 용량이 크므로 60초
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -86,11 +90,13 @@ class ApiService {
   static Future<AiDeduction?> deduceDrugWithAi(String scannedName) async {
     try {
       final url = Uri.parse('$baseUrl/drugs/ai-deduce');
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode({'scanned_name': scannedName}),
-      );
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json; charset=UTF-8'},
+            body: jsonEncode({'scanned_name': scannedName}),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));

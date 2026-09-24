@@ -143,58 +143,28 @@ class PrescriptionHistoryItem {
   }
 }
 
-// 다자녀(다둥이) 기본 등록 프로필 목록
+// 다자녀(다둥이) 기본 등록 프로필 목록 — 처방 히스토리는 빈 상태로 시작
 final List<MemberProfile> defaultFamilyProfiles = [
   MemberProfile(
     id: 'child_1',
     name: '하준이',
     memberType: MemberType.child,
     age: '생후 10개월',
-    birthDate: '2025년 03월 12일',
+    birthDate: '2025년 11월 25일',
     gender: '남아',
     weightKg: 9.2,
     allergyNotes: '페니실린 계열 항생제 복용 시 가벼운 피부 발진 유발 이력 있음.',
-    history: [
-      PrescriptionHistoryItem(
-        dateStr: '2026.01.24',
-        drugName: '코미시럽 (코감기)',
-        indication: '코막힘/콧물',
-        durationStr: '처방기간 3일',
-        clinicName: '소아과 처방',
-      ),
-      PrescriptionHistoryItem(
-        dateStr: '2026.01.20',
-        drugName: '아모클란듀오 시럽 (항생제)',
-        indication: '중이염',
-        durationStr: '처방기간 7일',
-        clinicName: '이비인후과 처방',
-      ),
-    ],
+    history: [], // 새 사용자 시작 시 처방 히스토리 없음
   ),
   MemberProfile(
     id: 'child_2',
     name: '서아',
     memberType: MemberType.child,
     age: '36개월 (만 3세)',
-    birthDate: '2023년 08월 15일',
+    birthDate: '2022년 09월 15일',
     gender: '여아',
     weightKg: 14.5,
     allergyNotes: '특이 약물 알레르기 없음. 아스피린 복용 주의.',
-    history: [
-      PrescriptionHistoryItem(
-        dateStr: '2026.01.25',
-        drugName: '클래리시드 건조시럽 (항생제)',
-        indication: '급성 기관지염',
-        durationStr: '처방기간 5일',
-        clinicName: '소아청소년과 처방',
-      ),
-      PrescriptionHistoryItem(
-        dateStr: '2026.01.15',
-        drugName: '맥시부펜시럽 (해열진통)',
-        indication: '미열 및 인후통',
-        durationStr: '필요 시 투약',
-        clinicName: '가정 비상약',
-      ),
-    ],
+    history: [], // 새 사용자 시작 시 처방 히스토리 없음
   ),
 ];

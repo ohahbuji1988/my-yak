@@ -29,8 +29,11 @@ class StorageService {
 
       final List<dynamic> decoded = jsonDecode(jsonString);
       return decoded.map((item) => MemberProfile.fromMap(item as Map<String, dynamic>)).toList();
-    } catch (e) {
-      // 오류 발생 시 fallback
+    } catch (e, stack) {
+      // JSON 파싱 오류 등 예외 발생 — 데이터 유실 방지를 위해 기본 프로필로 복구
+      // 실기기 환경에서 콘솔/로깅에서 확인 가능
+      // ignore: avoid_print
+      print('[StorageService] loadProfiles 오류 (데이터 복구): $e\n$stack');
       return List<MemberProfile>.from(defaultFamilyProfiles);
     }
   }
