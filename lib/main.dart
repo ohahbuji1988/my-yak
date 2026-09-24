@@ -1246,29 +1246,71 @@ class _PediatricNewsItem {
   });
 }
 
-_PediatricNewsItem _getAgeBasedPediatricNews(MemberProfile profile) {
+List<_PediatricNewsItem> _getPediatricNewsList(MemberProfile profile) {
   final months = profile.ageMonths ?? 10;
   if (months < 12) {
-    return const _PediatricNewsItem(
-      title: '영유아 RS바이러스(RSV) 유행 대비 항체주사(베이포투스) 권고',
-      content: '가을·겨울철 영아 모세기관지염·폐렴 급증에 대비해 장기 지속형 RSV 예방 항체주사 접종이 권고됩니다. 발열과 쌕쌕거림(천명) 관찰 시 소아과 진료를 서두르세요.',
-      date: '2026.09.18 발표',
-      source: '질병관리청(KCDA) & 대한소아청소년과학회',
-    );
+    return const [
+      _PediatricNewsItem(
+        title: '영유아 RS바이러스(RSV) 유행 대비 항체주사(베이포투스) 권고',
+        content: '가을·겨울철 영아 모세기관지염·폐렴 급증에 대비해 장기 지속형 RSV 예방 항체주사 접종이 권고됩니다. 발열과 쌕쌕거림(천명) 관찰 시 소아과 진료를 서두르세요.',
+        date: '09.18',
+        source: '질병관리청 & 대한소아청소년과학회',
+      ),
+      _PediatricNewsItem(
+        title: '생후 6개월 이상 영유아 인플루엔자(독감) 국가 무료 접종 개시',
+        content: '생후 6개월부터 만 13세 아동을 대상으로 2026-2027절기 4가 독감 무료 백신 접종이 시작되었습니다. 유행 전 사전 접종을 권장합니다.',
+        date: '09.20',
+        source: '질병관리청 예방접종관리과',
+      ),
+      _PediatricNewsItem(
+        title: '환절기 신생아·영아 급성 바이러스 장염 주의 당부',
+        content: '일교차가 큰 시기 로타·노로바이러스 등 장염 감염에 유의하세요. 수유기구 소독 및 기저귀 교환 후 손씻기, 탈수 징후를 면밀히 관찰해야 합니다.',
+        date: '09.14',
+        source: '대한소아감염학회',
+      ),
+    ];
   } else if (months <= 36) {
-    return const _PediatricNewsItem(
-      title: '어린이 인플루엔자(독감) 국가 무료 예방접종 시행 안내',
-      content: '생후 6개월~만 13세 이하 어린이를 대상으로 2026-2027절기 4가 인플루엔자 무료 백신 접종이 개시되었습니다. 단체생활 중 마이코플라스마 및 호흡기 감염에 유의하세요.',
-      date: '2026.09.20 발표',
-      source: '질병관리청(KCDA) 예방접종관리과',
-    );
+    return const [
+      _PediatricNewsItem(
+        title: '어린이 인플루엔자(독감) 국가 무료 예방접종 시행 안내',
+        content: '생후 6개월~만 13세 이하 어린이를 대상으로 2026-2027절기 4가 인플루엔자 무료 백신 접종이 개시되었습니다. 단체생활 중 마이코플라스마 및 호흡기 감염에 유의하세요.',
+        date: '09.20',
+        source: '질병관리청 예방접종관리과',
+      ),
+      _PediatricNewsItem(
+        title: '소아 마이코플라스마 폐렴 및 백일해 유행 주의보',
+        content: '3주 이상 지속되는 발작성 기침이나 야간 기침 심화 시 소아과 감별 진료를 권장합니다. 가족 간 감염 차단을 위해 마스크 착용이 권고됩니다.',
+        date: '09.16',
+        source: '질병관리청 감염병포털',
+      ),
+      _PediatricNewsItem(
+        title: '어린이집 등 보육시설 내 유아 수족구병 예방 수칙',
+        content: '손발 수포 및 입안 궤양 증상이 나타나면 등원을 중단하고 자택 격리 치료를 권고합니다. 탈수 예방을 위해 차가운 물과 부드러운 음식을 섭취해 주세요.',
+        date: '09.12',
+        source: '대한소아청소년과학회',
+      ),
+    ];
   } else {
-    return const _PediatricNewsItem(
-      title: '가을철 소아 호흡기 감염병(마이코플라스마·독감) 예방 수칙',
-      content: '어린이집·유치원 등 단체생활 아동 중심의 발열성 기침 환자가 증가하고 있습니다. 4가 독감 접종 완료와 함께 올바른 손씻기 및 기침 예절을 지도해 주세요.',
-      date: '2026.09.15 발표',
-      source: '질병관리청 감염병포털 & 소아감염학회',
-    );
+    return const [
+      _PediatricNewsItem(
+        title: '가을철 소아 호흡기 감염병(마이코플라스마·독감) 예방 수칙',
+        content: '어린이집·유치원 등 단체생활 아동 중심의 발열성 기침 환자가 증가하고 있습니다. 4가 독감 접종 완료와 함께 올바른 손씻기 및 기침 예절을 지도해 주세요.',
+        date: '09.20',
+        source: '질병관리청 감염병포털 & 대한소아감염학회',
+      ),
+      _PediatricNewsItem(
+        title: '환절기 소아 알레르기 비염 및 아토피 피부염 관리 지침',
+        content: '아침저녁 10도 이상 벌어지는 기온차에 대비해 실내 습도 50~60% 유지와 보습제 도포가 권장됩니다. 처방받은 비염 스프레이나 항히스타민제는 정해진 용법을 준수하세요.',
+        date: '09.17',
+        source: '대한소아알레르기호흡기학회',
+      ),
+      _PediatricNewsItem(
+        title: '야간 소아 고열 및 열성경련 시 가정 응급 대처법',
+        content: '열이 급격히 오를 때 옷을 얇게 입히고 미온수로 몸을 닦아주세요. 경련 발생 시 입에 물건을 물리지 말고 고개를 옆으로 돌려 기도를 확보한 뒤 시간을 측정하세요.',
+        date: '09.10',
+        source: '대한응급의학회 소아분과',
+      ),
+    ];
   }
 }
 
@@ -2915,6 +2957,128 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showPediatricNewsDetail(BuildContext context, _PediatricNewsItem news) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(22),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F4F6),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text('보건 소식', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Colors.black87)),
+                ),
+                const SizedBox(width: 8),
+                Text('📅 ${news.date}', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              news.title,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87, height: 1.35),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              news.content,
+              style: const TextStyle(fontSize: 13, color: Colors.black87, height: 1.55),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                const Icon(Icons.account_balance_outlined, size: 13, color: Colors.grey),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(news.source, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6B8B),
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(46),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('확인', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCareTipTextRow({
+    required String icon,
+    required String title,
+    required String desc,
+    required VoidCallback onTap,
+    bool isEmergency = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 2),
+        child: Row(
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 16)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isEmergency ? const Color(0xFFDC2626) : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    desc,
+                    style: const TextStyle(fontSize: 11, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, size: 18, color: Color(0xFF9CA3AF)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCareTipDivider() {
+    return const Divider(height: 1, thickness: 0.6, color: Color(0xFFF3F4F6));
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -3296,30 +3460,29 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
 
         const SizedBox(height: 10),
-        // Today's Safety Tip Banner
+        // Today's Safety Tip Banner (calm, neutral background, soft text)
         Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFFBEB),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFFDE68A)),
+            color: const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('🔑', style: TextStyle(fontSize: 18)),
-              const SizedBox(width: 10),
+              const Text('💡', style: TextStyle(fontSize: 16)),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('오늘의 복약 안심 정보', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF92400E))),
+                    const Text('오늘의 복약 안내', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Colors.black87)),
                     const SizedBox(height: 2),
                     Text(
                       _doses.isNotEmpty
                           ? '${widget.profile.name}이가 복용 중인 약품은 정해진 시간과 용량을 지켜 투약하고, 충분한 수분을 섭취해 주세요.'
                           : '${widget.profile.name}의 등록된 처방약이 없습니다. 상단 [처방전 스캔하기]를 누르면 약봉투나 처방전을 바로 등록할 수 있습니다.',
-                      style: const TextStyle(fontSize: 11, color: Color(0xFFB45309), height: 1.35),
+                      style: const TextStyle(fontSize: 11, color: Colors.black54, height: 1.35),
                     ),
                   ],
                 ),
@@ -3327,291 +3490,117 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 20),
 
-        // 💡 소아과 안심 케어 TIP & 긴급 가이드 (최신 보건 뉴스 브리핑 + 4대 가이드)
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 헤더 & 연령 뱃지
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.health_and_safety_outlined, size: 18, color: Color(0xFFFF6B8B)),
-                      SizedBox(width: 6),
-                      Text('안심 케어 TIP & 긴급 가이드', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text('${widget.profile.age} 맞춤', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
+        // 💡 안심 케어 TIP & 긴급 가이드 (테두리 없는 미니멀 텍스트 리스트)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  '안심 케어 TIP & 긴급 가이드',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+                Text(
+                  '${widget.profile.age} 맞춤',
+                  style: const TextStyle(fontSize: 11, color: Colors.black45, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
 
-              // 📢 아이 연령 연관 최신 소아 보건·방역 뉴스 브리핑
-              Builder(
-                builder: (ctx) {
-                  final news = _getAgeBasedPediatricNews(widget.profile);
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF86EFAC)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF059669),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Text('📢 최신 보건 소식', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                news.title,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF065F46)),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          news.content,
-                          style: const TextStyle(fontSize: 11, color: Color(0xFF047857), height: 1.45),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('📅 ${news.date}', style: const TextStyle(fontSize: 9.5, color: Color(0xFF059669), fontWeight: FontWeight.w600)),
-                            Text('🏛️ ${news.source}', style: const TextStyle(fontSize: 9.5, color: Color(0xFF059669), fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 14),
+            _buildCareTipTextRow(
+              icon: '🌡️',
+              title: '해열제 교차계산',
+              desc: '체온별 적정 용량 및 교차 복용 간격',
+              onTap: () => _openAntipyreticCalculatorModal(context),
+            ),
+            _buildCareTipDivider(),
+            _buildCareTipTextRow(
+              icon: '🤢',
+              title: '토했을 때 가이드',
+              desc: '10분/30분 이내 구토 시 재투약 수칙',
+              onTap: () => _openVomitGuidanceModal(context),
+            ),
+            _buildCareTipDivider(),
+            _buildCareTipTextRow(
+              icon: '💊',
+              title: '항생제 복용 수칙',
+              desc: '증상 호전 시에도 임의중단 금지 · 냉장보관',
+              onTap: () => _openAntibioticsGuidanceModal(context),
+            ),
+            _buildCareTipDivider(),
+            _buildCareTipTextRow(
+              icon: '🍯',
+              title: '약 거부 대처 팁',
+              desc: '약 뱉는 아이 달래기 및 안전 투약 노하우',
+              onTap: () => _openRefusalGuidanceModal(context),
+            ),
+            _buildCareTipDivider(),
+            _buildCareTipTextRow(
+              icon: '🚨',
+              title: '야간 소아응급실 & 달빛병원',
+              desc: '전국 24h 소아전문응급센터 및 심야 진료 병원 찾기',
+              isEmergency: true,
+              onTap: () => _openNightPediatricEmergencyModal(context),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
 
-              // 4대 긴급 케어 가이드 (2x2 컴팩트 그리드)
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(14),
-                      onTap: () => _openAntipyreticCalculatorModal(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFF7ED),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFFED7AA)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Text('🌡️', style: TextStyle(fontSize: 16)),
-                                SizedBox(width: 4),
-                                Expanded(
-                                  child: Text('해열제 교차계산', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFFC2410C))),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 3),
-                            Text('체온별 적정량·안전 간격', style: TextStyle(fontSize: 9.5, color: Colors.brown.shade700)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(14),
-                      onTap: () => _openVomitGuidanceModal(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFECFDF5),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFA7F3D0)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Text('🤢', style: TextStyle(fontSize: 16)),
-                                SizedBox(width: 4),
-                                Expanded(
-                                  child: Text('토했을 때 가이드', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF065F46))),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 3),
-                            Text('10분/30분 재투약 수칙', style: TextStyle(fontSize: 9.5, color: Colors.teal.shade800)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(14),
-                      onTap: () => _openAntibioticsGuidanceModal(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFBFDBFE)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Text('💊', style: TextStyle(fontSize: 16)),
-                                SizedBox(width: 4),
-                                Expanded(
-                                  child: Text('항생제 복용 수칙', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF1D4ED8))),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 3),
-                            Text('임의중단 금지·냉장보관', style: TextStyle(fontSize: 9.5, color: Colors.blue.shade900)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(14),
-                      onTap: () => _openRefusalGuidanceModal(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFF0F3),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFFFD6DF)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Text('🍯', style: TextStyle(fontSize: 16)),
-                                SizedBox(width: 4),
-                                Expanded(
-                                  child: Text('약 거부 대처 팁', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFFBE123C))),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 3),
-                            Text('약 뱉는 아이 투약 노하우', style: TextStyle(fontSize: 9.5, color: Colors.pink.shade900)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-
-              // 🚨 야간·소아응급실 & 달빛어린이병원 찾기 배너
-              InkWell(
-                borderRadius: BorderRadius.circular(14),
-                onTap: () => _openNightPediatricEmergencyModal(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+        // 📢 최신 보건 소식 (제일 아래 위치, 제목만 3개 표시)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  '최신 보건 소식',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFEF2F2), Color(0xFFFEE2E2)],
+                    color: const Color(0xFFF3F4F6),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text('질병관리청', style: TextStyle(fontSize: 9.5, color: Color(0xFF6B7280), fontWeight: FontWeight.w500)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            ..._getPediatricNewsList(widget.profile).map((news) => InkWell(
+              onTap: () => _showPediatricNewsDetail(context, news),
+              borderRadius: BorderRadius.circular(6),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+                child: Row(
+                  children: [
+                    const Text('•', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13, fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        news.title,
+                        style: const TextStyle(fontSize: 12, color: Colors.black87),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFFECACA)),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDC2626),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.emergency, color: Colors.white, size: 18),
-                      ),
-                      const SizedBox(width: 10),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  '야간 소아응급실 & 달빛병원',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF991B1B)),
-                                ),
-                                SizedBox(width: 6),
-                                Text(
-                                  '24h 가이드',
-                                  style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Color(0xFFDC2626)),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              '전국 소아전문응급의료센터 · 심야 진료 달빛병원 찾기',
-                              style: TextStyle(fontSize: 10, color: Color(0xFFB91C1C)),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFDC2626)),
-                    ],
-                  ),
+                    const SizedBox(width: 8),
+                    Text(
+                      news.date,
+                      style: const TextStyle(fontSize: 10.5, color: Color(0xFF9CA3AF)),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            )),
+          ],
         ),
+        const SizedBox(height: 20),
       ],
     );
   }
