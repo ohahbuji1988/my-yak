@@ -446,6 +446,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
           Image.asset(
             'assets/images/welcome_cover.jpg',
             fit: BoxFit.cover,
+            cacheWidth: 900,
             errorBuilder: (ctx, err, stack) => Container(
               color: const Color(0xFFFFEFF2),
               child: const Center(
