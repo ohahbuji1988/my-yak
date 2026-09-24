@@ -77,6 +77,13 @@ def read_root():
         "disclaimer": LEGAL_DISCLAIMER
     }
 
+@app.get("/health")
+@app.get("/api/v1/health")
+def health_check():
+    """모니터링 툴(UptimeRobot 등) 및 슬립 방지용 초경량 핑 엔드포인트"""
+    return {"status": "ok", "service": "My 약 (My Yak)"}
+
+
 @app.post(
     "/api/v1/prescriptions/analyze",
     response_model=PrescriptionAnalyzeResponse,

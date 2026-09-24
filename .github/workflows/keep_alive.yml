@@ -1,0 +1,17 @@
+name: Render Server Keep-Alive (24시간 슬립 방지)
+
+on:
+  schedule:
+    # 10분마다 Render 서버에 핑을 보내 15분 슬립 방지
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render Backend
+        run: |
+          echo "Pinging My Yak Render Server to prevent idle sleep..."
+          curl -s -f --retry 2 --max-time 15 https://my-yak.onrender.com/health || curl -s -f --max-time 20 https://my-yak.onrender.com/
+          echo "Ping successful! Server is awake."
