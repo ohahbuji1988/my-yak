@@ -13,7 +13,7 @@ import env_loader
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
-    title="My 약 (My Yak) - 처방전 및 복약 적정성 분석 API",
+    title="Kidipedia (키디피디아) - 처방전 및 복약 적정성 분석 API",
     description="OCR 약품명 보정(Levenshtein/Trigram) 및 소아/성인 용량 안심 가드레일 분석 API",
     version="1.0.0"
 )
@@ -66,23 +66,21 @@ import os
 
 WEB_BUILD_DIR = os.path.join(os.path.dirname(__file__), "build", "web")
 
-@app.get("/")
-def read_root():
-    index_file = os.path.join(WEB_BUILD_DIR, "index.html")
-    if os.path.exists(index_file):
-        return FileResponse(index_file)
+@app.get("/health")
+def health_check():
     return {
-        "service": "My 약 (My Yak) API",
+        "status": "healthy",
+        "service": "Kidipedia API",
+        "version": "1.0.0"
+    }
+
+@app.get("/api/info")
+def read_root():
+    return {
+        "service": "Kidipedia (키디피디아) API",
         "status": "running",
         "disclaimer": LEGAL_DISCLAIMER
     }
-
-@app.get("/health")
-@app.get("/api/v1/health")
-def health_check():
-    """모니터링 툴(UptimeRobot 등) 및 슬립 방지용 초경량 핑 엔드포인트"""
-    return {"status": "ok", "service": "My 약 (My Yak)"}
-
 
 @app.post(
     "/api/v1/prescriptions/analyze",

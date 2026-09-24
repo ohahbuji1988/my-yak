@@ -1,11 +1,11 @@
 {
-    "name": "my_yak",
-    "short_name": "my_yak",
+    "name": "Kidipedia",
+    "short_name": "Kidipedia",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFF7F9",
+    "theme_color": "#FF6B8B",
+    "description": "Kidipedia (키디피디아) - 우리아이 안심 복약 가이드",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

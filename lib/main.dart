@@ -12,17 +12,19 @@ import 'screens/vaccine_scheduler_sheet.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyYakFigmaApp());
+  runApp(const KidipediaApp());
 }
 
-class MyYakFigmaApp extends StatelessWidget {
+typedef MyYakFigmaApp = KidipediaApp;
+
+class KidipediaApp extends StatelessWidget {
   final bool initialShowCover;
-  const MyYakFigmaApp({super.key, this.initialShowCover = true});
+  const KidipediaApp({super.key, this.initialShowCover = true});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'My 약 (My Yak)',
+      title: 'Kidipedia (키디피디아)',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFFFAF9F6),
@@ -439,255 +441,335 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
     final availableProfiles = widget.profiles;
 
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background Nano Banana Image
-          Image.asset(
-            'assets/images/welcome_cover.jpg',
-            fit: BoxFit.cover,
-            cacheWidth: 900,
-            errorBuilder: (ctx, err, stack) => Container(
-              color: const Color(0xFFFFEFF2),
-              child: const Center(
-                child: Text('🌸 My 약 안심 복약 가이드',
-                    style: TextStyle(fontSize: 18, color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ),
-          // Gradient Scrim for Top & Bottom readability
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withValues(alpha: 0.2),
-                  Colors.black.withValues(alpha: 0.3),
-                  Colors.black.withValues(alpha: 0.88),
-                ],
-                stops: const [0.0, 0.40, 1.0],
-              ),
-            ),
-          ),
-          // Foreground Content
-          SafeArea(
-            child: LayoutBuilder(
-              builder: (ctx, constraints) => SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
-                  child: IntrinsicHeight(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: const Color(0xFFFFF7F9),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top Header Bar
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFFFD6DF)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF6B8B).withValues(alpha: 0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.95),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(_currentChild.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 14)),
-                                  const SizedBox(width: 6),
-                                  Text('${_currentChild.name} ${_currentChild.weightKg}kg 맞춤 모드',
-                                      style: const TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 12)),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.45),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Text('My 약 v1.0', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
-                            ),
-                          ],
+                        Text(_currentChild.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 14)),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${_currentChild.name} ${_currentChild.weightKg}kg 맞춤 모드',
+                          style: const TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 12),
                         ),
-                        const Spacer(),
-                        const SizedBox(height: 16),
-                        const Text('우리아이 안심 복약 가이드',
-                            style: TextStyle(color: Color(0xFFFFD6DF), fontSize: 15, fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 4),
-                        const Text('My 약 (My Yak)',
-                            style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold, letterSpacing: -0.5)),
-                        const SizedBox(height: 6),
-                        const Text(
-                          '처방전 사진 한 장으로 체중 맞춤 용량 검증,\n중복 처방 DUR 점검 및 소아과 의사용 안심 Q&A까지',
-                          style: TextStyle(color: Colors.white, fontSize: 12, height: 1.4),
-                        ),
-                        const SizedBox(height: 14),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Text(
+                      'Kidipedia v1.0',
+                      style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
 
-                        // Key Feature Badges
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.16),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
-                          ),
-                          child: Column(
-                            children: [
-                              _WelcomeFeatureRow(icon: '⚖️', title: '체중 ${_currentChild.weightKg}kg 소아 용량 검증', desc: '식약처 기준 과다·과소 투약 안심 방지'),
-                              const SizedBox(height: 6),
-                              const _WelcomeFeatureRow(icon: '📸', title: '6종 약품 AI 멀티 OCR', desc: '처방전 및 약봉투 약품명 자동 보정'),
-                              const SizedBox(height: 6),
-                              const _WelcomeFeatureRow(icon: '🩺', title: '소아과 의사용 안심 Q&A', desc: '진료 시 확인할 맞춤 질문지 자동 생성'),
-                            ],
+              // 🌟 Unobscured High-Resolution Cover Image (대문 사진 100% 원본 비율 & 가림 없음)
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: const Color(0xFFFFE0E8), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF6B8B).withValues(alpha: 0.14),
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: AspectRatio(
+                    aspectRatio: 1408 / 768, // 원본 해상도 비율 그대로 유지하여 좌우/상하 잘림 0%
+                    child: Image.asset(
+                      'assets/images/kidipedia_logo.png',
+                      fit: BoxFit.contain, // 사진 전체를 선명하게 100% 노출
+                      filterQuality: FilterQuality.high,
+                      errorBuilder: (ctx, err, stack) => Image.asset(
+                        'kidipedia_logo.png',
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.high,
+                        errorBuilder: (ctx2, err2, stack2) => Container(
+                          color: const Color(0xFFFFEFF2),
+                          child: const Center(
+                            child: Text(
+                              '🌸 Kidipedia 안심 복약 가이드',
+                              style: TextStyle(fontSize: 18, color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 14),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
 
-                        // 👶 Multi-Child Selector Section
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Row(
-                                children: [
-                                  Text('👶', style: TextStyle(fontSize: 14)),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    '복약 관리할 아이를 선택해 주세요:',
-                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+              // Title & Service Intro Section (사진 아래에 위치하여 사진을 전혀 가리지 않음)
+              const Text(
+                '우리아이 안심 복약 가이드',
+                style: TextStyle(color: Color(0xFFFF6B8B), fontSize: 13.5, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Kidipedia (키디피디아)',
+                style: TextStyle(
+                  color: Color(0xFF1E293B),
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                '처방전 사진 한 장으로 체중 맞춤 용량 검증,\n중복 처방 DUR 점검 및 소아과 의사용 안심 Q&A까지',
+                style: TextStyle(color: Color(0xFF64748B), fontSize: 12.5, height: 1.45),
+              ),
+              const SizedBox(height: 14),
+
+              // 👶 Multi-Child Selector Section
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: const Color(0xFFFFE0E8)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Text('👶', style: TextStyle(fontSize: 14)),
+                        SizedBox(width: 6),
+                        Text(
+                          '복약 관리할 아이를 선택해 주세요:',
+                          style: TextStyle(color: Color(0xFF334155), fontWeight: FontWeight.bold, fontSize: 12.5),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          ...availableProfiles.map((p) {
+                            final isSelected = p.id == _currentChild.id;
+                            return GestureDetector(
+                              onTap: () => setState(() => _currentChildNullable = p),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? const Color(0xFFFF6B8B) : const Color(0xFFFFF0F3),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: isSelected ? const Color(0xFFFF6B8B) : const Color(0xFFFFD6DF),
+                                    width: 1.5,
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: const Color(0xFFFF6B8B).withValues(alpha: 0.25),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          )
+                                        ]
+                                      : null,
+                                ),
                                 child: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    ...availableProfiles.map((p) {
-                                      final isSelected = p.id == _currentChild.id;
-                                      return GestureDetector(
-                                        onTap: () => setState(() => _currentChildNullable = p),
-                                        child: AnimatedContainer(
-                                          duration: const Duration(milliseconds: 200),
-                                          margin: const EdgeInsets.only(right: 8),
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                          decoration: BoxDecoration(
-                                            color: isSelected ? const Color(0xFFFF6B8B) : Colors.white.withValues(alpha: 0.2),
-                                            borderRadius: BorderRadius.circular(14),
-                                            border: Border.all(
-                                              color: isSelected ? Colors.white : Colors.transparent,
-                                              width: 1.5,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(p.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 14)),
-                                              const SizedBox(width: 6),
-                                              Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    p.name,
-                                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
-                                                  ),
-                                                  Text(
-                                                    '${p.age} · ${p.weightKg}kg',
-                                                    style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 10),
-                                                  ),
-                                                ],
-                                              ),
-                                              if (isSelected) ...[
-                                                const SizedBox(width: 6),
-                                                const Icon(Icons.check_circle, color: Colors.white, size: 14),
-                                              ],
-                                              const SizedBox(width: 8),
-                                              GestureDetector(
-                                                behavior: HitTestBehavior.opaque,
-                                                onTap: () => _confirmDeleteProfile(context, p),
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(3),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.black.withValues(alpha: 0.35),
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                  child: const Icon(Icons.close, size: 12, color: Colors.white),
-                                                ),
-                                              ),
-                                            ],
+                                    Text(p.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 14)),
+                                    const SizedBox(width: 6),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          p.name,
+                                          style: TextStyle(
+                                            color: isSelected ? Colors.white : const Color(0xFF1E293B),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
                                           ),
                                         ),
-                                      );
-                                    }),
-                                    // + Add Child Button
+                                        Text(
+                                          '${p.age} · ${p.weightKg}kg',
+                                          style: TextStyle(
+                                            color: isSelected ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF64748B),
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (isSelected) ...[
+                                      const SizedBox(width: 6),
+                                      const Icon(Icons.check_circle, color: Colors.white, size: 14),
+                                    ],
+                                    const SizedBox(width: 8),
                                     GestureDetector(
-                                      onTap: () => _openAddChildModal(context),
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () => _confirmDeleteProfile(context, p),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                        padding: const EdgeInsets.all(3),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(14),
-                                          border: Border.all(color: Colors.white38),
+                                          color: isSelected ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFE2E8F0),
+                                          shape: BoxShape.circle,
                                         ),
-                                        child: const Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.add, color: Colors.white, size: 16),
-                                            SizedBox(width: 4),
-                                            Text('아이 추가', style: TextStyle(color: Colors.white, fontSize: 11)),
-                                          ],
+                                        child: Icon(
+                                          Icons.close,
+                                          size: 12,
+                                          color: isSelected ? Colors.white : const Color(0xFF64748B),
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
+                            );
+                          }),
+                          // + Add Child Button
+                          GestureDetector(
+                            onTap: () => _openAddChildModal(context),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: const Color(0xFFFF6B8B), style: BorderStyle.solid),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.add_rounded, color: Color(0xFFFF6B8B), size: 16),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    '아이 추가',
+                                    style: TextStyle(color: Color(0xFFFF6B8B), fontSize: 11.5, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // CTA Button
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF6B8B),
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size.fromHeight(54),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-                            elevation: 4,
-                          ),
-                          onPressed: () {
-                            if (widget.onStartWithChild != null) {
-                              widget.onStartWithChild!(_currentChild);
-                            } else {
-                              widget.onStart?.call();
-                            }
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('${_currentChild.name} 우리아이 안심 복약 시작하기', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.arrow_forward_rounded, size: 20),
-                            ],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ),
+              const SizedBox(height: 12),
+
+              // Key Feature Badges
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFF1F5F9)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.025),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    _WelcomeFeatureRow(
+                      icon: '⚖️',
+                      title: '체중 ${_currentChild.weightKg}kg 소아 맞춤 용량 검증',
+                      desc: '식약처 기준 과다·과소 투약 안심 방지',
+                    ),
+                    const Divider(height: 14, thickness: 0.7, color: Color(0xFFF1F5F9)),
+                    const _WelcomeFeatureRow(
+                      icon: '📸',
+                      title: '약품 AI 멀티 OCR 자동 분석',
+                      desc: '처방전 및 약봉투 약품명 실시간 교정 및 인식',
+                    ),
+                    const Divider(height: 14, thickness: 0.7, color: Color(0xFFF1F5F9)),
+                    const _WelcomeFeatureRow(
+                      icon: '🩺',
+                      title: '소아과 의사용 안심 Q&A 자동 생성',
+                      desc: '진료 시 빠뜨리지 않고 확인할 맞춤 질문지',
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+
+              // Main CTA Button
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6B8B),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(54),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  elevation: 3,
+                  shadowColor: const Color(0xFFFF6B8B).withValues(alpha: 0.4),
+                ),
+                onPressed: () {
+                  if (widget.onStartWithChild != null) {
+                    widget.onStartWithChild!(_currentChild);
+                  } else {
+                    widget.onStart?.call();
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${_currentChild.name} 우리아이 안심 복약 시작하기',
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.arrow_forward_rounded, size: 20),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -709,8 +791,8 @@ class _WelcomeFeatureRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-              Text(desc, style: const TextStyle(color: Colors.white70, fontSize: 10)),
+              Text(title, style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
+              Text(desc, style: const TextStyle(color: Color(0xFF64748B), fontSize: 10.5)),
             ],
           ),
         ),
@@ -3160,7 +3242,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       SizedBox(height: 6),
-                      Text('1. 아기 체중 및 현재 복용 중인 약 (My 약 앱의 처방전 화면 제시)\n2. 해열제 최근 투약 시간 및 체온 변화 기록\n3. 구토/혈변 시 기저귀 또는 사진 지참\n4. 아기 보온 겉싸개, 여벌 옷, 기저귀, 보온병 분유',
+                      Text('1. 아기 체중 및 현재 복용 중인 약 (Kidipedia 앱의 처방전 화면 제시)\n2. 해열제 최근 투약 시간 및 체온 변화 기록\n3. 구토/혈변 시 기저귀 또는 사진 지참\n4. 아기 보온 겉싸개, 여벌 옷, 기저귀, 보온병 분유',
                           style: TextStyle(fontSize: 11, color: Color(0xFF78350F), height: 1.4)),
                     ],
                   ),
@@ -6472,7 +6554,7 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
     }
 
     final buffer = StringBuffer();
-    buffer.writeln('📋 [My 약 - 소아과 진료 안심 질문지]');
+    buffer.writeln('📋 [Kidipedia - 소아과 진료 안심 질문지]');
     buffer.writeln('• 아기 이름: ${widget.profile.name} (${widget.profile.gender}, ${widget.profile.age})');
     buffer.writeln('• 현재 체중: ${widget.profile.weightKg}kg');
     if (widget.profile.allergyNotes.isNotEmpty) {
