@@ -406,6 +406,8 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                     birthDate: birthDateCtrl.text.trim(),
                     gender: gender,
                     weightKg: w,
+                    allergyNotes: '',
+                    history: [],
                   );
                   widget.onAddNewChild?.call(newProfile);
                   setState(() {
@@ -1033,6 +1035,8 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
                     birthDate: birthDateCtrl.text.trim(),
                     gender: gender,
                     weightKg: w,
+                    allergyNotes: '',
+                    history: [],
                   );
                   widget.onAddNewChild?.call(newProfile);
                   setState(() {
@@ -1228,6 +1232,46 @@ class _TodayDoseItem {
   });
 }
 
+class _PediatricNewsItem {
+  final String title;
+  final String content;
+  final String date;
+  final String source;
+
+  const _PediatricNewsItem({
+    required this.title,
+    required this.content,
+    required this.date,
+    required this.source,
+  });
+}
+
+_PediatricNewsItem _getAgeBasedPediatricNews(MemberProfile profile) {
+  final months = profile.ageMonths ?? 10;
+  if (months < 12) {
+    return const _PediatricNewsItem(
+      title: '영유아 RS바이러스(RSV) 유행 대비 항체주사(베이포투스) 권고',
+      content: '가을·겨울철 영아 모세기관지염·폐렴 급증에 대비해 장기 지속형 RSV 예방 항체주사 접종이 권고됩니다. 발열과 쌕쌕거림(천명) 관찰 시 소아과 진료를 서두르세요.',
+      date: '2026.09.18 발표',
+      source: '질병관리청(KCDA) & 대한소아청소년과학회',
+    );
+  } else if (months <= 36) {
+    return const _PediatricNewsItem(
+      title: '어린이 인플루엔자(독감) 국가 무료 예방접종 시행 안내',
+      content: '생후 6개월~만 13세 이하 어린이를 대상으로 2026-2027절기 4가 인플루엔자 무료 백신 접종이 개시되었습니다. 단체생활 중 마이코플라스마 및 호흡기 감염에 유의하세요.',
+      date: '2026.09.20 발표',
+      source: '질병관리청(KCDA) 예방접종관리과',
+    );
+  } else {
+    return const _PediatricNewsItem(
+      title: '가을철 소아 호흡기 감염병(마이코플라스마·독감) 예방 수칙',
+      content: '어린이집·유치원 등 단체생활 아동 중심의 발열성 기침 환자가 증가하고 있습니다. 4가 독감 접종 완료와 함께 올바른 손씻기 및 기침 예절을 지도해 주세요.',
+      date: '2026.09.15 발표',
+      source: '질병관리청 감염병포털 & 소아감염학회',
+    );
+  }
+}
+
 class _HomeScreenState extends State<HomeScreen> {
   late List<_TodayDoseItem> _doses;
   // ARCH-01: childId + doseId 기반 다자녀 복약 완료 상태 격리 저장소
@@ -1324,7 +1368,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    // 2. 스캔 데이터가 아직 없는 경우 -> 기본 활성 처방약 기반 일정 유지
+    // 2. 스캔 데이터가 아직 없는 경우 -> 기본 샘플 프로필(하준이/서아)에만 예시를 제공하고, 새로 등록된 자녀는 샘플 없이 완전히 새로운 상태로 시작
     if (items.isEmpty) {
       if (profile.id == 'child_2' || profile.name == '서아') {
         items.addAll([
@@ -1332,13 +1376,14 @@ class _HomeScreenState extends State<HomeScreen> {
           _TodayDoseItem(id: 's2', timeTag: '점심 13:00', title: '유산균 정장제 (항생제 설사 예방)', subtitle: '1회 1포 · 식사 직후', isCompleted: false),
           _TodayDoseItem(id: 's3', timeTag: '저녁 19:00', title: '클래리시드 건조시럽 & 정장제', subtitle: '1회 5ml, 가루 1포 · 식후 30분', isCompleted: false),
         ]);
-      } else {
-        // Default (하준이 및 등록 자녀)
+      } else if (profile.id == 'child_1' || profile.name == '하준이') {
         items.addAll([
           _TodayDoseItem(id: '1', timeTag: '아침 08:30', title: '감기 물약 (코미시럽)', subtitle: '1회 4ml · 식전 30분', isCompleted: true),
           _TodayDoseItem(id: '2', timeTag: '점심 13:00', title: '기관지 패치 & 항생제', subtitle: '1회 1포 · 식사 직후', isCompleted: false),
           _TodayDoseItem(id: '3', timeTag: '저녁 19:00', title: '감기 물약 & 정장제', subtitle: '1회 4ml, 가루 1포 · 취침 전', isCompleted: false),
         ]);
+      } else {
+        // 새로 추가된 자녀: 샘플 투약 일정 없이 깨끗하게 시작 (처방전 스캔 시 등록)
       }
     }
 
@@ -1913,6 +1958,272 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openAntibioticsGuidanceModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        maxChildSize: 0.95,
+        minChildSize: 0.5,
+        builder: (c, scrollCtrl) => ListView(
+          controller: scrollCtrl,
+          padding: const EdgeInsets.all(24),
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text('💊', style: TextStyle(fontSize: 22)),
+                    ),
+                    const SizedBox(width: 10),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('항생제 복용 5대 골든룰', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('소아 세균 감염 및 내성균 예방 가이드', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                      ],
+                    ),
+                  ],
+                ),
+                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFBFDBFE)),
+              ),
+              child: const Text(
+                '💡 항생제는 증상이 사라졌다고 임의로 중단하면 살아남은 균이 "내성균(슈퍼박테리아)"으로 변해 재발합니다. 처방받은 일수를 반드시 완복하세요.',
+                style: TextStyle(fontSize: 12, color: Color(0xFF1E40AF), height: 1.4),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            _buildGuidanceCard(
+              badge: '1. 임의 중단 절대 금지',
+              badgeColor: const Color(0xFFDC2626),
+              title: '열·기침 멈춰도 끝까지 완복',
+              content: '세균이 완전히 박멸되지 않은 상태에서 약을 끊으면 재감염 시 기존 항생제가 듣지 않습니다. 소아과에서 처방한 기간(보통 3~7일)은 반드시 끝까지 먹이세요.',
+              cardBg: const Color(0xFFFEF2F2),
+              cardBorder: const Color(0xFFFECACA),
+            ),
+            const SizedBox(height: 10),
+
+            _buildGuidanceCard(
+              badge: '2. 냉장 vs 실온 보관 구별',
+              badgeColor: const Color(0xFF2563EB),
+              title: '약품별 보관 수칙 확인 필수',
+              content: '• 아모클란/오구멘틴(페니실린계): 물과 섞은 후 "반드시 냉장보관" (7~14일 후 폐기)\n• 클래리시드/지스로맥스(마크로라이드계): "실온 보관" (냉장 시 침전 및 쓴맛 극대화)',
+              cardBg: const Color(0xFFF0FDF4),
+              cardBorder: const Color(0xFFBBF7D0),
+            ),
+            const SizedBox(height: 10),
+
+            _buildGuidanceCard(
+              badge: '3. 정장제(유산균) 2시간 시간차',
+              badgeColor: const Color(0xFFD97706),
+              title: '항생제 설사 예방 골든타임',
+              content: '항생제는 장내 유익균도 함께 공격해 설사를 유발할 수 있습니다. 비오플 등 정장제나 유산균은 항생제 복용 "최소 2시간 뒤"에 먹여야 유산균이 죽지 않습니다.',
+              cardBg: const Color(0xFFFFFBEB),
+              cardBorder: const Color(0xFFFDE68A),
+            ),
+            const SizedBox(height: 10),
+
+            _buildGuidanceCard(
+              badge: '4. 복용 전 충분히 흔들기',
+              badgeColor: const Color(0xFF7C3AED),
+              title: '가라앉은 유효성분 균일화',
+              content: '어린이 항생제 시럽은 가루가 액체에 분산된 현탁액입니다. 먹이기 직전에 상하로 충분히 흔들어 약효 성분이 균일하게 섞이도록 하세요.',
+              cardBg: const Color(0xFFFAF5FF),
+              cardBorder: const Color(0xFFE9D5FF),
+            ),
+            const SizedBox(height: 18),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6B8B),
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('확인 완료', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openRefusalGuidanceModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        maxChildSize: 0.95,
+        minChildSize: 0.5,
+        builder: (c, scrollCtrl) => ListView(
+          controller: scrollCtrl,
+          padding: const EdgeInsets.all(24),
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF0F3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text('🍯', style: TextStyle(fontSize: 22)),
+                    ),
+                    const SizedBox(width: 10),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('약 안 먹는 아이 투약 노하우', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('약 뱉음·구토 예방 실전 꿀팁', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                      ],
+                    ),
+                  ],
+                ),
+                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF7ED),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFFED7AA)),
+              ),
+              child: const Text(
+                '💡 억지로 코를 막고 먹이거나 눕혀 먹이면 기도로 약이 넘어가 흡인성 폐렴 위험이 있습니다. 아래의 미뢰 우회법을 활용하세요.',
+                style: TextStyle(fontSize: 12, color: Color(0xFFC2410C), height: 1.4),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            _buildGuidanceCard(
+              badge: '1. 볼 안쪽(미뢰 우회) 주입',
+              badgeColor: const Color(0xFFDC2626),
+              title: '혀 앞쪽·가운데는 피하세요',
+              content: '혀의 앞부분과 중앙은 미각이 매우 예민합니다. 투약용 주사기나 피펫을 아기 어금니 쪽 볼 안쪽 구석으로 비스듬히 넣어 조금씩 천천히 밀어 넣어주세요.',
+              cardBg: const Color(0xFFFEF2F2),
+              cardBorder: const Color(0xFFFECACA),
+            ),
+            const SizedBox(height: 10),
+
+            _buildGuidanceCard(
+              badge: '2. 분유/우유에 타지 않기',
+              badgeColor: const Color(0xFFD97706),
+              title: '수유 거부의 주원인',
+              content: '젖병에 약을 섞으면 분유 맛이 변해 아기가 젖병 전체를 거부할 수 있습니다. 또한 분유를 다 먹지 않으면 정량을 섭취하지 못합니다.',
+              cardBg: const Color(0xFFFFFBEB),
+              cardBorder: const Color(0xFFFDE68A),
+            ),
+            const SizedBox(height: 10),
+
+            _buildGuidanceCard(
+              badge: '3. 퓨레·올리고당 살짝 묻히기',
+              badgeColor: const Color(0xFF059669),
+              title: '쓴맛 가리기 팁',
+              content: '가루약이나 쓴맛 시럽은 소량의 사과퓨레, 딸기잼, 올리고당을 숟가락 끝에 살짝 묻혀 약을 감싼 뒤 한입에 꿀꺽 삼키게 도와주세요.',
+              cardBg: const Color(0xFFECFDF5),
+              cardBorder: const Color(0xFFA7F3D0),
+            ),
+            const SizedBox(height: 10),
+
+            _buildGuidanceCard(
+              badge: '4. 45도 상체 세우기 & 칭찬',
+              badgeColor: const Color(0xFF2563EB),
+              title: '기도 흡인 예방과 긍정 피드백',
+              content: '아기를 45도 이상 비스듬히 안거나 앉힌 뒤 턱을 가볍게 들어주세요. 투약 직후 물을 한 모금 마시게 하고 아낌없이 칭찬해 주세요.',
+              cardBg: const Color(0xFFEFF6FF),
+              cardBorder: const Color(0xFFBFDBFE),
+            ),
+            const SizedBox(height: 18),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6B8B),
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('확인 완료', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGuidanceCard({
+    required String badge,
+    required Color badgeColor,
+    required String title,
+    required String content,
+    required Color cardBg,
+    required Color cardBorder,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(color: badgeColor, borderRadius: BorderRadius.circular(6)),
+                child: Text(badge, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: badgeColor)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(content, style: TextStyle(fontSize: 11.5, color: Colors.grey.shade800, height: 1.4)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -1960,57 +2271,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const SizedBox(height: 16),
-
-        // Nano Banana Welcome Cover Banner
-        if (widget.onOpenCover != null)
-          GestureDetector(
-            onTap: widget.onOpenCover,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFFF0F3), Color(0xFFFFE4E8)],
-                ),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFFFD6DF)),
-                boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
-              ),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      'assets/images/welcome_cover.jpg',
-                      width: 48,
-                      height: 48,
-                      fit: BoxFit.cover,
-                      errorBuilder: (ctx, _, __) => Container(
-                        width: 48,
-                        height: 48,
-                        color: const Color(0xFFFF6B8B),
-                        child: const Center(child: Text('🎨', style: TextStyle(fontSize: 20))),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('🎨 나노바나나 안심 복약 커버 페이지',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFFF6B8B))),
-                        SizedBox(height: 2),
-                        Text('하준이 9.2kg 맞춤 검증 & 서비스 소개 커버 다시보기',
-                            style: TextStyle(fontSize: 11, color: Colors.black87)),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFFFF6B8B)),
-                ],
-              ),
-            ),
-          ),
 
         // 💉 우리 아이 필수 예방접종 & 영유아검진 알림 D-Day 카드
         Builder(
@@ -2219,8 +2479,8 @@ class _HomeScreenState extends State<HomeScreen> {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
-                  ? const Color(0xFFBFDBFE)
-                  : const Color(0xFFCBD5E1),
+                ? const Color(0xFFBFDBFE)
+                : const Color(0xFFCBD5E1),
             ),
           ),
           child: Row(
@@ -2240,7 +2500,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
                       ? '📋 2026.01.24 스캔 처방전 기반 실시간 복약 일정 (총 ${widget.scannedDrugs!.length}개 의약품 연동)'
-                      : '💡 복약 스케줄: ${widget.profile.name}의 활성 처방약(복용 중) 기준 맞춤 일정입니다. 처방전 스캔 시 자동 동기화됩니다.',
+                      : (_doses.isNotEmpty
+                          ? '💡 복약 스케줄: ${widget.profile.name}의 활성 처방약(복용 중) 기준 맞춤 일정입니다. 처방전 스캔 시 자동 동기화됩니다.'
+                          : '💡 ${widget.profile.name}의 등록된 처방약이 없습니다. 상단 [처방전 스캔하기]로 첫 처방을 기록해보세요.'),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
@@ -2262,41 +2524,85 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text('오늘의 복약 일정', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: _progress == 1.0 ? const Color(0xFF10B981).withValues(alpha: 0.15) : const Color(0xFFFF6B8B).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$_completedCount/${_doses.length} 완료 (${(_progress * 100).round()}%)',
-                style: TextStyle(
-                  color: _progress == 1.0 ? const Color(0xFF059669) : const Color(0xFFFF6B8B),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11,
+            if (_doses.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: _progress == 1.0 ? const Color(0xFF10B981).withValues(alpha: 0.15) : const Color(0xFFFF6B8B).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$_completedCount/${_doses.length} 완료 (${(_progress * 100).round()}%)',
+                  style: TextStyle(
+                    color: _progress == 1.0 ? const Color(0xFF059669) : const Color(0xFFFF6B8B),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
         const SizedBox(height: 8),
 
-        // Progress Bar
-        ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: LinearProgressIndicator(
-            value: _progress,
-            minHeight: 6,
-            backgroundColor: Colors.grey.shade200,
-            valueColor: AlwaysStoppedAnimation<Color>(_progress == 1.0 ? const Color(0xFF10B981) : const Color(0xFFFF6B8B)),
+        if (_doses.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Center(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(Icons.medication_outlined, size: 32, color: Color(0xFF9CA3AF)),
+                  ),
+                  const SizedBox(height: 10),
+                  Text('${widget.profile.name}의 등록된 복약 일정이 없습니다',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+                  const SizedBox(height: 4),
+                  const Text('병원 처방전이나 약봉투를 스캔하면\n복약 일정과 안전 알림이 자동으로 등록됩니다.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 11, color: Colors.grey, height: 1.4)),
+                  const SizedBox(height: 14),
+                  ElevatedButton.icon(
+                    onPressed: widget.onNavigateScan,
+                    icon: const Icon(Icons.crop_free, size: 16),
+                    label: const Text('첫 처방전 스캔하기', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF6B8B),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else ...[
+          // Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: _progress,
+              minHeight: 6,
+              backgroundColor: Colors.grey.shade200,
+              valueColor: AlwaysStoppedAnimation<Color>(_progress == 1.0 ? const Color(0xFF10B981) : const Color(0xFFFF6B8B)),
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-
-        ..._doses.map((dose) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: _buildTimelineCard(dose),
-        )),
+          const SizedBox(height: 12),
+          ..._doses.map((dose) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _buildTimelineCard(dose),
+          )),
+        ],
 
         const SizedBox(height: 10),
         // Today's Safety Tip Banner
@@ -2307,19 +2613,23 @@ class _HomeScreenState extends State<HomeScreen> {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFFFDE68A)),
           ),
-          child: const Row(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('🔑', style: TextStyle(fontSize: 18)),
-              SizedBox(width: 10),
+              const Text('🔑', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('오늘의 복약 안심 정보', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF92400E))),
-                    SizedBox(height: 2),
-                    Text('하준이가 먹는 세페클러계 항생제는 졸음을 유발할 수 있으니 수분 섭취를 충분히 해주세요.',
-                        style: TextStyle(fontSize: 11, color: Color(0xFFB45309))),
+                    const Text('오늘의 복약 안심 정보', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF92400E))),
+                    const SizedBox(height: 2),
+                    Text(
+                      _doses.isNotEmpty
+                          ? '${widget.profile.name}이가 복용 중인 약품은 정해진 시간과 용량을 지켜 투약하고, 충분한 수분을 섭취해 주세요.'
+                          : '${widget.profile.name}의 등록된 처방약이 없습니다. 상단 [처방전 스캔하기]를 누르면 약봉투나 처방전을 바로 등록할 수 있습니다.',
+                      style: const TextStyle(fontSize: 11, color: Color(0xFFB45309), height: 1.35),
+                    ),
                   ],
                 ),
               ),
@@ -2328,35 +2638,107 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 14),
 
-        // 💡 소아과 안심 케어 TIP & 긴급 가이드 (하단 2열 컴팩트 카드)
+        // 💡 소아과 안심 케어 TIP & 긴급 가이드 (최신 보건 뉴스 브리핑 + 4대 가이드)
         Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(color: Colors.grey.shade200),
             boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              // 헤더 & 연령 뱃지
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(Icons.health_and_safety_outlined, size: 16, color: Color(0xFFFF6B8B)),
-                  SizedBox(width: 6),
-                  Text('안심 케어 TIP & 긴급 가이드', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  const Row(
+                    children: [
+                      Icon(Icons.health_and_safety_outlined, size: 18, color: Color(0xFFFF6B8B)),
+                      SizedBox(width: 6),
+                      Text('안심 케어 TIP & 긴급 가이드', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text('${widget.profile.age} 맞춤', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
+                  ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
+
+              // 📢 아이 연령 연관 최신 소아 보건·방역 뉴스 브리핑
+              Builder(
+                builder: (ctx) {
+                  final news = _getAgeBasedPediatricNews(widget.profile);
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFF86EFAC)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF059669),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text('📢 최신 보건 소식', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                news.title,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF065F46)),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          news.content,
+                          style: const TextStyle(fontSize: 11, color: Color(0xFF047857), height: 1.45),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('📅 ${news.date}', style: const TextStyle(fontSize: 9.5, color: Color(0xFF059669), fontWeight: FontWeight.w600)),
+                            Text('🏛️ ${news.source}', style: const TextStyle(fontSize: 9.5, color: Color(0xFF059669), fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
+
+              // 4대 긴급 케어 가이드 (2x2 컴팩트 그리드)
               Row(
                 children: [
-                  // 1. 열날 때 해열제 계산기 카드 (컴팩트)
                   Expanded(
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
                       onTap: () => _openAntipyreticCalculatorModal(context),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFF7ED),
                           borderRadius: BorderRadius.circular(14),
@@ -2382,13 +2764,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // 2. 토했을 때 가이드 카드 (컴팩트)
                   Expanded(
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
                       onTap: () => _openVomitGuidanceModal(context),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
                         decoration: BoxDecoration(
                           color: const Color(0xFFECFDF5),
                           borderRadius: BorderRadius.circular(14),
@@ -2408,6 +2789,72 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 3),
                             Text('10분/30분 재투약 수칙', style: TextStyle(fontSize: 9.5, color: Colors.teal.shade800)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => _openAntibioticsGuidanceModal(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Text('💊', style: TextStyle(fontSize: 16)),
+                                SizedBox(width: 4),
+                                Expanded(
+                                  child: Text('항생제 복용 수칙', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF1D4ED8))),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text('임의중단 금지·냉장보관', style: TextStyle(fontSize: 9.5, color: Colors.blue.shade900)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => _openRefusalGuidanceModal(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF0F3),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFFFD6DF)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Text('🍯', style: TextStyle(fontSize: 16)),
+                                SizedBox(width: 4),
+                                Expanded(
+                                  child: Text('약 거부 대처 팁', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFFBE123C))),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text('약 뱉는 아이 투약 노하우', style: TextStyle(fontSize: 9.5, color: Colors.pink.shade900)),
                           ],
                         ),
                       ),
@@ -5265,13 +5712,45 @@ class BabyProfileScreen extends StatelessWidget {
         // Allergy Warning Box
         Container(
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(color: const Color(0xFFFEF2F2), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFFECACA))),
+          decoration: BoxDecoration(
+            color: profile.allergyNotes.trim().isNotEmpty ? const Color(0xFFFEF2F2) : const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: profile.allergyNotes.trim().isNotEmpty ? const Color(0xFFFECACA) : Colors.grey.shade200,
+            ),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('🚨 특이사항 및 알레르기', style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.bold, fontSize: 12)),
+              Row(
+                children: [
+                  Icon(
+                    profile.allergyNotes.trim().isNotEmpty ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+                    size: 16,
+                    color: profile.allergyNotes.trim().isNotEmpty ? const Color(0xFFDC2626) : const Color(0xFF10B981),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    profile.allergyNotes.trim().isNotEmpty ? '🚨 특이사항 및 알레르기' : '🌱 특이사항 및 약물 알레르기',
+                    style: TextStyle(
+                      color: profile.allergyNotes.trim().isNotEmpty ? const Color(0xFFDC2626) : const Color(0xFF059669),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 4),
-              Text(profile.allergyNotes, style: const TextStyle(color: Color(0xFFB91C1C), fontSize: 11, height: 1.4)),
+              Text(
+                profile.allergyNotes.trim().isNotEmpty
+                    ? profile.allergyNotes
+                    : '등록된 특이 약물 알레르기가 없습니다. 필요 시 상단 [정보 수정]에서 입력하실 수 있습니다.',
+                style: TextStyle(
+                  color: profile.allergyNotes.trim().isNotEmpty ? const Color(0xFFB91C1C) : Colors.grey.shade600,
+                  fontSize: 11,
+                  height: 1.4,
+                ),
+              ),
             ],
           ),
         ),
@@ -5280,20 +5759,37 @@ class BabyProfileScreen extends StatelessWidget {
         const Text('복약 히스토리', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
 
-        ...profile.history.map((h) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(h.dateStr, style: const TextStyle(color: Colors.grey, fontSize: 10)),
-              const SizedBox(height: 2),
-              Text(h.drugName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-              Text('${h.durationStr} · ${h.clinicName}', style: const TextStyle(color: Colors.grey, fontSize: 11)),
-            ],
-          ),
-        )),
+        if (profile.history.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+            child: const Center(
+              child: Column(
+                children: [
+                  Icon(Icons.receipt_long_outlined, size: 36, color: Colors.grey),
+                  SizedBox(height: 8),
+                  Text('아직 등록된 처방 이력이 없습니다.', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
+                  SizedBox(height: 4),
+                  Text('처방전이나 약봉투를 스캔하면 여기에 안전하게 기록됩니다.', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                ],
+              ),
+            ),
+          )
+        else
+          ...profile.history.map((h) => Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(h.dateStr, style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                const SizedBox(height: 2),
+                Text(h.drugName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                Text('${h.durationStr} · ${h.clinicName}', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+              ],
+            ),
+          )),
         const SizedBox(height: 16),
         Center(
           child: TextButton.icon(

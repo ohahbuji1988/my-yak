@@ -21,7 +21,7 @@ class MemberProfile {
     this.gender = '남아',
     this.weightKg = 9.2,
     this.isPregnant = false,
-    this.allergyNotes = '페니실린 계열 항생제 복용 시 가벼운 피부 발진 유발 이력 있음.',
+    this.allergyNotes = '',
     List<PrescriptionHistoryItem>? history,
   }) : history = history ?? [];
 
