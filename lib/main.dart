@@ -1272,6 +1272,274 @@ _PediatricNewsItem _getAgeBasedPediatricNews(MemberProfile profile) {
   }
 }
 
+class _EmergencyHospitalItem {
+  final String name;
+  final String region;
+  final String type; // '소아전문응급센터' or '달빛어린이병원'
+  final String address;
+  final String hours;
+  final String phone;
+  final bool is24Hours;
+
+  const _EmergencyHospitalItem({
+    required this.name,
+    required this.region,
+    required this.type,
+    required this.address,
+    required this.hours,
+    required this.phone,
+    required this.is24Hours,
+  });
+}
+
+final List<_EmergencyHospitalItem> _emergencyHospitals = [
+  // 서울
+  const _EmergencyHospitalItem(
+    name: '서울대학교병원 소아전문응급의료센터',
+    region: '서울',
+    type: '소아전문응급센터',
+    address: '서울 종로구 대학로 101 (혜화동)',
+    hours: '24시간 365일 연중무휴 (소아응급전문의 상주)',
+    phone: '02-2072-3456',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '서울아산병원 소아전문응급의료센터',
+    region: '서울',
+    type: '소아전문응급센터',
+    address: '서울 송파구 올림픽로43길 88 (풍납동)',
+    hours: '24시간 365일 연중무휴 (소아중환자 전담)',
+    phone: '02-3010-3333',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '신촌세브란스병원 소아전문응급의료센터',
+    region: '서울',
+    type: '소아전문응급센터',
+    address: '서울 서대문구 연세로 50-1 (신촌)',
+    hours: '24시간 365일 연중무휴 (소아외상·소아응급)',
+    phone: '02-2228-5555',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '우리아이들병원 (구로) 달빛어린이병원',
+    region: '서울',
+    type: '달빛어린이병원',
+    address: '서울 구로구 새말로 120 (신도림)',
+    hours: '평일 08:30~23:00 / 토·일·공휴일 08:30~18:00',
+    phone: '02-868-2200',
+    is24Hours: false,
+  ),
+  const _EmergencyHospitalItem(
+    name: '성북우리아이들병원 달빛어린이병원',
+    region: '서울',
+    type: '달빛어린이병원',
+    address: '서울 성북구 동소문로 46',
+    hours: '평일 08:30~23:00 / 토·일·공휴일 08:30~18:00',
+    phone: '02-953-2300',
+    is24Hours: false,
+  ),
+  const _EmergencyHospitalItem(
+    name: '연세곰돌이소아청소년과의원 달빛어린이병원',
+    region: '서울',
+    type: '달빛어린이병원',
+    address: '서울 서초구 방배로 226',
+    hours: '평일 08:30~23:00 / 토·일·공휴일 08:30~18:00',
+    phone: '02-596-0063',
+    is24Hours: false,
+  ),
+
+  // 경기 / 인천
+  const _EmergencyHospitalItem(
+    name: '분당차병원 소아전문응급의료센터',
+    region: '경기/인천',
+    type: '소아전문응급센터',
+    address: '경기 성남시 분당구 야탑로 59',
+    hours: '24시간 365일 연중무휴 (경기 남부 권역)',
+    phone: '031-780-5000',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '아주대학교병원 소아전문응급의료센터',
+    region: '경기/인천',
+    type: '소아전문응급센터',
+    address: '경기 수원시 영통구 월드컵로 164',
+    hours: '24시간 365일 연중무휴 (수원 권역)',
+    phone: '031-219-5114',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '명지병원 소아전문응급의료센터',
+    region: '경기/인천',
+    type: '소아전문응급센터',
+    address: '경기 고양시 덕양구 화수로14번길 55',
+    hours: '24시간 365일 연중무휴 (경기 북부 권역)',
+    phone: '031-810-5114',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '인하대학교병원 소아전문응급의료센터',
+    region: '경기/인천',
+    type: '소아전문응급센터',
+    address: '인천 중구 인항로 27',
+    hours: '24시간 365일 연중무휴 (인천·서해 권역)',
+    phone: '032-890-2222',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '김포아이제일병원 달빛어린이병원',
+    region: '경기/인천',
+    type: '달빛어린이병원',
+    address: '경기 김포시 김포한강4로 125',
+    hours: '평일 08:30~23:00 / 토·일·공휴일 09:00~18:00',
+    phone: '031-987-0075',
+    is24Hours: false,
+  ),
+  const _EmergencyHospitalItem(
+    name: '아이플러스어린이병원 달빛어린이병원',
+    region: '경기/인천',
+    type: '달빛어린이병원',
+    address: '경기 부천시 원미구 신흥로 190',
+    hours: '평일 09:00~23:00 / 토·일·공휴일 09:00~18:00',
+    phone: '032-656-7582',
+    is24Hours: false,
+  ),
+
+  // 충청 / 대전 / 세종
+  const _EmergencyHospitalItem(
+    name: '세종충남대학교병원 소아전문응급의료센터',
+    region: '충청/대전',
+    type: '소아전문응급센터',
+    address: '세종시 보듬7로 20 (도담동)',
+    hours: '24시간 365일 연중무휴',
+    phone: '044-995-3114',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '순천향대학교천안병원 소아전문응급의료센터',
+    region: '충청/대전',
+    type: '소아전문응급센터',
+    address: '충남 천안시 동남구 순천향6길 31',
+    hours: '24시간 365일 연중무휴 (충남 권역)',
+    phone: '041-570-3555',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '충남대학교병원 권역소아응급의료센터',
+    region: '충청/대전',
+    type: '소아전문응급센터',
+    address: '대전 중구 문화로 282',
+    hours: '24시간 365일 연중무휴 (대전 권역)',
+    phone: '042-280-8129',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '대전 한국병원 달빛어린이병원',
+    region: '충청/대전',
+    type: '달빛어린이병원',
+    address: '대전 동구 동서대로 1672',
+    hours: '평일 18:00~23:00 / 주말·공휴일 09:00~18:00',
+    phone: '042-606-1000',
+    is24Hours: false,
+  ),
+
+  // 영남 / 부산 / 대구 / 울산
+  const _EmergencyHospitalItem(
+    name: '양산부산대학교병원 소아전문응급의료센터',
+    region: '영남/부산/대구',
+    type: '소아전문응급센터',
+    address: '경남 양산시 물금읍 금오로 20',
+    hours: '24시간 365일 연중무휴 (부산·경남 권역)',
+    phone: '055-360-1119',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '칠곡경북대학교병원 소아전문응급의료센터',
+    region: '영남/부산/대구',
+    type: '소아전문응급센터',
+    address: '대구 북구 호국로 807 (학정동)',
+    hours: '24시간 365일 연중무휴 (대구·경북 권역)',
+    phone: '053-200-2119',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '울산대학교병원 소아전문응급의료센터',
+    region: '영남/부산/대구',
+    type: '소아전문응급센터',
+    address: '울산 동구 대학병원로 25',
+    hours: '24시간 365일 연중무휴 (울산 권역)',
+    phone: '052-250-7000',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '부산 정관아동병원 달빛어린이병원',
+    region: '영남/부산/대구',
+    type: '달빛어린이병원',
+    address: '부산 기장군 정관읍 정관로 579',
+    hours: '평일 09:00~23:00 / 주말·공휴일 09:00~18:00',
+    phone: '051-727-8855',
+    is24Hours: false,
+  ),
+
+  // 호남 / 광주 / 전북 / 전남
+  const _EmergencyHospitalItem(
+    name: '전남대학교병원 소아전문응급의료센터',
+    region: '호남/광주',
+    type: '소아전문응급센터',
+    address: '광주 동구 제봉로 42 (학동)',
+    hours: '24시간 365일 연중무휴 (광주·전남 권역)',
+    phone: '062-220-6119',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '전북대학교병원 소아전문응급의료센터',
+    region: '호남/광주',
+    type: '소아전문응급센터',
+    address: '전북 전주시 덕진구 건지로 20',
+    hours: '24시간 365일 연중무휴 (전북 권역)',
+    phone: '063-250-1119',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '광주 광산수완미래아동병원 달빛어린이병원',
+    region: '호남/광주',
+    type: '달빛어린이병원',
+    address: '광주 광산구 임방울대로 348',
+    hours: '평일 09:00~23:00 / 주말·공휴일 09:00~18:00',
+    phone: '062-950-8000',
+    is24Hours: false,
+  ),
+
+  // 강원 / 제주
+  const _EmergencyHospitalItem(
+    name: '강원대학교병원 소아전문응급의료센터',
+    region: '강원/제주',
+    type: '소아전문응급센터',
+    address: '강원 춘천시 백령로 156',
+    hours: '24시간 365일 연중무휴 (강원 권역)',
+    phone: '033-258-2119',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '제주대학교병원 소아응급진료센터',
+    region: '강원/제주',
+    type: '소아전문응급센터',
+    address: '제주 제주시 아란13길 15',
+    hours: '24시간 365일 연중무휴 (제주 권역)',
+    phone: '064-717-1119',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '탑동365일의원 달빛어린이병원',
+    region: '강원/제주',
+    type: '달빛어린이병원',
+    address: '제주 제주시 중앙로 4',
+    hours: '평일·주말·공휴일 08:30~23:00',
+    phone: '064-756-3650',
+    is24Hours: false,
+  ),
+];
+
 class _HomeScreenState extends State<HomeScreen> {
   late List<_TodayDoseItem> _doses;
   // ARCH-01: childId + doseId 기반 다자녀 복약 완료 상태 격리 저장소
@@ -2224,6 +2492,429 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openNightPediatricEmergencyModal(BuildContext context) {
+    String selectedRegion = '전체';
+    String selectedType = '전체 병원';
+    String searchQuery = '';
+    final searchCtrl = TextEditingController();
+
+    final regions = ['전체', '서울', '경기/인천', '충청/대전', '영남/부산/대구', '호남/광주', '강원/제주'];
+    final types = ['전체 병원', '24시간 소아응급', '달빛어린이병원'];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          final filteredHospitals = _emergencyHospitals.where((h) {
+            if (selectedRegion != '전체' && h.region != selectedRegion) return false;
+            if (selectedType == '24시간 소아응급' && !h.is24Hours) return false;
+            if (selectedType == '달빛어린이병원' && h.is24Hours) return false;
+            if (searchQuery.isNotEmpty) {
+              final query = searchQuery.toLowerCase();
+              final matchesName = h.name.toLowerCase().contains(query);
+              final matchesAddr = h.address.toLowerCase().contains(query);
+              if (!matchesName && !matchesAddr) return false;
+            }
+            return true;
+          }).toList();
+
+          return DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: 0.9,
+            maxChildSize: 0.95,
+            minChildSize: 0.5,
+            builder: (c, scrollCtrl) => ListView(
+              controller: scrollCtrl,
+              padding: const EdgeInsets.all(20),
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF2F2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text('🚨', style: TextStyle(fontSize: 22)),
+                        ),
+                        const SizedBox(width: 10),
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('야간·소아응급실 & 달빛병원', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                            Text('24시간 소아응급센터 및 야간 진료 안내', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // 📞 119 구급상황관리센터 퀵 안내 배너
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFEF2F2), Color(0xFFFEE2E2)],
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: const Color(0xFFFCA5A5)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDC2626),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(Icons.phone_in_talk, color: Colors.white, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('야간 119 소아응급의료 상담 (무료)',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF991B1B))),
+                            SizedBox(height: 2),
+                            Text('24시간 전문의·간호사 상주! 응급처치 지도 및 실시간 진료 가능 병원 안내',
+                                style: TextStyle(fontSize: 11, color: Color(0xFFB91C1C), height: 1.35)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFDC2626),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () {
+                          Clipboard.setData(const ClipboardData(text: '119'));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('📞 119 전화번호가 클립보드에 복사되었습니다. 통화 앱에서 바로 연결하세요.')),
+                          );
+                        },
+                        child: const Text('119 안내', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Triage Guide: 달빛어린이병원 vs 24시간 소아응급센터
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.help_outline, size: 16, color: Color(0xFF475569)),
+                          SizedBox(width: 6),
+                          Text('어디로 가야 할까요? (방문 기준 가이드)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF1E293B))),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFAF5FF),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFFE9D5FF)),
+                              ),
+                              child: const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('🌙 달빛어린이병원', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5, color: Color(0xFF7C3AED))),
+                                  SizedBox(height: 3),
+                                  Text('• 밤 11~12시까지 운영\n• 미열, 감기, 중이염, 장염 등 경증\n• 짧은 대기시간 & 일반 외래 진료비',
+                                      style: TextStyle(fontSize: 10, color: Color(0xFF581C87), height: 1.35)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF2F2),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFFFECACA)),
+                              ),
+                              child: const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('🚨 소아전문응급센터', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5, color: Color(0xFFDC2626))),
+                                  SizedBox(height: 3),
+                                  Text('• 24시간 연중무휴 (대학병원 ER)\n• 3개월 미만 38℃ 이상 고열\n• 5분 이상 경련, 호흡곤란, 의식 처짐',
+                                      style: TextStyle(fontSize: 10, color: Color(0xFF991B1B), height: 1.35)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Search Bar
+                TextField(
+                  controller: searchCtrl,
+                  decoration: InputDecoration(
+                    hintText: '병원명 또는 지역구 검색 (예: 서울대, 분당, 구로)',
+                    prefixIcon: const Icon(Icons.search, size: 20, color: Colors.grey),
+                    suffixIcon: searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              setModalState(() {
+                                searchCtrl.clear();
+                                searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    isDense: true,
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                  ),
+                  onChanged: (val) => setModalState(() => searchQuery = val.trim()),
+                ),
+                const SizedBox(height: 10),
+
+                // Region Chips
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: regions.map((r) {
+                      final isSelected = selectedRegion == r;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: ChoiceChip(
+                          label: Text(r, style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                          selected: isSelected,
+                          selectedColor: const Color(0xFFFF6B8B),
+                          labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black87),
+                          onSelected: (val) {
+                            if (val) setModalState(() => selectedRegion = r);
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Type Chips
+                Row(
+                  children: types.map((t) {
+                    final isSelected = selectedType == t;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: FilterChip(
+                        label: Text(t, style: TextStyle(fontSize: 10.5, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                        selected: isSelected,
+                        selectedColor: const Color(0xFFFFD6DF),
+                        checkmarkColor: const Color(0xFFFF6B8B),
+                        onSelected: (val) {
+                          setModalState(() => selectedType = t);
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 12),
+
+                // Hospital Count
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('검색 결과: 총 ${filteredHospitals.length}개 기관',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87)),
+                    const Text('⚠️ 방문 전 전화 확인 필수', style: TextStyle(fontSize: 10, color: Color(0xFFDC2626), fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Hospital List
+                if (filteredHospitals.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(16)),
+                    child: const Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.search_off, size: 36, color: Colors.grey),
+                          SizedBox(height: 8),
+                          Text('조건에 맞는 응급의료기관이 없습니다.', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          SizedBox(height: 4),
+                          Text('응급 시에는 국번없이 119로 전화하여 실시간 진료 병원을 안내받으세요.',
+                              style: TextStyle(color: Colors.grey, fontSize: 11)),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  ...filteredHospitals.map((h) => Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: h.is24Hours ? const Color(0xFFFECACA) : const Color(0xFFE9D5FF)),
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: h.is24Hours ? const Color(0xFFDC2626) : const Color(0xFF7C3AED),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                h.is24Hours ? '🚨 24시간 소아전문응급' : '🌙 달빛어린이병원',
+                                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(6)),
+                              child: Text(h.region, style: TextStyle(fontSize: 10, color: Colors.grey.shade700, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(h.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            const Icon(Icons.access_time, size: 12, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(h.hours, style: TextStyle(fontSize: 11, color: Colors.grey.shade800, fontWeight: FontWeight.w500)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(h.address, style: const TextStyle(fontSize: 10.5, color: Colors.grey)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('📞 ${h.phone}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E40AF))),
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.call, size: 14),
+                              label: const Text('전화번호 복사', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: h.is24Hours ? const Color(0xFFFEF2F2) : const Color(0xFFFAF5FF),
+                                foregroundColor: h.is24Hours ? const Color(0xFFDC2626) : const Color(0xFF7C3AED),
+                                elevation: 0,
+                                side: BorderSide(color: h.is24Hours ? const Color(0xFFFCA5A5) : const Color(0xFFD8B4FE)),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              onPressed: () {
+                                Clipboard.setData(ClipboardData(text: h.phone));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('📞 ${h.name} 전화번호(${h.phone})가 복사되었습니다. 통화 앱에서 바로 연결하세요.'),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )),
+
+                const SizedBox(height: 14),
+                // Checklist Box
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFFDE68A)),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.checklist_rounded, size: 18, color: Color(0xFFD97706)),
+                          SizedBox(width: 6),
+                          Text('야간 응급실 출발 전 필수 지참물', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF92400E))),
+                        ],
+                      ),
+                      SizedBox(height: 6),
+                      Text('1. 아기 체중 및 현재 복용 중인 약 (My 약 앱의 처방전 화면 제시)\n2. 해열제 최근 투약 시간 및 체온 변화 기록\n3. 구토/혈변 시 기저귀 또는 사진 지참\n4. 아기 보온 겉싸개, 여벌 옷, 기저귀, 보온병 분유',
+                          style: TextStyle(fontSize: 11, color: Color(0xFF78350F), height: 1.4)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF6B8B),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('확인 완료', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -2861,6 +3552,62 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 10),
+
+              // 🚨 야간·소아응급실 & 달빛어린이병원 찾기 배너
+              InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () => _openNightPediatricEmergencyModal(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFEF2F2), Color(0xFFFEE2E2)],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFFECACA)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDC2626),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.emergency, color: Colors.white, size: 18),
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  '야간 소아응급실 & 달빛병원',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF991B1B)),
+                                ),
+                                SizedBox(width: 6),
+                                Text(
+                                  '24h 가이드',
+                                  style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Color(0xFFDC2626)),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              '전국 소아전문응급의료센터 · 심야 진료 달빛병원 찾기',
+                              style: TextStyle(fontSize: 10, color: Color(0xFFB91C1C)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFDC2626)),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
