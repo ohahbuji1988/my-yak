@@ -1227,15 +1227,18 @@ class _TodayDoseItem {
   final String timeTag;
   final String title;
   final String subtitle;
+  final List<String> drugDetails;
   bool isCompleted;
+  bool isExpanded;
 
   _TodayDoseItem({
     required this.id,
     required this.timeTag,
     required this.title,
     required this.subtitle,
+    this.drugDetails = const [],
     this.isCompleted = false,
-  });
+  }) : isExpanded = false;
 }
 
 class _PediatricNewsItem {
@@ -1426,6 +1429,15 @@ final List<_EmergencyHospitalItem> _emergencyHospitals = [
     is24Hours: true,
   ),
   const _EmergencyHospitalItem(
+    name: '송도 VIC365 소아청소년과의원 달빛어린이병원',
+    region: '경기/인천',
+    type: '달빛어린이병원',
+    address: '인천 연수구 인천타워대로 132번길 30, 휴먼빌파크 3층 (송도동)',
+    hours: '평일 08:30~23:00 / 토·일·공휴일 09:00~18:00 (365일 야간진료)',
+    phone: '032-834-0365',
+    is24Hours: false,
+  ),
+  const _EmergencyHospitalItem(
     name: '인하대학교병원 소아전문응급의료센터',
     region: '경기/인천',
     type: '소아전문응급센터',
@@ -1433,6 +1445,24 @@ final List<_EmergencyHospitalItem> _emergencyHospitals = [
     hours: '24시간 365일 연중무휴 (인천·서해 권역)',
     phone: '032-890-2222',
     is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '가천대길병원 권역응급의료센터',
+    region: '경기/인천',
+    type: '소아전문응급센터',
+    address: '인천 남동구 남동대로 774번길 21 (구월동)',
+    hours: '24시간 365일 연중무휴 (소아중증응급)',
+    phone: '032-460-3114',
+    is24Hours: true,
+  ),
+  const _EmergencyHospitalItem(
+    name: '청라연세어린이병원 달빛어린이병원',
+    region: '경기/인천',
+    type: '달빛어린이병원',
+    address: '인천 서구 중봉대로 612번길 10-17 (청라동)',
+    hours: '평일 09:00~23:00 / 토·일·공휴일 09:00~18:00',
+    phone: '032-567-7582',
+    is24Hours: false,
   ),
   const _EmergencyHospitalItem(
     name: '김포아이제일병원 달빛어린이병원',
@@ -1663,6 +1693,7 @@ class _HomeScreenState extends State<HomeScreen> {
           timeTag: '아침 08:30',
           title: formatDrugsTitle(morningDrugs),
           subtitle: formatDrugsSubtitle(morningDrugs, '식후 30분'),
+          drugDetails: List.from(morningDrugs),
           isCompleted: _completionState[key] ?? false,
         ));
       }
@@ -1673,6 +1704,7 @@ class _HomeScreenState extends State<HomeScreen> {
           timeTag: '점심 13:00',
           title: formatDrugsTitle(lunchDrugs),
           subtitle: formatDrugsSubtitle(lunchDrugs, '식사 직후'),
+          drugDetails: List.from(lunchDrugs),
           isCompleted: _completionState[key] ?? false,
         ));
       }
@@ -1683,6 +1715,7 @@ class _HomeScreenState extends State<HomeScreen> {
           timeTag: '저녁 19:00',
           title: formatDrugsTitle(dinnerDrugs),
           subtitle: formatDrugsSubtitle(dinnerDrugs, '식후 30분'),
+          drugDetails: List.from(dinnerDrugs),
           isCompleted: _completionState[key] ?? false,
         ));
       }
@@ -1693,6 +1726,7 @@ class _HomeScreenState extends State<HomeScreen> {
           timeTag: '취침전 21:30',
           title: formatDrugsTitle(nightDrugs),
           subtitle: formatDrugsSubtitle(nightDrugs, '필요 시/발열 시 복용'),
+          drugDetails: List.from(nightDrugs),
           isCompleted: _completionState[key] ?? false,
         ));
       }
@@ -2745,13 +2779,72 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
+
+                // Quick Location Bar (Songdo / Local focus)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDF4),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFBBF7D0)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.my_location, size: 16, color: Color(0xFF16A34A)),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          '📍 내 위치(인천 송도) 추천',
+                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF15803D)),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          setModalState(() {
+                            selectedRegion = '경기/인천';
+                            searchCtrl.text = '송도';
+                            searchQuery = '송도';
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF16A34A),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text('송도 VIC 등 보기', style: TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      InkWell(
+                        onTap: () {
+                          setModalState(() {
+                            selectedRegion = '전체';
+                            searchCtrl.clear();
+                            searchQuery = '';
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFF86EFAC)),
+                          ),
+                          child: const Text('초기화', style: TextStyle(fontSize: 11, color: Color(0xFF15803D))),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
 
                 // Search Bar
                 TextField(
                   controller: searchCtrl,
                   decoration: InputDecoration(
-                    hintText: '병원명 또는 지역구 검색 (예: 서울대, 분당, 구로)',
+                    hintText: '병원명 또는 지역구 검색 (예: 송도, 서울대, 분당)',
                     prefixIcon: const Icon(Icons.search, size: 20, color: Colors.grey),
                     suffixIcon: searchQuery.isNotEmpty
                         ? IconButton(
@@ -3325,9 +3418,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE6F7F0),
+                    color: const Color(0xFFFFF0F3),
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: const Color(0xFFA7F3D0)),
+                    border: Border.all(color: const Color(0xFFFFD6DF)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -3335,7 +3428,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
-                        child: const Icon(Icons.medication, color: Color(0xFF10B981), size: 24),
+                        child: const Icon(Icons.medication, color: Color(0xFFFF6B8B), size: 24),
                       ),
                       const SizedBox(height: 12),
                       const Text('처방 기록 보기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
@@ -3699,86 +3792,171 @@ class _HomeScreenState extends State<HomeScreen> {
     final statusColor = dose.isCompleted ? const Color(0xFF10B981) : const Color(0xFFFF6B8B);
     final statusText = dose.isCompleted ? '✓ 복용 완료' : '복용 대기';
 
-    return GestureDetector(
-      onTap: () => _toggleDose(dose),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: dose.isCompleted ? const Color(0xFFA7F3D0) : Colors.transparent,
-            width: dose.isCompleted ? 1.5 : 1,
-          ),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: dose.isCompleted ? const Color(0xFFA7F3D0) : Colors.transparent,
+          width: dose.isCompleted ? 1.5 : 1,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () {
+              if (dose.drugDetails.isNotEmpty) {
+                setState(() => dose.isExpanded = !dose.isExpanded);
+              } else {
+                _toggleDose(dose);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(14),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      dose.timeTag,
-                      style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Text(
-                          dose.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            decoration: dose.isCompleted ? TextDecoration.lineThrough : null,
-                            color: dose.isCompleted ? Colors.grey.shade600 : Colors.black87,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            dose.timeTag,
+                            style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        Text(
-                          dose.subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      dose.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: dose.isCompleted ? TextDecoration.lineThrough : null,
+                                        color: dose.isCompleted ? Colors.grey.shade600 : Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                  if (dose.drugDetails.isNotEmpty) ...[
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      dose.isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                      size: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                dose.drugDetails.isNotEmpty
+                                    ? (dose.isExpanded ? '터치하여 약 목록 접기 ▲' : '터치하여 포함 약품 & 용량(ml) 보기 ▼')
+                                    : dose.subtitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: dose.drugDetails.isNotEmpty ? const Color(0xFF64748B) : Colors.grey,
+                                  fontWeight: dose.drugDetails.isNotEmpty ? FontWeight.w500 : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  // 독립 체크 버튼
+                  GestureDetector(
+                    onTap: () => _toggleDose(dose),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            dose.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
+                            size: 14,
+                            color: statusColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(statusText, style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+          ),
+          // 포함된 약품 및 몇 ml 인지 아코디언 드롭다운 노출
+          if (dose.isExpanded && dose.drugDetails.isNotEmpty) ...[
+            const Divider(height: 1, indent: 14, endIndent: 14),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(16),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    dose.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
-                    size: 14,
-                    color: statusColor,
+                  const Row(
+                    children: [
+                      Icon(Icons.medication_liquid_outlined, size: 14, color: Color(0xFFFF6B8B)),
+                      SizedBox(width: 6),
+                      Text(
+                        '처방 복용 약품 및 1회 권장 용량:',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  Text(statusText, style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  ...dose.drugDetails.map((detail) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_circle_outline, size: 14, color: Color(0xFF10B981)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              detail,
+                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -4935,18 +5113,21 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                   padding: EdgeInsets.only(top: 5, right: 6),
                   child: Icon(Icons.circle, size: 4, color: Color(0xFF64748B)),
                 ),
-                Expanded(
-                  child: RichText(
-                    text: TextSpan(
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.45),
-                      children: [
-                        if (entry.key.isNotEmpty)
-                          TextSpan(
-                            text: '${entry.key}: ',
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-                          ),
-                        TextSpan(text: entry.value),
-                      ],
+                Flexible(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: RichText(
+                      text: TextSpan(
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF334155), height: 1.55),
+                        children: [
+                          if (entry.key.isNotEmpty)
+                            TextSpan(
+                              text: '${entry.key}: ',
+                              style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                            ),
+                          TextSpan(text: entry.value),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -5397,13 +5578,13 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
         const SizedBox(height: 10),
         OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+            side: const BorderSide(color: Color(0xFFFF6B8B), width: 1.5),
             minimumSize: const Size.fromHeight(50),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
-          icon: const Icon(Icons.medication, color: Color(0xFF10B981)),
+          icon: const Icon(Icons.medication, color: Color(0xFFFF6B8B)),
           label: const Text('처방약 복용 정보 목록 보기',
-              style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 14)),
+              style: TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 14)),
           onPressed: () => widget.onNavigateTab(1),
         ),
         const SizedBox(height: 8),
