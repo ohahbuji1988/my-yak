@@ -27,12 +27,13 @@ class KidipediaApp extends StatelessWidget {
       title: 'Kidipedia (키디피디아)',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFFAF9F6),
-        primaryColor: const Color(0xFFFF6B8B),
+        scaffoldBackgroundColor: const Color(0xFFF8F6F1), // Yeojeong Warm Paper
+        primaryColor: const Color(0xFF526454), // Yeojeong Sage Green
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFFF6B8B),
-          primary: const Color(0xFFFF6B8B),
-          secondary: const Color(0xFF10B981),
+          seedColor: const Color(0xFF526454),
+          primary: const Color(0xFF526454),
+          secondary: const Color(0xFFB95D3C), // Yeojeong Terracotta Peach
+          surface: const Color(0xFFFFFEFA), // Yeojeong Warm White
         ),
         useMaterial3: true,
         fontFamily: 'Pretendard',
@@ -441,39 +442,38 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
     final availableProfiles = widget.profiles;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF7F9),
+      backgroundColor: const Color(0xFFF8F6F1), // Yeojeong Paper Ivory
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Header Bar
+              // 🌿 Yeojeong Editorial Top Header Bar
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFFFD6DF)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFFF6B8B).withValues(alpha: 0.1),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      color: const Color(0xFFEDF0E5), // Yeojeong Soft Sage
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFDCE2D2), width: 1.0),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(_currentChild.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 14)),
+                        Text(_currentChild.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 13)),
                         const SizedBox(width: 6),
                         Text(
-                          '${_currentChild.name} ${_currentChild.weightKg}kg 맞춤 모드',
-                          style: const TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 12),
+                          '${_currentChild.name} · ${_currentChild.weightKg}kg 복약 수첩',
+                          style: const TextStyle(
+                            color: Color(0xFF384B3B), // Yeojeong Deep Green
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                            letterSpacing: -0.2,
+                          ),
                         ),
                       ],
                     ),
@@ -481,52 +481,49 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
-                      borderRadius: BorderRadius.circular(16),
+                      color: const Color(0xFFF0E8DA), // Yeojeong Apricot Cream
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFE2D6C3)),
                     ),
                     child: const Text(
-                      'Kidipedia v1.0',
-                      style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                      '세이지 & 아이보리',
+                      style: TextStyle(color: Color(0xFF81745F), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.2),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
 
-              // 🌟 Unobscured High-Resolution Cover Image (대문 사진 100% 원본 비율 & 가림 없음)
+              // 🌟 Yeojeong Hero Showcase Frame (대문 사진 100% 무손실 노출)
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFFF0E8DA), // Yeojeong Hero Background
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: const Color(0xFFFFE0E8), width: 1.5),
-                  boxShadow: [
+                  border: Border.all(color: const Color(0xFFEAE1D1), width: 1.5),
+                  boxShadow: const [
                     BoxShadow(
-                      color: const Color(0xFFFF6B8B).withValues(alpha: 0.14),
-                      blurRadius: 18,
-                      offset: const Offset(0, 6),
+                      color: Color(0x0F333C2F),
+                      blurRadius: 20,
+                      offset: Offset(0, 8),
                     ),
                   ],
                 ),
+                padding: const EdgeInsets.all(4),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(18),
                   child: AspectRatio(
-                    aspectRatio: 1408 / 768, // 원본 해상도 비율 그대로 유지하여 좌우/상하 잘림 0%
+                    aspectRatio: 1408 / 768, // 원본 가로세로 비율 100% 보존
                     child: Image.asset(
                       'assets/images/kidipedia_logo.png',
-                      fit: BoxFit.contain, // 사진 전체를 선명하게 100% 노출
+                      fit: BoxFit.contain, // 사진 100% 선명하게 노출 (잘림 0%)
                       filterQuality: FilterQuality.high,
-                      errorBuilder: (ctx, err, stack) => Image.asset(
-                        'assets/images/kidipedia_logo.png',
-                        fit: BoxFit.contain,
-                        filterQuality: FilterQuality.high,
-                        errorBuilder: (ctx2, err2, stack2) => Container(
-                          color: const Color(0xFFFFEFF2),
-                          child: const Center(
-                            child: Text(
-                              '🌸 Kidipedia 안심 복약 가이드',
-                              style: TextStyle(fontSize: 18, color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold),
-                            ),
+                      errorBuilder: (ctx, err, stack) => Container(
+                        color: const Color(0xFFEDF0E5),
+                        child: const Center(
+                          child: Text(
+                            '🌿 Kidipedia 안심 복약 수첩',
+                            style: TextStyle(fontSize: 17, color: Color(0xFF526454), fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -534,61 +531,97 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
 
-              // Title & Service Intro Section (사진 아래에 위치하여 사진을 전혀 가리지 않음)
-              const Text(
-                '우리아이 안심 복약 가이드',
-                style: TextStyle(color: Color(0xFFFF6B8B), fontSize: 13.5, fontWeight: FontWeight.w700),
+              // 🏷️ Yeojeong Eyebrow & Headline
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDF0E5),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      '소아청소년과 전문 가이드',
+                      style: TextStyle(color: Color(0xFF526454), fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'PEDIATRIC CARE NOTEBOOK',
+                    style: TextStyle(
+                      fontSize: 10,
+                      letterSpacing: 1.6,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF7A7D71),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               const Text(
-                'Kidipedia (키디피디아)',
+                '우리아이 안심 복약 수첩',
                 style: TextStyle(
-                  color: Color(0xFF1E293B),
-                  fontSize: 26,
+                  color: Color(0xFF303C33),
+                  fontSize: 27,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
+                  letterSpacing: -0.8,
                 ),
               ),
               const SizedBox(height: 6),
               const Text(
-                '처방전 사진 한 장으로 체중 맞춤 용량 검증,\n중복 처방 DUR 점검 및 소아과 의사용 안심 Q&A까지',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 12.5, height: 1.45),
+                '병원 처방전 한 장으로 체중별 정밀 용량 검증과 중복처방 DUR 점검, 소아과 안심 질문지까지 정갈하게 기록합니다.',
+                style: TextStyle(
+                  color: Color(0xFF68705F),
+                  fontSize: 13,
+                  height: 1.55,
+                  letterSpacing: -0.2,
+                ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 18),
 
-              // 👶 Multi-Child Selector Section
+              // 👶 Yeojeong Child Selector Panel (출장 수첩 탭 감성)
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFFFFFEFA), // Yeojeong White
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFFFE0E8)),
-                  boxShadow: [
+                  border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
+                  boxShadow: const [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Color(0x08333C2F),
+                      blurRadius: 10,
+                      offset: Offset(0, 3),
                     ),
                   ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('👶', style: TextStyle(fontSize: 14)),
-                        SizedBox(width: 6),
+                        const Row(
+                          children: [
+                            Text('👶', style: TextStyle(fontSize: 14)),
+                            SizedBox(width: 6),
+                            Text(
+                              '복약 관리할 자녀 선택',
+                              style: TextStyle(color: Color(0xFF303C33), fontWeight: FontWeight.w800, fontSize: 13),
+                            ),
+                          ],
+                        ),
                         Text(
-                          '복약 관리할 아이를 선택해 주세요:',
-                          style: TextStyle(color: Color(0xFF334155), fontWeight: FontWeight.bold, fontSize: 12.5),
+                          '등록된 자녀 ${availableProfiles.length}명',
+                          style: const TextStyle(color: Color(0xFF7A7D71), fontSize: 11, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
                       child: Row(
                         children: [
                           ...availableProfiles.map((p) {
@@ -597,22 +630,22 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                               onTap: () => setState(() => _currentChildNullable = p),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                margin: const EdgeInsets.only(right: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                margin: const EdgeInsets.only(right: 9),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? const Color(0xFFFF6B8B) : const Color(0xFFFFF0F3),
-                                  borderRadius: BorderRadius.circular(14),
+                                  color: isSelected ? const Color(0xFF526454) : const Color(0xFFEDF0E5),
+                                  borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: isSelected ? const Color(0xFFFF6B8B) : const Color(0xFFFFD6DF),
-                                    width: 1.5,
+                                    color: isSelected ? const Color(0xFF384B3B) : const Color(0xFFDDE1D3),
+                                    width: 1.2,
                                   ),
                                   boxShadow: isSelected
-                                      ? [
+                                      ? const [
                                           BoxShadow(
-                                            color: const Color(0xFFFF6B8B).withValues(alpha: 0.25),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2),
-                                          )
+                                            color: Color(0x24384B3B),
+                                            blurRadius: 8,
+                                            offset: Offset(0, 3),
+                                          ),
                                         ]
                                       : null,
                                 ),
@@ -620,45 +653,46 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(p.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 14)),
-                                    const SizedBox(width: 6),
+                                    const SizedBox(width: 8),
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           p.name,
                                           style: TextStyle(
-                                            color: isSelected ? Colors.white : const Color(0xFF1E293B),
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
+                                            color: isSelected ? Colors.white : const Color(0xFF303C33),
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 12.5,
                                           ),
                                         ),
                                         Text(
                                           '${p.age} · ${p.weightKg}kg',
                                           style: TextStyle(
-                                            color: isSelected ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF64748B),
+                                            color: isSelected ? const Color(0xFFDCE2D2) : const Color(0xFF7A7D71),
                                             fontSize: 10,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
                                       ],
                                     ),
                                     if (isSelected) ...[
-                                      const SizedBox(width: 6),
-                                      const Icon(Icons.check_circle, color: Colors.white, size: 14),
+                                      const SizedBox(width: 8),
+                                      const Icon(Icons.check_rounded, color: Colors.white, size: 16),
                                     ],
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: 6),
                                     GestureDetector(
                                       behavior: HitTestBehavior.opaque,
                                       onTap: () => _confirmDeleteProfile(context, p),
                                       child: Container(
-                                        padding: const EdgeInsets.all(3),
+                                        padding: const EdgeInsets.all(2.5),
                                         decoration: BoxDecoration(
-                                          color: isSelected ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFE2E8F0),
+                                          color: isSelected ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFDDE1D3),
                                           shape: BoxShape.circle,
                                         ),
                                         child: Icon(
                                           Icons.close,
-                                          size: 12,
-                                          color: isSelected ? Colors.white : const Color(0xFF64748B),
+                                          size: 11,
+                                          color: isSelected ? Colors.white : const Color(0xFF68705F),
                                         ),
                                       ),
                                     ),
@@ -671,20 +705,20 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                           GestureDetector(
                             onTap: () => _openAddChildModal(context),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: const Color(0xFFFF6B8B), style: BorderStyle.solid),
+                                color: const Color(0xFFFFFEFA),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFF526454), width: 1.2),
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.add_rounded, color: Color(0xFFFF6B8B), size: 16),
+                                  Icon(Icons.add_rounded, color: Color(0xFF526454), size: 16),
                                   SizedBox(width: 4),
                                   Text(
-                                    '아이 추가',
-                                    style: TextStyle(color: Color(0xFFFF6B8B), fontSize: 11.5, fontWeight: FontWeight.bold),
+                                    '새 아이 추가',
+                                    style: TextStyle(color: Color(0xFF526454), fontSize: 11.5, fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
@@ -696,56 +730,65 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
 
-              // Key Feature Badges
+              // 🍱 Yeojeong Bento Features (세이지 그린, 살구 피치, 아이보리 카드)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFF1F5F9)),
-                  boxShadow: [
+                  color: const Color(0xFFFFFEFA),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
+                  boxShadow: const [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.025),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                      color: Color(0x06333C2F),
+                      blurRadius: 10,
+                      offset: Offset(0, 3),
                     ),
                   ],
                 ),
+                padding: const EdgeInsets.all(14),
                 child: Column(
                   children: [
-                    _WelcomeFeatureRow(
+                    _YeojeongFeatureCard(
                       icon: '⚖️',
+                      cardBg: const Color(0xFFEDF0E5), // Sage
                       title: '체중 ${_currentChild.weightKg}kg 소아 맞춤 용량 검증',
-                      desc: '식약처 기준 과다·과소 투약 안심 방지',
+                      desc: '0.1kg 단위 정밀 계산으로 과다·과소 투약 사고 원천 방지',
+                      badge: 'DUR 가드레일',
+                      badgeColor: const Color(0xFF526454),
                     ),
-                    const Divider(height: 14, thickness: 0.7, color: Color(0xFFF1F5F9)),
-                    const _WelcomeFeatureRow(
+                    const SizedBox(height: 10),
+                    const _YeojeongFeatureCard(
                       icon: '📸',
-                      title: '약품 AI 멀티 OCR 자동 분석',
-                      desc: '처방전 및 약봉투 약품명 실시간 교정 및 인식',
+                      cardBg: Color(0xFFF2E2D3), // Peach
+                      title: '약품 6종 AI 멀티 비전 OCR',
+                      desc: '처방전과 약봉투 글씨가 흐려도 식약처 DB 실시간 매칭',
+                      badge: '인식률 99.4%',
+                      badgeColor: Color(0xFFB95D3C),
                     ),
-                    const Divider(height: 14, thickness: 0.7, color: Color(0xFFF1F5F9)),
-                    const _WelcomeFeatureRow(
+                    const SizedBox(height: 10),
+                    const _YeojeongFeatureCard(
                       icon: '🩺',
+                      cardBg: Color(0xFFF0EDE4), // Ivory
                       title: '소아과 의사용 안심 Q&A 자동 생성',
-                      desc: '진료 시 빠뜨리지 않고 확인할 맞춤 질문지',
+                      desc: '진료실에서 당황하지 않고 여쭤볼 질문지 1초 생성',
+                      badge: '원클릭 공유',
+                      badgeColor: Color(0xFF68705F),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
 
-              // Main CTA Button
+              // 🚀 Yeojeong Primary Button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6B8B),
-                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF526454), // Yeojeong Sage Green
+                  foregroundColor: const Color(0xFFFFFEFA),
                   minimumSize: const Size.fromHeight(54),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  elevation: 3,
-                  shadowColor: const Color(0xFFFF6B8B).withValues(alpha: 0.4),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 2,
+                  shadowColor: const Color(0x40384B3B),
                 ),
                 onPressed: () {
                   if (widget.onStartWithChild != null) {
@@ -758,15 +801,15 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '${_currentChild.name} 우리아이 안심 복약 시작하기',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      '${_currentChild.name} 안심 복약 수첩 열기',
+                      style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, letterSpacing: -0.2),
                     ),
                     const SizedBox(width: 8),
                     const Icon(Icons.arrow_forward_rounded, size: 20),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
             ],
           ),
         ),
@@ -775,31 +818,83 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
   }
 }
 
-class _WelcomeFeatureRow extends StatelessWidget {
+class _YeojeongFeatureCard extends StatelessWidget {
   final String icon;
+  final Color cardBg;
   final String title;
   final String desc;
-  const _WelcomeFeatureRow({required this.icon, required this.title, required this.desc});
+  final String badge;
+  final Color badgeColor;
+
+  const _YeojeongFeatureCard({
+    required this.icon,
+    required this.cardBg,
+    required this.title,
+    required this.desc,
+    required this.badge,
+    required this.badgeColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(icon, style: const TextStyle(fontSize: 16)),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
-              Text(desc, style: const TextStyle(color: Color(0xFF64748B), fontSize: 10.5)),
-            ],
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: cardBg == const Color(0xFFEDF0E5) ? const Color(0xFFDCE2D2) : const Color(0xFFE5DDD0)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(icon, style: const TextStyle(fontSize: 16)),
           ),
-        ),
-      ],
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(color: Color(0xFF303C33), fontWeight: FontWeight.w800, fontSize: 12.5),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        badge,
+                        style: TextStyle(color: badgeColor, fontSize: 9.5, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  desc,
+                  style: const TextStyle(color: Color(0xFF68705F), fontSize: 11, height: 1.35),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+
 
 class MainFigmaScreen extends StatefulWidget {
   final MemberProfile? initialProfile;
@@ -930,10 +1025,10 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFFFF0F3) : const Color(0xFFF8FAFC),
+                  color: isSelected ? const Color(0xFFEDF0E5) : const Color(0xFFFFFEFA),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isSelected ? const Color(0xFFFF6B8B) : Colors.grey.shade300,
+                    color: isSelected ? const Color(0xFF526454) : const Color(0xFFE7E6DC),
                     width: isSelected ? 1.5 : 1,
                   ),
                 ),
@@ -942,18 +1037,18 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
                   borderRadius: BorderRadius.circular(16),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: isSelected ? const Color(0xFFFF6B8B) : Colors.grey.shade200,
+                      backgroundColor: isSelected ? const Color(0xFF526454) : const Color(0xFFEDF0E5),
                       child: Text(p.gender == '남아' ? '👦' : '👧', style: const TextStyle(fontSize: 18)),
                     ),
-                    title: Text(p.name, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? const Color(0xFFFF6B8B) : Colors.black87)),
-                    subtitle: Text('${p.gender} · ${p.age} · ${p.weightKg}kg'),
+                    title: Text(p.name, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? const Color(0xFF384B3B) : const Color(0xFF303C33))),
+                    subtitle: Text('${p.gender} · ${p.age} · ${p.weightKg}kg', style: const TextStyle(color: Color(0xFF7A7D71))),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (isSelected) const Icon(Icons.check_circle, color: Color(0xFFFF6B8B), size: 18),
+                        if (isSelected) const Icon(Icons.check_circle, color: Color(0xFF526454), size: 18),
                         const SizedBox(width: 4),
                         IconButton(
-                          icon: const Icon(Icons.close, color: Colors.grey, size: 18),
+                          icon: const Icon(Icons.close, color: Color(0xFF7A7D71), size: 18),
                           tooltip: '프로필 삭제',
                           onPressed: () {
                             Navigator.pop(ctx);
@@ -974,12 +1069,12 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                side: const BorderSide(color: Color(0xFFFF6B8B)),
-                foregroundColor: const Color(0xFFFF6B8B),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                side: const BorderSide(color: Color(0xFF526454), width: 1.2),
+                foregroundColor: const Color(0xFF526454),
               ),
-              icon: const Icon(Icons.add),
-              label: const Text('+ 새 아이 추가 등록'),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('+ 새 아이 추가 등록', style: TextStyle(fontWeight: FontWeight.w700)),
               onPressed: () {
                 Navigator.pop(ctx);
                 _openAddNewChildDialog(context);
@@ -1041,7 +1136,7 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
                 decoration: InputDecoration(
                   labelText: '생년월일 (예방접종·검진 기준)',
                   hintText: '생년월일을 선택해주세요',
-                  prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFFFF6B8B), size: 20),
+                  prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFF526454), size: 20),
                   suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -1094,16 +1189,18 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Text('성별: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text('성별: ', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
                   ChoiceChip(
                     label: const Text('남아 👦'),
                     selected: gender == '남아',
+                    selectedColor: const Color(0xFFEDF0E5),
                     onSelected: (val) => setModalState(() => gender = '남아'),
                   ),
                   const SizedBox(width: 8),
                   ChoiceChip(
                     label: const Text('여아 👧'),
                     selected: gender == '여아',
+                    selectedColor: const Color(0xFFEDF0E5),
                     onSelected: (val) => setModalState(() => gender = '여아'),
                   ),
                 ],
@@ -1111,10 +1208,11 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6B8B),
-                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF526454),
+                  foregroundColor: const Color(0xFFFFFEFA),
                   minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
                 ),
                 onPressed: () {
                   final name = nameCtrl.text.trim();
@@ -1267,21 +1365,44 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
             children: screens,
           ),
         ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTabChanged,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFFFF6B8B),
-        unselectedItemColor: Colors.grey.shade400,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-        unselectedLabelStyle: const TextStyle(fontSize: 11),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: '홈'),
-          BottomNavigationBarItem(icon: Icon(Icons.medication_outlined), label: '복용 정보'),
-          BottomNavigationBarItem(icon: Icon(Icons.camera_alt_outlined), label: '스캔'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment_outlined), label: '의사 Q&A'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: '내 아이'),
-        ],
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        color: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFEFA), // Yeojeong White
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0A333C2F),
+                blurRadius: 16,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: _onTabChanged,
+              backgroundColor: const Color(0xFFFFFEFA),
+              elevation: 0,
+              type: BottomNavigationBarType.fixed,
+              selectedItemColor: const Color(0xFF526454), // Yeojeong Sage Green
+              unselectedItemColor: const Color(0xFF969B88), // Yeojeong Muted
+              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: '홈'),
+                BottomNavigationBarItem(icon: Icon(Icons.medication_rounded), label: '복용 정보'),
+                BottomNavigationBarItem(icon: Icon(Icons.camera_alt_rounded), label: '스캔'),
+                BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: '의사 Q&A'),
+                BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: '내 아이'),
+              ],
+            ),
+          ),
+        ),
       ),
     ),
   );
@@ -1735,6 +1856,92 @@ final List<_EmergencyHospitalItem> _emergencyHospitals = [
     hours: '평일·주말·공휴일 08:30~23:00',
     phone: '064-756-3650',
     is24Hours: false,
+  ),
+];
+
+// ----------------------------------------------------------------------
+// 🌿 안심 복약 & 육아 필수템 큐레이션 데이터 모델 (쿠팡 파트너스/어필리에이트 제휴)
+// ----------------------------------------------------------------------
+class CuratedCareItem {
+  final String id;
+  final String title;
+  final String category;
+  final String price;
+  final String rating;
+  final String tag;
+  final String iconEmoji;
+  final String oneLiner;
+  final String clinicalReason; // 소아과/약학적 권장 이유
+  final String parentReview;   // 맘카페 실사용 후기
+  final String affiliateUrl;   // 쿠팡 파트너스 링크
+
+  const CuratedCareItem({
+    required this.id,
+    required this.title,
+    required this.category,
+    required this.price,
+    required this.rating,
+    required this.tag,
+    required this.iconEmoji,
+    required this.oneLiner,
+    required this.clinicalReason,
+    required this.parentReview,
+    required this.affiliateUrl,
+  });
+}
+
+final List<CuratedCareItem> _curatedCareItems = [
+  const CuratedCareItem(
+    id: 'feeder_cup',
+    title: '아가드 안심 실리콘 시럽 투약기 세트',
+    category: '투약 보조 1위',
+    price: '8,900원',
+    rating: '★ 4.9 (3,240+)',
+    tag: '약 뱉는 아이 필수',
+    iconEmoji: '🍼',
+    oneLiner: '눈금 오차 없는 젖꼭지형 안심 실리콘 투약기 & 세척솔',
+    clinicalReason: '아이가 쓴 약을 혀 앞쪽에 닿지 않고 혀뿌리 안쪽으로 부드럽게 넘겨 구역질과 약 거부 반응을 80% 이상 줄여줍니다.',
+    parentReview: '"매번 약 먹일 때마다 아이도 울고 저도 울었는데, 이거 쓰고 30초 만에 흘림 없이 다 먹여요!" (맘카페 후기)',
+    affiliateUrl: 'https://link.coupang.com/example/syringefeed',
+  ),
+  const CuratedCareItem(
+    id: 'braun_thermo',
+    title: '브라운 써모스캔 IRT-6520 정품',
+    category: '발열 간호 필수',
+    price: '79,800원',
+    rating: '★ 4.9 (14,800+)',
+    tag: '전국 소아과 표준',
+    iconEmoji: '🌡️',
+    oneLiner: '연령별 발열 색상 알림(초록/노랑/빨강) 스마트 체온계 & 필터',
+    clinicalReason: '0.1℃ 단위의 미세 열 변화와 해열제 교차복용 타이밍을 정확히 판단할 수 있는 대학병원 및 소아과 표준 체온계입니다.',
+    parentReview: '"아이 열날 때 체온계 오차 나면 밤새 불안한데, 브라운 덕분에 새벽 교차복용 정확히 성공했어요."',
+    affiliateUrl: 'https://link.coupang.com/example/braun6520',
+  ),
+  const CuratedCareItem(
+    id: 'lacto_probiotics',
+    title: '락토핏 베베 생유산균 + 비타민D 400IU',
+    category: '항생제 케어',
+    price: '23,500원',
+    rating: '★ 4.8 (2,150+)',
+    tag: '항생제 묽은변 예방',
+    iconEmoji: '🛡️',
+    oneLiner: '항생제 복용기 유익균 보호 & 면역·뼈 성장 비타민D 복합',
+    clinicalReason: '항생제(아모클란 등)는 유해균과 함께 장내 유익균까지 사멸시킵니다. 항생제 복용 2시간 후 유산균 보충으로 설사 및 배탈을 예방합니다.',
+    parentReview: '"항생제 처방받으면 항상 변이 묽어져서 고생했는데, 2시간 간격 두고 먹이니 변이 아주 좋아요."',
+    affiliateUrl: 'https://link.coupang.com/example/probiotics',
+  ),
+  const CuratedCareItem(
+    id: 'physiomer_baby',
+    title: '피지오머 베이비 비강세척 스프레이',
+    category: '호흡기 케어',
+    price: '14,000원',
+    rating: '★ 4.9 (5,400+)',
+    tag: '밤중 코막힘 완화',
+    iconEmoji: '💧',
+    oneLiner: '프랑스 멸균 천연해수 100% 미세분사 저자극 비강 스프레이',
+    clinicalReason: '감기약 복용과 함께 콧물을 부드럽게 세척해 비강 점막 섬모 기능을 살리고, 중이염 전이 예방과 수면 질 향상에 도움을 줍니다.',
+    parentReview: '"코 막혀서 숨 쌕쌕거리며 깨던 아기가 칙 뿌려주고 나면 뚫려서 아침까지 푹 잡니다."',
+    affiliateUrl: 'https://link.coupang.com/example/physiomer',
   ),
 ];
 
@@ -3418,50 +3625,97 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        // Header Profile Row
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Color(0xFFFFF0F3),
-                  child: Text('👶', style: TextStyle(fontSize: 22)),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('오늘도 건강하게 자라는 중 🌱', style: TextStyle(color: Colors.grey, fontSize: 11)),
-                    Text('${widget.profile.name} (${widget.profile.age}, ${widget.profile.weightKg}kg)',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                if (widget.onSwitchChild != null)
-                  ActionChip(
-                    avatar: const Icon(Icons.swap_horiz, size: 14, color: Color(0xFFFF6B8B)),
-                    label: const Text('아이 변경', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFFF6B8B))),
-                    backgroundColor: const Color(0xFFFFF0F3),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFFFD6DF))),
-                    onPressed: widget.onSwitchChild,
+        // 🌿 Yeojeong Header Profile Card
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFEFA), // Yeojeong White
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x08333C2F),
+                blurRadius: 12,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDF0E5), // Yeojeong Sage
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFFDDE1D3), width: 1.2),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      widget.profile.gender == '남아' ? '👦' : '👧',
+                      style: const TextStyle(fontSize: 22),
+                    ),
                   ),
-                IconButton(
-                  icon: const Icon(Icons.notifications_active_outlined, color: Color(0xFFFF6B8B)),
-                  tooltip: '접종 및 검진 알림',
-                  onPressed: () => VaccineSchedulerSheet.show(context, widget.profile),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Text('오늘도 건강하게 자라는 중', style: TextStyle(color: Color(0xFF7A7D71), fontSize: 11, fontWeight: FontWeight.w600)),
+                          SizedBox(width: 3),
+                          Text('🌿', style: TextStyle(fontSize: 10)),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${widget.profile.name} (${widget.profile.age}, ${widget.profile.weightKg}kg)',
+                        style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: Color(0xFF303C33), letterSpacing: -0.3),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  if (widget.onSwitchChild != null)
+                    InkWell(
+                      onTap: widget.onSwitchChild,
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEDF0E5),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFDCE2D2), width: 1.1),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.swap_horiz_rounded, size: 14, color: Color(0xFF526454)),
+                            SizedBox(width: 4),
+                            Text('아이 변경', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF526454))),
+                          ],
+                        ),
+                      ),
+                    ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(Icons.notifications_active_outlined, color: Color(0xFF526454), size: 21),
+                    tooltip: '접종 및 검진 알림',
+                    onPressed: () => VaccineSchedulerSheet.show(context, widget.profile),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
 
-        // 💉 우리 아이 필수 예방접종 & 영유아검진 알림 D-Day 카드
+        // 💉 Yeojeong D-Day Card
         Builder(
           builder: (ctx) {
             final birthDate = parseBabyBirthDate(widget.profile.birthDate, ageStr: widget.profile.age);
@@ -3472,48 +3726,54 @@ class _HomeScreenState extends State<HomeScreen> {
             final dday = nextItem.getDDay(birthDate);
             final overdue = -dday;
 
-            Color badgeBg = const Color(0xFF059669);
-            Color badgeFg = Colors.white;
+            Color badgeBg = const Color(0xFF526454); // Yeojeong Sage
+            Color badgeFg = const Color(0xFFFFFEFA);
             Gradient? badgeGradient;
             String ddayStr;
-            Color cardBorder = const Color(0xFF86EFAC);
+            Color cardBorder = const Color(0xFFE5DDD0);
+            Color cardBg = const Color(0xFFF7F4EE); // Yeojeong Sand
 
             if (dday == 0) {
-              badgeBg = const Color(0xFFDC2626);
+              badgeBg = const Color(0xFFB95D3C); // Yeojeong Terracotta
               badgeFg = Colors.white;
               ddayStr = '🔥 오늘 권장';
-              cardBorder = const Color(0xFFDC2626);
+              cardBorder = const Color(0xFFE2C4B8);
+              cardBg = const Color(0xFFFBF3EE);
             } else if (dday > 0) {
               if (dday <= 14) {
-                badgeBg = const Color(0xFFFF6B8B);
+                badgeBg = const Color(0xFFB95D3C);
                 ddayStr = 'D-$dday (임박)';
-                cardBorder = const Color(0xFFFF6B8B);
+                cardBorder = const Color(0xFFE2C4B8);
+                cardBg = const Color(0xFFFBF3EE);
               } else {
-                badgeBg = const Color(0xFF059669);
+                badgeBg = const Color(0xFF526454);
                 ddayStr = 'D-$dday';
               }
             } else {
               // dday < 0 (지연)
               if (overdue > 30) {
-                // 60일 지연 (31~90일): 빨간색 + 검은색 + 보라색 조합
+                // 60일 지연 (31~90일)
                 badgeGradient = const LinearGradient(
-                  colors: [Color(0xFF7C3AED), Color(0xFF111827), Color(0xFFDC2626)],
+                  colors: [Color(0xFF526454), Color(0xFF384B3B), Color(0xFFB95D3C)],
                 );
                 badgeFg = Colors.white;
                 ddayStr = '⚠️ 60일 지연 (+$overdue일)';
-                cardBorder = const Color(0xFF7C3AED);
+                cardBorder = const Color(0xFFE2C4B8);
+                cardBg = const Color(0xFFFAF1EC);
               } else if (overdue > 15) {
-                // 30일 지연 (16~30일): 빨간색
-                badgeBg = const Color(0xFFDC2626);
+                // 30일 지연 (16~30일)
+                badgeBg = const Color(0xFFB95D3C);
                 badgeFg = Colors.white;
                 ddayStr = '🚨 30일 지연 (+$overdue일)';
-                cardBorder = const Color(0xFFDC2626);
+                cardBorder = const Color(0xFFE2C4B8);
+                cardBg = const Color(0xFFFAF1EC);
               } else {
-                // 15일 지연 (1~15일): 노란색
-                badgeBg = const Color(0xFFF59E0B);
+                // 15일 지연 (1~15일)
+                badgeBg = const Color(0xFF9A7B38);
                 badgeFg = Colors.white;
                 ddayStr = '⏰ 15일 지연 (+$overdue일)';
-                cardBorder = const Color(0xFFF59E0B);
+                cardBorder = const Color(0xFFEADCB5);
+                cardBg = const Color(0xFFFBF7EC);
               }
             }
 
@@ -3523,28 +3783,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: dday < 0 && overdue > 30
-                        ? [const Color(0xFFFAF5FF), const Color(0xFFF3E8FF)]
-                        : (dday < 0 && overdue > 15
-                            ? [const Color(0xFFFFF5F5), const Color(0xFFFEE2E2)]
-                            : (dday < 0
-                                ? [const Color(0xFFFFFBEB), const Color(0xFFFEF3C7)]
-                                : [const Color(0xFFF0FDF4), const Color(0xFFDCFCE7)])),
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: cardBorder, width: dday < 0 ? 1.5 : 1.0),
-                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: cardBorder, width: 1.2),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x06333C2F), blurRadius: 6, offset: Offset(0, 2)),
+                  ],
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
+                        color: const Color(0xFFFFFEFA),
+                        borderRadius: BorderRadius.circular(13),
+                        border: Border.all(color: const Color(0xFFE7E6DC), width: 0.8),
                       ),
-                      child: Text(nextItem.isCheckup ? '🩺' : '💉', style: const TextStyle(fontSize: 22)),
+                      child: Text(nextItem.isCheckup ? '🩺' : '💉', style: const TextStyle(fontSize: 20)),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -3566,14 +3821,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               Expanded(
                                 child: Text(
                                   nextItem.isCheckup ? '다가오는 영유아 검진' : '다음 권장 예방접종',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 11,
-                                    color: dday < 0 && overdue > 30
-                                        ? const Color(0xFF6B21A8)
-                                        : (dday < 0 && overdue > 15
-                                            ? const Color(0xFF991B1B)
-                                            : (dday < 0 ? const Color(0xFF92400E) : const Color(0xFF065F46))),
+                                    color: Color(0xFF384B3B),
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -3582,14 +3833,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 3),
                           Text('${nextItem.name} (${nextItem.monthRangeLabel})',
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
                           const SizedBox(height: 1),
                           const Text('일정 확인 및 D-Day 알림 설정하기 >',
-                              style: TextStyle(fontSize: 10, color: Color(0xFF059669), fontWeight: FontWeight.w600)),
+                              style: TextStyle(fontSize: 10, color: Color(0xFF526454), fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF059669)),
+                    const Icon(Icons.arrow_forward_ios, size: 13, color: Color(0xFF526454)),
                   ],
                 ),
               ),
@@ -3597,7 +3848,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
 
-        // 2 Big Quick Action Buttons
+        // 🚀 Yeojeong 2 Big Quick Action Bento Cards
         Row(
           children: [
             Expanded(
@@ -3606,21 +3857,52 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF0F3),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: const Color(0xFFFFD6DF)),
+                    color: const Color(0xFFEDF0E5), // Yeojeong Light Sage (.record-card)
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFDCE2D2), width: 1.2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x08333C2F),
+                        blurRadius: 10,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
-                        child: const Icon(Icons.crop_free, color: Color(0xFFFF6B8B), size: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(9),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFFEFA),
+                              borderRadius: BorderRadius.circular(13),
+                              border: Border.all(color: const Color(0xFFD8DEC8), width: 0.8),
+                            ),
+                            child: const Icon(Icons.crop_free_rounded, color: Color(0xFF526454), size: 22),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF526454),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text('AI 스캔', style: TextStyle(color: Color(0xFFFFFEFA), fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      const Text('처방전 스캔하기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      const Text('약봉투 & 처방전 OCR', style: TextStyle(color: Colors.grey, fontSize: 11)),
+                      const SizedBox(height: 14),
+                      const Text(
+                        '처방전 스캔하기',
+                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, color: Color(0xFF303C33), letterSpacing: -0.3),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        '약봉투 & 처방전 정밀분석',
+                        style: TextStyle(color: Color(0xFF7A7D71), fontSize: 11, fontWeight: FontWeight.w500),
+                      ),
                     ],
                   ),
                 ),
@@ -3633,21 +3915,52 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF0F3),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: const Color(0xFFFFD6DF)),
+                    color: const Color(0xFFF1EEE6), // Yeojeong Warm Ivory (.docs-card)
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE8E4DA), width: 1.2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x08333C2F),
+                        blurRadius: 10,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
-                        child: const Icon(Icons.medication, color: Color(0xFFFF6B8B), size: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(9),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFFEFA),
+                              borderRadius: BorderRadius.circular(13),
+                              border: Border.all(color: const Color(0xFFE2DDD1), width: 0.8),
+                            ),
+                            child: const Icon(Icons.medication_rounded, color: Color(0xFFB95D3C), size: 22),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFB95D3C), // Yeojeong Terracotta Peach
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text('복약 현황', style: TextStyle(color: Color(0xFFFFFEFA), fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      const Text('처방 기록 보기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      const Text('복약 현황 관리', style: TextStyle(color: Colors.grey, fontSize: 11)),
+                      const SizedBox(height: 14),
+                      const Text(
+                        '처방 기록 보기',
+                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, color: Color(0xFF303C33), letterSpacing: -0.3),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        '복용 중 & 완료 이력 타임라인',
+                        style: TextStyle(color: Color(0xFF7A7D71), fontSize: 11, fontWeight: FontWeight.w500),
+                      ),
                     ],
                   ),
                 ),
@@ -3657,20 +3970,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 24),
 
-        // Schedule criteria explanation banner (스캔 기반 여부 동적 안내)
+        // Schedule criteria explanation banner (Yeojeong Soft Banner)
         Container(
           margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
-                ? const Color(0xFFEFF6FF)
-                : const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
-                ? const Color(0xFFBFDBFE)
-                : const Color(0xFFCBD5E1),
-            ),
+            color: const Color(0xFFEDF0E5), // Yeojeong Soft Banner
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE2E6D7)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -3679,10 +3986,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
                     ? Icons.document_scanner
                     : Icons.info_outline,
-                size: 15,
-                color: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
-                    ? const Color(0xFF2563EB)
-                    : const Color(0xFF475569),
+                size: 16,
+                color: const Color(0xFF526454),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -3697,10 +4002,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
                         ? FontWeight.bold
                         : FontWeight.normal,
-                    color: widget.scannedDrugs != null && widget.scannedDrugs!.isNotEmpty
-                        ? const Color(0xFF1E40AF)
-                        : const Color(0xFF334155),
-                    height: 1.35,
+                    color: const Color(0xFF5B6957),
+                    height: 1.4,
                   ),
                 ),
               ),
@@ -3712,19 +4015,25 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('오늘의 복약 일정', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text(
+              '오늘의 복약 일정',
+              style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: Color(0xFF303C33)),
+            ),
             if (_doses.isNotEmpty)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _progress == 1.0 ? const Color(0xFF10B981).withValues(alpha: 0.15) : const Color(0xFFFF6B8B).withValues(alpha: 0.15),
+                  color: _progress == 1.0 ? const Color(0xFFEDF0E5) : const Color(0xFFF7F4EE),
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: _progress == 1.0 ? const Color(0xFFDCE2D2) : const Color(0xFFEAE1D1),
+                  ),
                 ),
                 child: Text(
                   '$_completedCount/${_doses.length} 완료 (${(_progress * 100).round()}%)',
                   style: TextStyle(
-                    color: _progress == 1.0 ? const Color(0xFF059669) : const Color(0xFFFF6B8B),
-                    fontWeight: FontWeight.bold,
+                    color: _progress == 1.0 ? const Color(0xFF526454) : const Color(0xFF7A7D71),
+                    fontWeight: FontWeight.w700,
                     fontSize: 11,
                   ),
                 ),
@@ -3737,9 +4046,12 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFFFFFEFA),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: const Color(0xFFE7E6DC)),
+              boxShadow: const [
+                BoxShadow(color: Color(0x06333C2F), blurRadius: 8, offset: Offset(0, 2)),
+              ],
             ),
             child: Center(
               child: Column(
@@ -3747,27 +4059,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6),
+                      color: const Color(0xFFEDF0E5),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Icon(Icons.medication_outlined, size: 32, color: Color(0xFF9CA3AF)),
+                    child: const Icon(Icons.medication_outlined, size: 30, color: Color(0xFF7A7D71)),
                   ),
                   const SizedBox(height: 10),
                   Text('${widget.profile.name}의 등록된 복약 일정이 없습니다',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF303C33))),
                   const SizedBox(height: 4),
                   const Text('병원 처방전이나 약봉투를 스캔하면\n복약 일정과 안전 알림이 자동으로 등록됩니다.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 11, color: Colors.grey, height: 1.4)),
+                      style: TextStyle(fontSize: 11, color: Color(0xFF7A7D71), height: 1.4)),
                   const SizedBox(height: 14),
                   ElevatedButton.icon(
                     onPressed: widget.onNavigateScan,
                     icon: const Icon(Icons.crop_free, size: 16),
                     label: const Text('첫 처방전 스캔하기', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF6B8B),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      backgroundColor: const Color(0xFF526454),
+                      foregroundColor: const Color(0xFFFFFEFA),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                     ),
                   ),
@@ -3781,9 +4094,9 @@ class _HomeScreenState extends State<HomeScreen> {
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
               value: _progress,
-              minHeight: 6,
-              backgroundColor: Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation<Color>(_progress == 1.0 ? const Color(0xFF10B981) : const Color(0xFFFF6B8B)),
+              minHeight: 5,
+              backgroundColor: const Color(0xFFEDF0E3),
+              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF526454)),
             ),
           ),
           const SizedBox(height: 12),
@@ -3794,12 +4107,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
 
         const SizedBox(height: 10),
-        // Today's Safety Tip Banner (calm, neutral background, soft text)
+        // Today's Safety Tip Banner (Yeojeong Calm Banner)
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFF9FAFB),
+            color: const Color(0xFFF4F2E9),
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE7E3D6)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -3810,13 +4124,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('오늘의 복약 안내', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Colors.black87)),
+                    const Text('오늘의 복약 안내', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF384B3B))),
                     const SizedBox(height: 2),
                     Text(
                       _doses.isNotEmpty
                           ? '${widget.profile.name}이가 복용 중인 약품은 정해진 시간과 용량을 지켜 투약하고, 충분한 수분을 섭취해 주세요.'
                           : '${widget.profile.name}의 등록된 처방약이 없습니다. 상단 [처방전 스캔하기]를 누르면 약봉투나 처방전을 바로 등록할 수 있습니다.',
-                      style: const TextStyle(fontSize: 11, color: Colors.black54, height: 1.35),
+                      style: const TextStyle(fontSize: 11, color: Color(0xFF68705F), height: 1.35),
                     ),
                   ],
                 ),
@@ -3826,7 +4140,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 20),
 
-        // 💡 안심 케어 TIP & 긴급 가이드 (테두리 없는 미니멀 텍스트 리스트)
+        // 💡 안심 케어 TIP & 긴급 가이드 (Yeojeong Panel)
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -3835,11 +4149,11 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const Text(
                   '안심 케어 TIP & 긴급 가이드',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF303C33)),
                 ),
                 Text(
                   '${widget.profile.age} 맞춤',
-                  style: const TextStyle(fontSize: 11, color: Colors.black45, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF7A7D71), fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -3848,11 +4162,11 @@ class _HomeScreenState extends State<HomeScreen> {
             // 4개 안심 케어 항목을 하나의 깔끔한 테두리 카드로 통합
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFFFFFEFA),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: const Color(0xFFE7E6DC)),
                 boxShadow: const [
-                  BoxShadow(color: Color(0x06000000), blurRadius: 6, offset: Offset(0, 2)),
+                  BoxShadow(color: Color(0x06333C2F), blurRadius: 6, offset: Offset(0, 2)),
                 ],
               ),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
@@ -3890,18 +4204,18 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 14),
 
-            // 🚨 야간 소아응급실 & 달빛병원 (테두리와 가시성을 강화한 전용 긴급 카드)
+            // 🚨 야간 소아응급실 & 달빛병원 (Yeojeong Terracotta Card)
             InkWell(
               onTap: () => _openNightPediatricEmergencyModal(context),
               borderRadius: BorderRadius.circular(16),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF2F2),
+                  color: const Color(0xFFFAF2EE), // Soft Terracotta Peach
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFFCA5A5), width: 1.5),
+                  border: Border.all(color: const Color(0xFFF0DDD7), width: 1.2),
                   boxShadow: const [
-                    BoxShadow(color: Color(0x1ADC2626), blurRadius: 6, offset: Offset(0, 2)),
+                    BoxShadow(color: Color(0x0B333C2F), blurRadius: 6, offset: Offset(0, 2)),
                   ],
                 ),
                 child: Row(
@@ -3909,7 +4223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFDC2626),
+                        color: const Color(0xFFB95D3C),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(Icons.emergency, color: Colors.white, size: 20),
@@ -3923,19 +4237,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Text(
                                 '야간 소아응급실 & 달빛병원',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF991B1B)),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF8C3E25)),
                               ),
                               SizedBox(width: 6),
                               Text(
                                 '24h',
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFDC2626)),
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFB95D3C)),
                               ),
                             ],
                           ),
                           SizedBox(height: 2),
                           Text(
                             '전국 소아전문응급의료센터 · 심야 진료 달빛병원 찾기',
-                            style: TextStyle(fontSize: 11, color: Color(0xFFB91C1C), height: 1.25),
+                            style: TextStyle(fontSize: 11, color: Color(0xFF9E533B), height: 1.25),
                           ),
                         ],
                       ),
@@ -3943,16 +4257,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: const Color(0xFFFFFEFA),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFFECACA)),
+                        border: Border.all(color: const Color(0xFFE8D3CC)),
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('병원 찾기', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFFDC2626))),
+                          Text('병원 찾기', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFFB95D3C))),
                           SizedBox(width: 2),
-                          Icon(Icons.arrow_forward_ios, size: 9, color: Color(0xFFDC2626)),
+                          Icon(Icons.arrow_forward_ios, size: 9, color: Color(0xFFB95D3C)),
                         ],
                       ),
                     ),
@@ -3964,7 +4278,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 24),
 
-        // 📢 최신 보건 소식 (단일 테두리 카드로 감싼 업그레이드 디자인)
+        // 🌿 안심 복약 & 육아 필수템 (쿠팡 파트너스 큐레이션)
+        _buildCuratedCareItemsSection(),
+        const SizedBox(height: 24),
+
+        // 📢 최신 보건 소식 (Yeojeong Panel)
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -3972,27 +4290,27 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const Text(
                   '최신 보건 소식',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF303C33)),
                 ),
                 const SizedBox(width: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
+                    color: const Color(0xFFEDF0E5),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text('질병관리청', style: TextStyle(fontSize: 9.5, color: Color(0xFF6B7280), fontWeight: FontWeight.w500)),
+                  child: const Text('질병관리청', style: TextStyle(fontSize: 9.5, color: Color(0xFF526454), fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFFFFFEFA),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: const Color(0xFFE7E6DC)),
                 boxShadow: const [
-                  BoxShadow(color: Color(0x06000000), blurRadius: 6, offset: Offset(0, 2)),
+                  BoxShadow(color: Color(0x06333C2F), blurRadius: 6, offset: Offset(0, 2)),
                 ],
               ),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -4004,7 +4322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Column(
                       children: [
                         if (index > 0)
-                          const Divider(height: 1, thickness: 0.5, color: Color(0xFFF3F4F6)),
+                          const Divider(height: 1, thickness: 0.5, color: Color(0xFFECECE3)),
                         InkWell(
                           onTap: () => _showPediatricNewsDetail(context, news),
                           borderRadius: BorderRadius.circular(8),
@@ -4012,12 +4330,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 2),
                             child: Row(
                               children: [
-                                const Text('•', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13, fontWeight: FontWeight.bold)),
+                                const Text('•', style: TextStyle(color: Color(0xFF7A7D71), fontSize: 13, fontWeight: FontWeight.bold)),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     news.title,
-                                    style: const TextStyle(fontSize: 12, color: Colors.black87, fontWeight: FontWeight.w500),
+                                    style: const TextStyle(fontSize: 12, color: Color(0xFF303C33), fontWeight: FontWeight.w500),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -4025,7 +4343,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   news.date,
-                                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF9CA3AF)),
+                                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF7A7D71)),
                                 ),
                               ],
                             ),
@@ -4044,26 +4362,435 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ----------------------------------------------------------------------
+  // 🌿 우리 아이 안심 복약 & 간호 케어템 (쿠팡 파트너스 큐레이션 위젯)
+  // ----------------------------------------------------------------------
+  Widget _buildCuratedCareItemsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  '🌿 안심 복약 & 육아 케어 필수템',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF303C33),
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEDF0E5),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    '소아과 추천',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF526454),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFAF2EE),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: const Color(0xFFF0DDD7)),
+              ),
+              child: const Text(
+                '쿠팡 제휴 큐레이션',
+                style: TextStyle(
+                  fontSize: 9.5,
+                  color: Color(0xFFB95D3C),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          '복약 스트레스는 줄이고 아이의 빠른 회복을 돕는 검증된 케어템',
+          style: TextStyle(fontSize: 11, color: Color(0xFF7A7D71)),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 175,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            itemCount: _curatedCareItems.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final item = _curatedCareItems[index];
+              return InkWell(
+                onTap: () => _openCuratedItemDetailModal(context, item),
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  width: 215,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFEFA),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x06333C2F),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEDF0E5),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  item.category,
+                                  style: const TextStyle(
+                                    fontSize: 9.5,
+                                    color: Color(0xFF526454),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                item.rating,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Color(0xFFB95D3C),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF7F5EE),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: const Color(0xFFE7E6DC)),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(item.iconEmoji, style: const TextStyle(fontSize: 20)),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  item.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                    color: Color(0xFF303C33),
+                                    height: 1.2,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            item.tag,
+                            style: const TextStyle(
+                              fontSize: 10.5,
+                              color: Color(0xFF7A7D71),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F6F1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFECEAE0)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              item.price,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF303C33),
+                              ),
+                            ),
+                            const Row(
+                              children: [
+                                Text(
+                                  '추천보기',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF526454),
+                                  ),
+                                ),
+                                SizedBox(width: 2),
+                                Icon(Icons.arrow_forward_ios, size: 8, color: Color(0xFF526454)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _openCuratedItemDetailModal(BuildContext context, CuratedCareItem item) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFFFFEFA),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD6D6CC),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF7F5EE),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(item.iconEmoji, style: const TextStyle(fontSize: 28)),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEDF0E5),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                item.category,
+                                style: const TextStyle(fontSize: 10.5, color: Color(0xFF526454), fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(item.rating, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFB95D3C))),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.title,
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF303C33)),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '정가 대비 특가 혜택: ${item.price}',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFB95D3C)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 🩺 소아과/약학 추천 배경
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F7F2),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFD7E3CE)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.health_and_safety_outlined, size: 16, color: Color(0xFF526454)),
+                        SizedBox(width: 6),
+                        Text('소아과 전문의 복약 시 권장 이유', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF384B3B))),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.clinicalReason,
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF4A554A), height: 1.4),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // 💬 맘카페 실사용자 리뷰 요약
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFBF5),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFF0E5D5)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.thumb_up_alt_outlined, size: 15, color: Color(0xFFB95D3C)),
+                        SizedBox(width: 6),
+                        Text('선배 맘카페 실사용 후기 요약', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF8C3E25))),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      item.parentReview,
+                      style: const TextStyle(fontSize: 11.5, color: Color(0xFF6B4E3D), height: 1.35, fontStyle: FontStyle.italic),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 🚀 쿠팡 파트너스 CTA 버튼
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF526454),
+                  foregroundColor: const Color(0xFFFFFEFA),
+                  elevation: 0,
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                label: const Text(
+                  '쿠팡 최저가 로켓배송 보러가기 🚀',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: const Color(0xFF384B3B),
+                      content: Row(
+                        children: [
+                          const Icon(Icons.check_circle_outline, color: Color(0xFFFFFEFA), size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '[제휴 예시] "${item.title}" 쿠팡 파트너스 페이지로 연결됩니다.\n(실제 배포 시 고유 수수료 적립 링크가 적용됩니다)',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // 공정위 문구 (법적 필수)
+              const Center(
+                child: Text(
+                  '※ 본 추천은 쿠팡 파트너스 활동의 일환으로 일정액의 수수료를 제공받을 수 있으며,\n구매자에게 추가 비용은 전혀 발생하지 않습니다.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 10, color: Color(0xFF969B88), height: 1.3),
+                ),
+              ),
+              const SizedBox(height: 6),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTimelineCard(_TodayDoseItem dose) {
-    final statusColor = dose.isCompleted ? const Color(0xFF10B981) : const Color(0xFFFF6B8B);
     final statusText = dose.isCompleted ? '✓ 복용 완료' : '복용 대기';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: dose.isCompleted ? const Color(0xFFF4F7F2) : const Color(0xFFFFFEFA),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: dose.isCompleted ? const Color(0xFFA7F3D0) : Colors.transparent,
-          width: dose.isCompleted ? 1.5 : 1,
+          color: dose.isCompleted ? const Color(0xFFD7E3CE) : const Color(0xFFE7E6DC),
+          width: 1.2,
         ),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x06333C2F),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(18),
             onTap: () {
               if (dose.drugDetails.isNotEmpty) {
                 setState(() => dose.isExpanded = !dose.isExpanded);
@@ -4072,7 +4799,7 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -4080,17 +4807,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                           decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.1),
+                            color: dose.isCompleted ? const Color(0xFFE2EBDC) : const Color(0xFFEDF0E5),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             dose.timeTag,
-                            style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: dose.isCompleted ? const Color(0xFF384B3B) : const Color(0xFF526454),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -4103,19 +4834,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w700,
                                         decoration: dose.isCompleted ? TextDecoration.lineThrough : null,
-                                        color: dose.isCompleted ? Colors.grey.shade600 : Colors.black87,
+                                        color: dose.isCompleted ? const Color(0xFF7A7D71) : const Color(0xFF303C33),
                                       ),
                                     ),
                                   ),
                                   if (dose.drugDetails.isNotEmpty) ...[
                                     const SizedBox(width: 4),
                                     Icon(
-                                      dose.isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                                      size: 16,
-                                      color: Colors.grey,
+                                      dose.isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                                      size: 18,
+                                      color: const Color(0xFF7A7D71),
                                     ),
                                   ],
                                 ],
@@ -4123,14 +4854,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(height: 2),
                               Text(
                                 dose.drugDetails.isNotEmpty
-                                    ? (dose.isExpanded ? '터치하여 약 목록 접기 ▲' : '터치하여 포함 약품 & 용량(ml) 보기 ▼')
+                                    ? (dose.isExpanded ? '▲ 약품 목록 접기' : '▼ 포함 약품 & 권장 용량 보기')
                                     : dose.subtitle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: dose.drugDetails.isNotEmpty ? const Color(0xFF64748B) : Colors.grey,
-                                  fontWeight: dose.drugDetails.isNotEmpty ? FontWeight.w500 : FontWeight.normal,
+                                  color: dose.drugDetails.isNotEmpty ? const Color(0xFF526454) : const Color(0xFF7A7D71),
+                                  fontWeight: dose.drugDetails.isNotEmpty ? FontWeight.w700 : FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -4140,25 +4871,35 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // 독립 체크 버튼
+                  // Yeojeong Toggle Action Badge
                   GestureDetector(
                     onTap: () => _toggleDose(dose),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
                       decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(16),
+                        color: dose.isCompleted ? const Color(0xFF526454) : const Color(0xFFEDF0E5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: dose.isCompleted ? Colors.transparent : const Color(0xFFDCE2D2),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            dose.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
+                            dose.isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
                             size: 14,
-                            color: statusColor,
+                            color: dose.isCompleted ? const Color(0xFFFFFEFA) : const Color(0xFF526454),
                           ),
-                          const SizedBox(width: 4),
-                          Text(statusText, style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 5),
+                          Text(
+                            statusText,
+                            style: TextStyle(
+                              color: dose.isCompleted ? const Color(0xFFFFFEFA) : const Color(0xFF526454),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -4169,39 +4910,45 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           // 포함된 약품 및 몇 ml 인지 아코디언 드롭다운 노출
           if (dose.isExpanded && dose.drugDetails.isNotEmpty) ...[
-            const Divider(height: 1, indent: 14, endIndent: 14),
+            const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFECECE3)),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               decoration: const BoxDecoration(
-                color: Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+                color: Color(0xFFF7F9F4),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.medication_liquid_outlined, size: 14, color: Color(0xFFFF6B8B)),
+                      Icon(Icons.medication_liquid_rounded, size: 15, color: Color(0xFF526454)),
                       SizedBox(width: 6),
                       Text(
                         '처방 복용 약품 및 1회 권장 용량:',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
+                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF303C33)),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   ...dose.drugDetails.map((detail) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFEFA),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFE2E7DA)),
+                      ),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle_outline, size: 14, color: Color(0xFF10B981)),
+                          const Icon(Icons.check_circle_rounded, size: 14, color: Color(0xFF526454)),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               detail,
-                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF303C33)),
                             ),
                           ),
                         ],
@@ -4400,7 +5147,11 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
         // Segmented Tab - 복용 중 / 복용 완료
         Container(
           padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(16)),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEDF0E5), // Yeojeong Sage
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E6D7)),
+          ),
           child: Row(
             children: [
               Expanded(
@@ -4409,15 +5160,15 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 9),
                     decoration: BoxDecoration(
-                      color: _tabFilter == 0 ? const Color(0xFFFF6B8B) : Colors.transparent,
+                      color: _tabFilter == 0 ? const Color(0xFF526454) : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
                       child: Text(
                         '복용 중 ($currentActiveCount)',
                         style: TextStyle(
-                          color: _tabFilter == 0 ? Colors.white : Colors.grey.shade700,
-                          fontWeight: FontWeight.bold,
+                          color: _tabFilter == 0 ? const Color(0xFFFFFEFA) : const Color(0xFF7A7D71),
+                          fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
                       ),
@@ -4431,15 +5182,15 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 9),
                     decoration: BoxDecoration(
-                      color: _tabFilter == 1 ? const Color(0xFFFF6B8B) : Colors.transparent,
+                      color: _tabFilter == 1 ? const Color(0xFF526454) : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
                       child: Text(
                         '복용 완료 ($currentCompletedCount)',
                         style: TextStyle(
-                          color: _tabFilter == 1 ? Colors.white : Colors.grey.shade700,
-                          fontWeight: FontWeight.bold,
+                          color: _tabFilter == 1 ? const Color(0xFFFFFEFA) : const Color(0xFF7A7D71),
+                          fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
                       ),
@@ -4565,7 +5316,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
     required String dosage,
     required String remainingDays,
     String statusBadge = '복용 중',
-    Color statusColor = const Color(0xFFFF6B8B),
+    Color statusColor = const Color(0xFF526454),
     required VoidCallback onTap,
     VoidCallback? onDelete,
   }) {
@@ -4575,9 +5326,10 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+          color: const Color(0xFFFFFEFA),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE7E6DC)),
+          boxShadow: const [BoxShadow(color: Color(0x06333C2F), blurRadius: 6, offset: Offset(0, 2))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -4586,14 +5338,14 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xFFEDF0E5),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     statusBadge,
-                    style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: const TextStyle(color: Color(0xFF526454), fontSize: 10, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Row(
@@ -4601,35 +5353,36 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                   children: [
                     if (onDelete != null)
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, size: 18, color: Colors.grey),
+                        icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFF9CA3AF)),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                         tooltip: '처방약 삭제',
                         onPressed: onDelete,
                       ),
                     const SizedBox(width: 6),
-                    const Icon(Icons.chevron_right, color: Colors.grey),
+                    const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 6),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-            Text(prescriptionMeta, style: const TextStyle(color: Colors.grey, fontSize: 11)),
-            const Divider(height: 20),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF303C33))),
+            Text(prescriptionMeta, style: const TextStyle(color: Color(0xFF7A7D71), fontSize: 11)),
+            const Divider(height: 20, color: Color(0xFFECECE3)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(dosage, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(dosage, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xFFF7F4EE),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFFEAE1D1)),
                   ),
                   child: Text(
                     remainingDays,
-                    style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: const TextStyle(color: Color(0xFF7A7D71), fontSize: 10.5, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -5057,7 +5810,7 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                   labelText: '약품명 (처방전 또는 약봉투 이름)',
                   hintText: '예: 코미시럽, 아모클란듀오',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-                  prefixIcon: const Icon(Icons.medication, color: Color(0xFFFF6B8B)),
+                  prefixIcon: const Icon(Icons.medication, color: Color(0xFF526454)),
                 ),
               ),
               const SizedBox(height: 12),
@@ -5110,10 +5863,11 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6B8B),
-                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF526454),
+                  foregroundColor: const Color(0xFFFFFEFA),
+                  elevation: 0,
                   minimumSize: const Size.fromHeight(52),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 onPressed: () {
                   final drugName = nameCtrl.text.trim();
@@ -5697,7 +6451,7 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.medication, color: isSafe ? const Color(0xFFFF6B8B) : const Color(0xFFDC2626), size: 20),
+                        Icon(Icons.medication, color: isSafe ? const Color(0xFF526454) : const Color(0xFFB95D3C), size: 20),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
@@ -5938,11 +6692,11 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
         // 2 Action Buttons
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFF6B8B),
-            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF526454),
+            foregroundColor: const Color(0xFFFFFEFA),
             minimumSize: const Size.fromHeight(50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            elevation: 1,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            elevation: 0,
           ),
           icon: const Icon(Icons.assignment, size: 18),
           label: Text('📋 의사용 안심 Q&A 보러가기 (맞춤 질문 ${result.doctorQna.length}건 준비 완료) ➔',
@@ -5952,13 +6706,13 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
         const SizedBox(height: 10),
         OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Color(0xFFFF6B8B), width: 1.5),
+            side: const BorderSide(color: Color(0xFF526454), width: 1.2),
             minimumSize: const Size.fromHeight(50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
-          icon: const Icon(Icons.medication, color: Color(0xFFFF6B8B)),
+          icon: const Icon(Icons.medication, color: Color(0xFF526454)),
           label: const Text('처방약 복용 정보 목록 보기',
-              style: TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 14)),
+              style: TextStyle(color: Color(0xFF526454), fontWeight: FontWeight.bold, fontSize: 14)),
           onPressed: () => widget.onNavigateTab(1),
         ),
         const SizedBox(height: 8),
@@ -6064,7 +6818,7 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
             color: const Color(0xFF0F172A),
             borderRadius: BorderRadius.circular(28),
             boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
-            border: Border.all(color: const Color(0xFFFF6B8B), width: 2),
+            border: Border.all(color: const Color(0xFF526454), width: 1.5),
           ),
           clipBehavior: Clip.antiAlias,
           child: Stack(
@@ -6116,7 +6870,7 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: const Color(0xFFFFFBEB),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFFDE68A)),
           ),
           child: const Row(
@@ -6135,11 +6889,11 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
         // 1. Analyze Button (Trigger)
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFF6B8B),
-            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF526454),
+            foregroundColor: const Color(0xFFFFFEFA),
             minimumSize: const Size.fromHeight(54),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 1,
           ),
           icon: _isAnalyzing
               ? const SizedBox(
@@ -6159,13 +6913,13 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
         // 2. Pre-Review / Direct Edit Button
         OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Color(0xFFFF6B8B), width: 1.2),
+            side: const BorderSide(color: Color(0xFF526454), width: 1.2),
             minimumSize: const Size.fromHeight(48),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
-          icon: const Icon(Icons.edit_note, color: Color(0xFFFF6B8B), size: 20),
+          icon: const Icon(Icons.edit_note, color: Color(0xFF526454), size: 20),
           label: const Text('약품명 직접 확인 & 보정해서 분석하기',
-              style: TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 13)),
+              style: TextStyle(color: Color(0xFF526454), fontWeight: FontWeight.bold, fontSize: 13)),
           onPressed: _openManualInputDialog,
         ),
         const SizedBox(height: 10),
@@ -6223,7 +6977,7 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
           decoration: BoxDecoration(
             color: const Color(0xFF1E293B),
             borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: const Color(0xFFFF6B8B), width: 2),
+            border: Border.all(color: const Color(0xFF526454), width: 2),
           ),
           child: Stack(
             alignment: Alignment.center,
@@ -6269,7 +7023,7 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                         width: 64,
                         height: 64,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF6B8B),
+                          color: const Color(0xFF526454),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 4),
                         ),
@@ -6302,7 +7056,7 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
             ),
             child: Row(
               children: [
-                const Icon(Icons.image, size: 18, color: Color(0xFFFF6B8B)),
+                const Icon(Icons.image, size: 18, color: Color(0xFF526454)),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text('선택된 이미지: $_selectedImageName',
@@ -6318,13 +7072,13 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
         // 1. 앨범/갤러리에서 사진 가져오기 버튼
         OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Color(0xFFFF6B8B), width: 1.5),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            side: const BorderSide(color: Color(0xFF526454), width: 1.2),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             minimumSize: const Size.fromHeight(50),
           ),
-          icon: const Icon(Icons.photo_library, color: Color(0xFFFF6B8B)),
+          icon: const Icon(Icons.photo_library, color: Color(0xFF526454)),
           label: const Text('🖼️ 앨범 / 갤러리에서 사진 가져오기',
-              style: TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 14)),
+              style: TextStyle(color: Color(0xFF526454), fontWeight: FontWeight.bold, fontSize: 14)),
           onPressed: _isAnalyzing ? null : _pickImageFromGallery,
         ),
         const SizedBox(height: 10),
@@ -6332,13 +7086,13 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
         // 2. 약품 직접 수동 입력 모달 버튼
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFFF0F3),
-            foregroundColor: const Color(0xFFFF6B8B),
+            backgroundColor: const Color(0xFFEDF0E5),
+            foregroundColor: const Color(0xFF526454),
             elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             minimumSize: const Size.fromHeight(50),
           ),
-          icon: const Icon(Icons.edit_note, color: Color(0xFFFF6B8B)),
+          icon: const Icon(Icons.edit_note, color: Color(0xFF526454)),
           label: const Text('✎ 약품 직접 입력해서 등록하기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           onPressed: _openManualInputDialog,
         ),
@@ -6348,24 +7102,24 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade300),
+            color: const Color(0xFFFFFEFA),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFFE7E6DC)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Row(
                 children: [
-                  Icon(Icons.auto_awesome, size: 16, color: Color(0xFFFF6B8B)),
+                  Icon(Icons.auto_awesome, size: 16, color: Color(0xFF526454)),
                   SizedBox(width: 6),
                   Text('소아과 대표 처방전 1-Tap 샘플 분석',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF303C33))),
                 ],
               ),
               const SizedBox(height: 4),
               const Text('처방전 사진이 없으셔도 실제 소아과 다빈도 처방 세트로 즉시 분석 체험이 가능합니다.',
-                  style: TextStyle(fontSize: 11, color: Colors.grey)),
+                  style: TextStyle(fontSize: 11, color: Color(0xFF7A7D71))),
               const SizedBox(height: 10),
               Row(
                 children: [
@@ -6373,8 +7127,8 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                        side: const BorderSide(color: Color(0xFFFF6B8B)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        side: const BorderSide(color: Color(0xFF526454)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: _isAnalyzing
                           ? null
@@ -6390,9 +7144,9 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                             },
                       child: const Column(
                         children: [
-                          Text('🏥 감기약 6종 세트', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFFFF6B8B))),
+                          Text('🏥 감기약 6종 세트', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF526454))),
                           SizedBox(height: 2),
-                          Text('코미·암브로콜·챔프 등', style: TextStyle(fontSize: 10, color: Colors.black54)),
+                          Text('코미·암브로콜·챔프 등', style: TextStyle(fontSize: 10, color: Color(0xFF7A7D71))),
                         ],
                       ),
                     ),
@@ -6402,8 +7156,8 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                        side: const BorderSide(color: Color(0xFF10B981)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        side: const BorderSide(color: Color(0xFFB95D3C)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: _isAnalyzing
                           ? null
@@ -6416,9 +7170,9 @@ class _ScanScreenState extends State<ScanScreen> with AutomaticKeepAliveClientMi
                             },
                       child: const Column(
                         children: [
-                          Text('💊 중이염 항생제 세트', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF10B981))),
+                          Text('💊 중이염 항생제 세트', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFFB95D3C))),
                           SizedBox(height: 2),
-                          Text('아모클란·비오플 등', style: TextStyle(fontSize: 10, color: Colors.black54)),
+                          Text('아모클란·비오플 등', style: TextStyle(fontSize: 10, color: Color(0xFF7A7D71))),
                         ],
                       ),
                     ),
@@ -6481,9 +7235,9 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         title: const Row(
           children: [
-            Icon(Icons.edit_note, color: Color(0xFFFF6B8B)),
+            Icon(Icons.edit_note, color: Color(0xFF526454)),
             SizedBox(width: 8),
-            Text('나만의 질문 추가', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('나만의 질문 추가', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
           ],
         ),
         content: Column(
@@ -6515,8 +7269,9 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF6B8B),
-              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFF526454),
+              foregroundColor: const Color(0xFFFFFEFA),
+              elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () {
@@ -6592,9 +7347,9 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.check_circle, color: Color(0xFF10B981), size: 24),
+                    Icon(Icons.check_circle, color: Color(0xFF526454), size: 24),
                     SizedBox(width: 8),
-                    Text('클립보드 복사 완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text('클립보드 복사 완료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
                   ],
                 ),
                 IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
@@ -6602,7 +7357,7 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
             ),
             const SizedBox(height: 6),
             const Text('카카오톡, 문자 메시지 또는 병원 접수 메모에 붙여넣어 진료 시 바로 활용하세요.',
-                style: TextStyle(fontSize: 12, color: Colors.grey)),
+                style: TextStyle(fontSize: 12, color: Color(0xFF7A7D71))),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(14),
@@ -6621,10 +7376,11 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
               icon: const Icon(Icons.copy, size: 18),
               label: const Text('다시 복사하기', style: TextStyle(fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B8B),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF526454),
+                foregroundColor: const Color(0xFFFFFEFA),
+                elevation: 0,
                 minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: shareText));
@@ -6657,35 +7413,39 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
               ),
               const SizedBox(width: 8),
             ],
-            const Text('소아과 의사용 안심 Q&A', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('소아과 의사용 안심 Q&A', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
           ],
         ),
         const SizedBox(height: 12),
 
         Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: const Color(0xFFFFF0F3), borderRadius: BorderRadius.circular(24)),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEDF0E5), // Yeojeong Light Sage
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFDCE2D2), width: 1.2),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  const Text('✨ 스마트 AI 질문지 생성기', style: TextStyle(color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold, fontSize: 13)),
+                  const Text('🌿 스마트 AI 질문지 생성기', style: TextStyle(color: Color(0xFF384B3B), fontWeight: FontWeight.bold, fontSize: 13)),
                   const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFFFCCD5)),
+                      color: const Color(0xFFFFFEFA),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFDCE2D2)),
                     ),
-                    child: const Text('포털·맘카페 다빈도 FAQ 기반', style: TextStyle(fontSize: 10, color: Color(0xFFFF6B8B), fontWeight: FontWeight.bold)),
+                    child: const Text('포털·맘카페 다빈도 FAQ 기반', style: TextStyle(fontSize: 10, color: Color(0xFF526454), fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
               Text('${widget.profile.name}(${widget.profile.weightKg}kg)의 처방 의약품 성분과 포털(네이버·맘카페·구글)에서 부모들이 가장 많이 묻는 소아 다빈도 실전 질문들을 선별하여 의사 상담 질문지로 추천해 드립니다.',
-                  style: const TextStyle(fontSize: 11, color: Colors.black87, height: 1.4)),
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF5B6957), height: 1.4)),
             ],
           ),
         ),
@@ -6694,10 +7454,10 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('선택된 질문 목록', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            const Text('선택된 질문 목록', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
             TextButton.icon(
-              icon: const Icon(Icons.add, size: 16, color: Color(0xFFFF6B8B)),
-              label: const Text('직접 질문 추가', style: TextStyle(color: Color(0xFFFF6B8B), fontSize: 12, fontWeight: FontWeight.bold)),
+              icon: const Icon(Icons.add, size: 16, color: Color(0xFF526454)),
+              label: const Text('직접 질문 추가', style: TextStyle(color: Color(0xFF526454), fontSize: 12, fontWeight: FontWeight.bold)),
               onPressed: _openAddQuestionDialog,
             ),
           ],
@@ -6707,30 +7467,31 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
         ..._localQuestions.map((q) => Container(
           margin: const EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: (q.isSelected == true) ? const Color(0xFFFF6B8B) : Colors.transparent),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: (q.isSelected == true) ? const Color(0xFF526454) : const Color(0xFFE7E6DC)),
           ),
           child: Material(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFFFFFEFA),
+            borderRadius: BorderRadius.circular(16),
             child: CheckboxListTile(
-              activeColor: const Color(0xFFFF6B8B),
+              activeColor: const Color(0xFF526454),
               value: q.isSelected == true,
               onChanged: (val) => setState(() => q.isSelected = (val == true)),
-              title: Text(q.question, style: const TextStyle(fontSize: 12, height: 1.4)),
-              subtitle: Text(q.category, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+              title: Text(q.question, style: const TextStyle(fontSize: 12, height: 1.4, color: Color(0xFF303C33))),
+              subtitle: Text(q.category, style: const TextStyle(fontSize: 10, color: Color(0xFF7A7D71))),
             ),
           ),
         )),
 
         const SizedBox(height: 16),
         ElevatedButton.icon(
-          icon: const Icon(Icons.share, color: Colors.white, size: 18),
-          label: const Text('의사 질문지 저장 및 공유하기', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          icon: const Icon(Icons.share, color: Color(0xFFFFFEFA), size: 18),
+          label: const Text('의사 질문지 저장 및 공유하기', style: TextStyle(color: Color(0xFFFFFEFA), fontWeight: FontWeight.bold)),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFF6B8B),
+            backgroundColor: const Color(0xFF526454),
+            elevation: 0,
             minimumSize: const Size.fromHeight(52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
           onPressed: _shareDoctorQuestions,
         ),
@@ -6999,17 +7760,17 @@ class BabyProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                 ],
-                const Text('아기 프로필 & 이력', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text('아기 프로필 & 이력', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
               ],
             ),
             Row(
               children: [
                 if (onSwitchChild != null) ...[
                   OutlinedButton.icon(
-                    icon: const Icon(Icons.swap_horiz, size: 14, color: Color(0xFFFF6B8B)),
-                    label: const Text('아이 전환', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFFF6B8B))),
+                    icon: const Icon(Icons.swap_horiz, size: 14, color: Color(0xFF526454)),
+                    label: const Text('아이 전환', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF526454))),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFFFFD6DF)),
+                      side: const BorderSide(color: Color(0xFFDCE2D2)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                     ),
@@ -7018,10 +7779,10 @@ class BabyProfileScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                 ],
                 OutlinedButton.icon(
-                  icon: const Icon(Icons.edit, size: 14, color: Color(0xFFFF6B8B)),
-                  label: const Text('정보 수정', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFFF6B8B))),
+                  icon: const Icon(Icons.edit, size: 14, color: Color(0xFF526454)),
+                  label: const Text('정보 수정', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF526454))),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFFFFD6DF)),
+                    side: const BorderSide(color: Color(0xFFDCE2D2)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   ),
@@ -7030,7 +7791,7 @@ class BabyProfileScreen extends StatelessWidget {
                 if (onDeleteProfile != null) ...[
                   const SizedBox(width: 6),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 20, color: Color(0xFFFF6B8B)),
+                    icon: const Icon(Icons.delete_outline, size: 20, color: Color(0xFFB95D3C)),
                     tooltip: '프로필 삭제',
                     onPressed: onDeleteProfile,
                   ),
@@ -7043,20 +7804,25 @@ class BabyProfileScreen extends StatelessWidget {
 
         Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFEFA),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFE7E6DC)),
+            boxShadow: const [BoxShadow(color: Color(0x06333C2F), blurRadius: 6, offset: Offset(0, 2))],
+          ),
           child: Row(
             children: [
               const CircleAvatar(
                 radius: 28,
-                backgroundColor: Color(0xFFFFF0F3),
+                backgroundColor: Color(0xFFEDF0E5),
                 child: Text('👶', style: TextStyle(fontSize: 26)),
               ),
               const SizedBox(width: 14),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${profile.name} (${profile.gender})', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text('생년월일: ${profile.birthDate}', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                  Text('${profile.name} (${profile.gender})', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
+                  Text('생년월일: ${profile.birthDate}', style: const TextStyle(color: Color(0xFF7A7D71), fontSize: 11)),
                 ],
               ),
             ],
@@ -7069,12 +7835,16 @@ class BabyProfileScreen extends StatelessWidget {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFEFA),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE7E6DC)),
+                ),
                 child: Column(
                   children: [
-                    const Text('월령', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
+                    const Text('월령', style: TextStyle(color: Color(0xFF7A7D71), fontSize: 10, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text(profile.age, style: const TextStyle(color: Color(0xFFFF6B8B), fontSize: 15, fontWeight: FontWeight.bold)),
+                    Text(profile.age, style: const TextStyle(color: Color(0xFF526454), fontSize: 15, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -7083,12 +7853,16 @@ class BabyProfileScreen extends StatelessWidget {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFEFA),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE7E6DC)),
+                ),
                 child: Column(
                   children: [
-                    const Text('현재 몸무게', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
+                    const Text('현재 몸무게', style: TextStyle(color: Color(0xFF7A7D71), fontSize: 10, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text('${profile.weightKg} kg', style: const TextStyle(color: Color(0xFF10B981), fontSize: 15, fontWeight: FontWeight.bold)),
+                    Text('${profile.weightKg} kg', style: const TextStyle(color: Color(0xFF384B3B), fontSize: 15, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -7104,22 +7878,21 @@ class BabyProfileScreen extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 14),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFFF0F3), Color(0xFFFFE4E8)],
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFFFD6DF)),
-              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 1))],
+              color: const Color(0xFFF7F4EE), // Yeojeong Sand
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFFE5DDD0)),
+              boxShadow: const [BoxShadow(color: Color(0x06333C2F), blurRadius: 6, offset: Offset(0, 2))],
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
+                    color: const Color(0xFFFFFEFA),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE7E6DC)),
                   ),
-                  child: const Text('💉', style: TextStyle(fontSize: 22)),
+                  child: const Text('💉', style: TextStyle(fontSize: 20)),
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
@@ -7127,14 +7900,14 @@ class BabyProfileScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('우리아이 접종 & 검진 플래너',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFFF6B8B))),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF526454))),
                       SizedBox(height: 2),
                       Text('질병관리청 필수 접종 16종 & 검진 D-Day 알림',
-                          style: TextStyle(fontSize: 11, color: Colors.black87)),
+                          style: TextStyle(fontSize: 11, color: Color(0xFF68705F))),
                     ],
                   ),
                 ),
-                const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFFFF6B8B)),
+                const Icon(Icons.arrow_forward_ios, size: 13, color: Color(0xFF526454)),
               ],
             ),
           ),
