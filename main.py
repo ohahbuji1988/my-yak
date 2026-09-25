@@ -26,6 +26,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def add_no_cache_headers(request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path == "/" or path.endswith((".html", ".js", ".json", ".wasm")):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 LEGAL_DISCLAIMER = (
     "※ 본 서비스는 공공 의약품 데이터 기반의 참고 자료일 뿐, "
     "의사·약사의 의학적 소견을 대체하지 않습니다. "
