@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'models/profile.dart';
 import 'models/prescription.dart';
@@ -1895,53 +1896,53 @@ final List<CuratedCareItem> _curatedCareItems = [
     id: 'feeder_cup',
     title: '아가드 안심 실리콘 시럽 투약기 세트',
     category: '투약 보조 1위',
-    price: '8,900원',
+    price: '8,900원 (로켓배송)',
     rating: '★ 4.9 (3,240+)',
     tag: '약 뱉는 아이 필수',
     iconEmoji: '🍼',
     oneLiner: '눈금 오차 없는 젖꼭지형 안심 실리콘 투약기 & 세척솔',
     clinicalReason: '아이가 쓴 약을 혀 앞쪽에 닿지 않고 혀뿌리 안쪽으로 부드럽게 넘겨 구역질과 약 거부 반응을 80% 이상 줄여줍니다.',
     parentReview: '"매번 약 먹일 때마다 아이도 울고 저도 울었는데, 이거 쓰고 30초 만에 흘림 없이 다 먹여요!" (맘카페 후기)',
-    affiliateUrl: 'https://link.coupang.com/example/syringefeed',
+    affiliateUrl: 'https://link.coupang.com/a/hkXpPHftpk',
   ),
   const CuratedCareItem(
-    id: 'braun_thermo',
-    title: '브라운 써모스캔 IRT-6520 정품',
+    id: 'cooling_sheet',
+    title: '어린이 안심 열냉각패치 (해열 쿨링 시트)',
     category: '발열 간호 필수',
-    price: '79,800원',
-    rating: '★ 4.9 (14,800+)',
-    tag: '전국 소아과 표준',
-    iconEmoji: '🌡️',
-    oneLiner: '연령별 발열 색상 알림(초록/노랑/빨강) 스마트 체온계 & 필터',
-    clinicalReason: '0.1℃ 단위의 미세 열 변화와 해열제 교차복용 타이밍을 정확히 판단할 수 있는 대학병원 및 소아과 표준 체온계입니다.',
-    parentReview: '"아이 열날 때 체온계 오차 나면 밤새 불안한데, 브라운 덕분에 새벽 교차복용 정확히 성공했어요."',
-    affiliateUrl: 'https://link.coupang.com/example/braun6520',
+    price: '9,800원 (로켓배송)',
+    rating: '★ 4.9 (8,400+)',
+    tag: '밤샘 고열 간호 필수',
+    iconEmoji: '❄️',
+    oneLiner: '피부 자극 없는 고밀착 젤 시트 · 지속 냉각 10시간',
+    clinicalReason: '해열제 복약 후 약효가 나타나기까지(약 30분~1시간) 이마와 목뒤에 부착하여 체열 발산과 두통/칭얼거림 완화를 돕습니다.',
+    parentReview: '"열날 때 이마에 붙여주면 시원한지 아이가 보채지 않고 바로 잠들어요. 비상용으로 쟁여둡니다."',
+    affiliateUrl: 'https://link.coupang.com/a/hkXIIQsaHY',
   ),
   const CuratedCareItem(
     id: 'lacto_probiotics',
     title: '락토핏 베베 생유산균 + 비타민D 400IU',
     category: '항생제 케어',
-    price: '23,500원',
+    price: '23,500원 (로켓배송)',
     rating: '★ 4.8 (2,150+)',
     tag: '항생제 묽은변 예방',
     iconEmoji: '🛡️',
     oneLiner: '항생제 복용기 유익균 보호 & 면역·뼈 성장 비타민D 복합',
     clinicalReason: '항생제(아모클란 등)는 유해균과 함께 장내 유익균까지 사멸시킵니다. 항생제 복용 2시간 후 유산균 보충으로 설사 및 배탈을 예방합니다.',
     parentReview: '"항생제 처방받으면 항상 변이 묽어져서 고생했는데, 2시간 간격 두고 먹이니 변이 아주 좋아요."',
-    affiliateUrl: 'https://link.coupang.com/example/probiotics',
+    affiliateUrl: 'https://link.coupang.com/a/hkXtVfXvZQ',
   ),
   const CuratedCareItem(
     id: 'physiomer_baby',
     title: '피지오머 베이비 비강세척 스프레이',
     category: '호흡기 케어',
-    price: '14,000원',
+    price: '14,000원 (로켓배송)',
     rating: '★ 4.9 (5,400+)',
     tag: '밤중 코막힘 완화',
     iconEmoji: '💧',
     oneLiner: '프랑스 멸균 천연해수 100% 미세분사 저자극 비강 스프레이',
     clinicalReason: '감기약 복용과 함께 콧물을 부드럽게 세척해 비강 점막 섬모 기능을 살리고, 중이염 전이 예방과 수면 질 향상에 도움을 줍니다.',
     parentReview: '"코 막혀서 숨 쌕쌕거리며 깨던 아기가 칙 뿌려주고 나면 뚫려서 아침까지 푹 잡니다."',
-    affiliateUrl: 'https://link.coupang.com/example/physiomer',
+    affiliateUrl: 'https://link.coupang.com/a/hkXvMWzGz6',
   ),
 ];
 
@@ -4725,27 +4726,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   '쿠팡 최저가 로켓배송 보러가기 🚀',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: const Color(0xFF384B3B),
-                      content: Row(
-                        children: [
-                          const Icon(Icons.check_circle_outline, color: Color(0xFFFFFEFA), size: 18),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '[제휴 예시] "${item.title}" 쿠팡 파트너스 페이지로 연결됩니다.\n(실제 배포 시 고유 수수료 적립 링크가 적용됩니다)',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        ],
-                      ),
-                      duration: const Duration(seconds: 3),
-                    ),
-                  );
+                  final uri = Uri.parse(item.affiliateUrl);
+                  try {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } catch (_) {
+                    await launchUrl(uri);
+                  }
                 },
               ),
               const SizedBox(height: 10),
