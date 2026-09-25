@@ -154,7 +154,7 @@ class _AppRootScreenState extends State<AppRootScreen> {
       return const Scaffold(
         backgroundColor: Color(0xFFFAF9F6),
         body: Center(
-          child: CircularProgressIndicator(color: Color(0xFFFF6B8B)),
+          child: CircularProgressIndicator(color: Color(0xFFB95D3C)),
         ),
       );
     }
@@ -253,7 +253,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.delete_outline, color: Color(0xFFFF6B8B)),
+            const Icon(Icons.delete_outline, color: Color(0xFFB95D3C)),
             const SizedBox(width: 8),
             Text('${profile.name} 삭제', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           ],
@@ -267,7 +267,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF6B8B),
+              backgroundColor: const Color(0xFFB95D3C),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -332,7 +332,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                 decoration: InputDecoration(
                   labelText: '생년월일 (예방접종·검진 기준)',
                   hintText: '생년월일을 선택해주세요',
-                  prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFFFF6B8B), size: 20),
+                  prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFFB95D3C), size: 20),
                   suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -402,7 +402,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6B8B),
+                  backgroundColor: const Color(0xFFB95D3C),
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(48),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -966,7 +966,7 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.delete_outline, color: Color(0xFFFF6B8B)),
+            const Icon(Icons.delete_outline, color: Color(0xFFB95D3C)),
             const SizedBox(width: 8),
             Text('${profile.name} 삭제', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           ],
@@ -980,7 +980,7 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF6B8B),
+              backgroundColor: const Color(0xFFB95D3C),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -2294,7 +2294,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B8B),
+                backgroundColor: const Color(0xFFB95D3C),
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -2633,7 +2633,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF6B8B),
+                    backgroundColor: const Color(0xFFB95D3C),
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(50),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -2749,7 +2749,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B8B),
+                backgroundColor: const Color(0xFFB95D3C),
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -2863,7 +2863,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B8B),
+                backgroundColor: const Color(0xFFB95D3C),
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -3023,7 +3023,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 8),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF6B8B),
+                          backgroundColor: const Color(0xFFB95D3C),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -3276,7 +3276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: ChoiceChip(
                           label: Text(r, style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                           selected: isSelected,
-                          selectedColor: const Color(0xFFFF6B8B),
+                          selectedColor: const Color(0xFFB95D3C),
                           labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black87),
                           onSelected: (val) {
                             if (val) setModalState(() => selectedRegion = r);
@@ -3297,8 +3297,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: FilterChip(
                         label: Text(t, style: TextStyle(fontSize: 10.5, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                         selected: isSelected,
-                        selectedColor: const Color(0xFFFFD6DF),
-                        checkmarkColor: const Color(0xFFFF6B8B),
+                        selectedColor: const Color(0xFFFAF2EE),
+                        checkmarkColor: const Color(0xFFB95D3C),
                         onSelected: (val) {
                           setModalState(() => selectedType = t);
                         },
@@ -3481,7 +3481,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF6B8B),
+                    backgroundColor: const Color(0xFFB95D3C),
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(50),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -3558,7 +3558,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B8B),
+                backgroundColor: const Color(0xFFB95D3C),
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(46),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -5052,7 +5052,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
-            Icon(Icons.delete_outline, color: Color(0xFFFF6B8B)),
+            Icon(Icons.delete_outline, color: Color(0xFFB95D3C)),
             SizedBox(width: 8),
             Text('처방약 삭제', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
           ],
@@ -5065,7 +5065,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF6B8B),
+              backgroundColor: const Color(0xFFB95D3C),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -5109,7 +5109,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
         dosage: scanned.status == 'SAFE' ? '${widget.profile.name} ${widget.profile.weightKg}kg 적정 용량' : '소아 용량 주의 확인 필요',
         remainingDays: isDone ? '복용 완료' : '안심 복약 진행 중',
         statusBadge: isDone ? '✓ 복용 완료' : (scanned.status == 'SAFE' ? '복용 중' : '⚠️ 주의'),
-        statusColor: isDone ? const Color(0xFF10B981) : (scanned.status == 'SAFE' ? const Color(0xFFFF6B8B) : const Color(0xFFDC2626)),
+        statusColor: isDone ? const Color(0xFF10B981) : (scanned.status == 'SAFE' ? const Color(0xFFB95D3C) : const Color(0xFFDC2626)),
         category: scanned.status == 'SAFE' ? '적정 소아 처방' : '⚠️ 용량 점검 요망',
         desc: scanned.comment,
         isCompleted: isDone,
@@ -5258,7 +5258,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                       icon: const Icon(Icons.crop_free, size: 16),
                       label: const Text('첫 처방전 스캔하기', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF6B8B),
+                        backgroundColor: const Color(0xFFB95D3C),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -5427,7 +5427,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(color: const Color(0xFFFFF0F3), borderRadius: BorderRadius.circular(12)),
-                child: Text(_selectedCategory, style: const TextStyle(color: Color(0xFFFF6B8B), fontSize: 10, fontWeight: FontWeight.bold)),
+                child: Text(_selectedCategory, style: const TextStyle(color: Color(0xFFB95D3C), fontSize: 10, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(height: 8),
               Text(_selectedDrug, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -5582,7 +5582,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: isCompleted ? const Color(0xFFFF6B8B) : const Color(0xFF10B981),
+            backgroundColor: isCompleted ? const Color(0xFFB95D3C) : const Color(0xFF10B981),
             foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(52),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -7529,7 +7529,7 @@ class BabyProfileScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
-            Icon(Icons.dns, color: Color(0xFFFF6B8B)),
+            Icon(Icons.dns, color: Color(0xFFB95D3C)),
             SizedBox(width: 8),
             Text('백엔드 서버 설정', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
           ],
@@ -7560,7 +7560,7 @@ class BabyProfileScreen extends StatelessWidget {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF6B8B),
+              backgroundColor: const Color(0xFFB95D3C),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -7631,7 +7631,7 @@ class BabyProfileScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: '아기 이름',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-                    prefixIcon: const Icon(Icons.person, color: Color(0xFFFF6B8B)),
+                    prefixIcon: const Icon(Icons.person, color: Color(0xFFB95D3C)),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -7642,7 +7642,7 @@ class BabyProfileScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: '생년월일 (예방접종·검진 기준)',
                     hintText: '생년월일을 선택해주세요',
-                    prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFFFF6B8B)),
+                    prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFFB95D3C)),
                     suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                   ),
@@ -7710,7 +7710,7 @@ class BabyProfileScreen extends StatelessWidget {
 
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF6B8B),
+                    backgroundColor: const Color(0xFFB95D3C),
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(52),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
