@@ -1295,6 +1295,193 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
     });
   }
 
+  bool _isBottomAdVisible = true;
+
+  CuratedCareItem _getAdItemForTab(int tabIndex) {
+    if (_curatedCareItems.isEmpty) {
+      return const CuratedCareItem(
+        id: 'default',
+        title: '우리아이 안심 복약 가이드',
+        category: '케어',
+        price: '로켓배송',
+        rating: '5.0',
+        tag: '필수',
+        iconEmoji: '🍼',
+        oneLiner: '안심 케어 큐레이션',
+        clinicalReason: '',
+        parentReview: '',
+        affiliateUrl: 'https://link.coupang.com',
+      );
+    }
+    switch (tabIndex) {
+      case 0:
+        return _curatedCareItems[0];
+      case 1:
+        return _curatedCareItems[2 % _curatedCareItems.length];
+      case 2:
+        return _curatedCareItems[1 % _curatedCareItems.length];
+      case 3:
+        return _curatedCareItems[3 % _curatedCareItems.length];
+      case 4:
+      default:
+        return _curatedCareItems[0];
+    }
+  }
+
+  Widget _buildTabBottomAdBanner() {
+    if (!_isBottomAdVisible) return const SizedBox.shrink();
+
+    final adItem = _getAdItemForTab(_currentIndex);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFEFA),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08333C2F),
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () async {
+            final uri = Uri.parse(adItem.affiliateUrl);
+            try {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } catch (_) {
+              await launchUrl(uri);
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            child: Row(
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7F5EE),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFECEAE0)),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(adItem.iconEmoji, style: const TextStyle(fontSize: 18)),
+                    ),
+                    Positioned(
+                      top: -3,
+                      left: -3,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 3.5, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF526454),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'AD',
+                          style: TextStyle(
+                            fontSize: 7.5,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              adItem.title,
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF303C33),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            adItem.price,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFFB95D3C),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        adItem.oneLiner,
+                        style: const TextStyle(
+                          fontSize: 9.5,
+                          color: Color(0xFF7A7D71),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF526454),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '특가',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 1),
+                      Icon(Icons.arrow_forward_ios, size: 7.5, color: Colors.white),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 4),
+                InkWell(
+                  onTap: () => setState(() => _isBottomAdVisible = false),
+                  borderRadius: BorderRadius.circular(12),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.close, size: 14, color: Color(0xFFA8AAA0)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screens = [
@@ -1366,43 +1553,52 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
             children: screens,
           ),
         ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        color: Colors.transparent,
-        child: Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFFEFA), // Yeojeong White
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0A333C2F),
-                blurRadius: 16,
-                offset: Offset(0, 4),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildTabBottomAdBanner(),
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              color: Colors.transparent,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFEFA), // Yeojeong White
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x0A333C2F),
+                      blurRadius: 16,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: BottomNavigationBar(
+                    currentIndex: _currentIndex,
+                    onTap: _onTabChanged,
+                    backgroundColor: const Color(0xFFFFFEFA),
+                    elevation: 0,
+                    type: BottomNavigationBarType.fixed,
+                    selectedItemColor: const Color(0xFF526454), // Yeojeong Sage Green
+                    unselectedItemColor: const Color(0xFF969B88), // Yeojeong Muted
+                    selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+                    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
+                    items: const [
+                      BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: '홈'),
+                      BottomNavigationBarItem(icon: Icon(Icons.medication_rounded), label: '복용 정보'),
+                      BottomNavigationBarItem(icon: Icon(Icons.camera_alt_rounded), label: '스캔'),
+                      BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: '의사 Q&A'),
+                      BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: '내 아이'),
+                    ],
+                  ),
+                ),
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(22),
-            child: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: _onTabChanged,
-              backgroundColor: const Color(0xFFFFFEFA),
-              elevation: 0,
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: const Color(0xFF526454), // Yeojeong Sage Green
-              unselectedItemColor: const Color(0xFF969B88), // Yeojeong Muted
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: '홈'),
-                BottomNavigationBarItem(icon: Icon(Icons.medication_rounded), label: '복용 정보'),
-                BottomNavigationBarItem(icon: Icon(Icons.camera_alt_rounded), label: '스캔'),
-                BottomNavigationBarItem(icon: Icon(Icons.assignment_rounded), label: '의사 Q&A'),
-                BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: '내 아이'),
-              ],
             ),
-          ),
+          ],
         ),
       ),
     ),
