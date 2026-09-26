@@ -2142,6 +2142,411 @@ final List<CuratedCareItem> _curatedCareItems = [
   ),
 ];
 
+// ----------------------------------------------------------------------
+// 🌿 우리 아이 안심 복약 & 간호 케어템 공용 위젯 (쿠팡 파트너스 큐레이션)
+// ----------------------------------------------------------------------
+void openCuratedItemDetailModal(BuildContext context, CuratedCareItem item) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFFFFFEFA),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (ctx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD6D6CC),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF7F5EE),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(item.iconEmoji, style: const TextStyle(fontSize: 28)),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEDF0E5),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              item.category,
+                              style: const TextStyle(fontSize: 10.5, color: Color(0xFF526454), fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(item.rating, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFB95D3C))),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.title,
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF303C33)),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '정가 대비 특가 혜택: ${item.price}',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFB95D3C)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // 🩺 소아과/약학 추천 배경
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF4F7F2),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFD7E3CE)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.health_and_safety_outlined, size: 16, color: Color(0xFF526454)),
+                      SizedBox(width: 6),
+                      Text('소아과 전문의 복약 시 권장 이유', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF384B3B))),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    item.clinicalReason,
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF4A554A), height: 1.4),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // 💬 맘카페 실사용자 리뷰 요약
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFBF5),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFF0E5D5)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.thumb_up_alt_outlined, size: 15, color: Color(0xFFB95D3C)),
+                      SizedBox(width: 6),
+                      Text('선배 맘카페 실사용 후기 요약', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF8C3E25))),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    item.parentReview,
+                    style: const TextStyle(fontSize: 11.5, color: Color(0xFF6B4E3D), height: 1.35, fontStyle: FontStyle.italic),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 🚀 쿠팡 파트너스 CTA 버튼
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF526454),
+                foregroundColor: const Color(0xFFFFFEFA),
+                elevation: 0,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+              label: const Text(
+                '쿠팡 최저가 로켓배송 보러가기 🚀',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              onPressed: () async {
+                Navigator.pop(ctx);
+                final uri = Uri.parse(item.affiliateUrl);
+                try {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } catch (_) {
+                  await launchUrl(uri);
+                }
+              },
+            ),
+            const SizedBox(height: 10),
+
+            // 공정위 문구 (법적 필수)
+            const Center(
+              child: Text(
+                '※ 본 추천은 쿠팡 파트너스 활동의 일환으로 일정액의 수수료를 제공받을 수 있으며,\n구매자에게 추가 비용은 전혀 발생하지 않습니다.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 10, color: Color(0xFF969B88), height: 1.3),
+              ),
+            ),
+            const SizedBox(height: 6),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class CuratedCareItemsSection extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String badgeText;
+
+  const CuratedCareItemsSection({
+    super.key,
+    this.title = '🌿 안심 복약 & 육아 케어 필수템',
+    this.subtitle = '복약 스트레스는 줄이고 아이의 빠른 회복을 돕는 검증된 케어템',
+    this.badgeText = '소아과 추천',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF303C33),
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEDF0E5),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    badgeText,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF526454),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFAF2EE),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: const Color(0xFFF0DDD7)),
+              ),
+              child: const Text(
+                '쿠팡 제휴 큐레이션',
+                style: TextStyle(
+                  fontSize: 9.5,
+                  color: Color(0xFFB95D3C),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: const TextStyle(fontSize: 11, color: Color(0xFF7A7D71)),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 175,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            itemCount: _curatedCareItems.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final item = _curatedCareItems[index];
+              return InkWell(
+                onTap: () => openCuratedItemDetailModal(context, item),
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  width: 215,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFEFA),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x06333C2F),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEDF0E5),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  item.category,
+                                  style: const TextStyle(
+                                    fontSize: 9.5,
+                                    color: Color(0xFF526454),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                item.rating,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Color(0xFFB95D3C),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF7F5EE),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: const Color(0xFFE7E6DC)),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(item.iconEmoji, style: const TextStyle(fontSize: 20)),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  item.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                    color: Color(0xFF303C33),
+                                    height: 1.2,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            item.tag,
+                            style: const TextStyle(
+                              fontSize: 10.5,
+                              color: Color(0xFF7A7D71),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F6F1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFECEAE0)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              item.price,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF303C33),
+                              ),
+                            ),
+                            const Row(
+                              children: [
+                                Text(
+                                  '추천보기',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF526454),
+                                  ),
+                                ),
+                                SizedBox(width: 2),
+                                Icon(Icons.arrow_forward_ios, size: 8, color: Color(0xFF526454)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _HomeScreenState extends State<HomeScreen> {
   late List<_TodayDoseItem> _doses;
   // ARCH-01: childId + doseId 기반 다자녀 복약 완료 상태 격리 저장소
@@ -4563,391 +4968,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // 🌿 우리 아이 안심 복약 & 간호 케어템 (쿠팡 파트너스 큐레이션 위젯)
   // ----------------------------------------------------------------------
   Widget _buildCuratedCareItemsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                const Text(
-                  '🌿 안심 복약 & 육아 케어 필수템',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF303C33),
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEDF0E5),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    '소아과 추천',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Color(0xFF526454),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFAF2EE),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: const Color(0xFFF0DDD7)),
-              ),
-              child: const Text(
-                '쿠팡 제휴 큐레이션',
-                style: TextStyle(
-                  fontSize: 9.5,
-                  color: Color(0xFFB95D3C),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          '복약 스트레스는 줄이고 아이의 빠른 회복을 돕는 검증된 케어템',
-          style: TextStyle(fontSize: 11, color: Color(0xFF7A7D71)),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 175,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            itemCount: _curatedCareItems.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final item = _curatedCareItems[index];
-              return InkWell(
-                onTap: () => _openCuratedItemDetailModal(context, item),
-                borderRadius: BorderRadius.circular(18),
-                child: Container(
-                  width: 215,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFEFA),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x06333C2F),
-                        blurRadius: 8,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEDF0E5),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  item.category,
-                                  style: const TextStyle(
-                                    fontSize: 9.5,
-                                    color: Color(0xFF526454),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                item.rating,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Color(0xFFB95D3C),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF7F5EE),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: const Color(0xFFE7E6DC)),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(item.iconEmoji, style: const TextStyle(fontSize: 20)),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  item.title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 12,
-                                    color: Color(0xFF303C33),
-                                    height: 1.2,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            item.tag,
-                            style: const TextStyle(
-                              fontSize: 10.5,
-                              color: Color(0xFF7A7D71),
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F6F1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFECEAE0)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              item.price,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF303C33),
-                              ),
-                            ),
-                            const Row(
-                              children: [
-                                Text(
-                                  '추천보기',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF526454),
-                                  ),
-                                ),
-                                SizedBox(width: 2),
-                                Icon(Icons.arrow_forward_ios, size: 8, color: Color(0xFF526454)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _openCuratedItemDetailModal(BuildContext context, CuratedCareItem item) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFFFFFEFA),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD6D6CC),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF7F5EE),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE7E6DC), width: 1.2),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(item.iconEmoji, style: const TextStyle(fontSize: 28)),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEDF0E5),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                item.category,
-                                style: const TextStyle(fontSize: 10.5, color: Color(0xFF526454), fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(item.rating, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFB95D3C))),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.title,
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF303C33)),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '정가 대비 특가 혜택: ${item.price}',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFB95D3C)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // 🩺 소아과/약학 추천 배경
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4F7F2),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFFD7E3CE)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.health_and_safety_outlined, size: 16, color: Color(0xFF526454)),
-                        SizedBox(width: 6),
-                        Text('소아과 전문의 복약 시 권장 이유', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF384B3B))),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      item.clinicalReason,
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF4A554A), height: 1.4),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // 💬 맘카페 실사용자 리뷰 요약
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBF5),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFFF0E5D5)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.thumb_up_alt_outlined, size: 15, color: Color(0xFFB95D3C)),
-                        SizedBox(width: 6),
-                        Text('선배 맘카페 실사용 후기 요약', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF8C3E25))),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      item.parentReview,
-                      style: const TextStyle(fontSize: 11.5, color: Color(0xFF6B4E3D), height: 1.35, fontStyle: FontStyle.italic),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // 🚀 쿠팡 파트너스 CTA 버튼
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF526454),
-                  foregroundColor: const Color(0xFFFFFEFA),
-                  elevation: 0,
-                  minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                icon: const Icon(Icons.shopping_bag_outlined, size: 18),
-                label: const Text(
-                  '쿠팡 최저가 로켓배송 보러가기 🚀',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  final uri = Uri.parse(item.affiliateUrl);
-                  try {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  } catch (_) {
-                    await launchUrl(uri);
-                  }
-                },
-              ),
-              const SizedBox(height: 10),
-
-              // 공정위 문구 (법적 필수)
-              const Center(
-                child: Text(
-                  '※ 본 추천은 쿠팡 파트너스 활동의 일환으로 일정액의 수수료를 제공받을 수 있으며,\n구매자에게 추가 비용은 전혀 발생하지 않습니다.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 10, color: Color(0xFF969B88), height: 1.3),
-                ),
-              ),
-              const SizedBox(height: 6),
-            ],
-          ),
-        ),
-      ),
-    );
+    return const CuratedCareItemsSection();
   }
 
   Widget _buildTimelineCard(_TodayDoseItem dose) {
@@ -7679,6 +7700,9 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
           ),
           onPressed: _shareDoctorQuestions,
         ),
+        const SizedBox(height: 28),
+        const CuratedCareItemsSection(),
+        const SizedBox(height: 24),
       ],
     );
   }
