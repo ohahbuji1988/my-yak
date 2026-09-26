@@ -1315,14 +1315,15 @@ class _MainFigmaScreenState extends State<MainFigmaScreen> {
     }
     switch (tabIndex) {
       case 0:
-        return _curatedCareItems[0];
+        return _curatedCareItems[0]; // 아가드 실리콘 투약기
       case 1:
-        return _curatedCareItems[2 % _curatedCareItems.length];
+        return _curatedCareItems[2]; // 락토핏 유산균
       case 2:
-        return _curatedCareItems[1 % _curatedCareItems.length];
+        return _curatedCareItems[7]; // 약 먹이는 안심 젤리
       case 3:
-        return _curatedCareItems[3 % _curatedCareItems.length];
+        return _curatedCareItems[4]; // 실리콘 안심 투약병
       case 4:
+        return _curatedCareItems[5]; // 식염수 물티슈
       default:
         return _curatedCareItems[0];
     }
@@ -2140,6 +2141,76 @@ final List<CuratedCareItem> _curatedCareItems = [
     parentReview: '"코 막혀서 숨 쌕쌕거리며 깨던 아기가 칙 뿌려주고 나면 뚫려서 아침까지 푹 잡니다."',
     affiliateUrl: 'https://link.coupang.com/a/hkXvMWzGz6',
   ),
+  const CuratedCareItem(
+    id: 'silicone_bottle',
+    title: '말랑말랑 실리콘 안심 투약병 세트',
+    category: '초저가 소모품',
+    price: '4,900원 (로켓배송)',
+    rating: '★ 4.9 (4,120+)',
+    tag: '어린이집 등원 필수',
+    iconEmoji: '🧴',
+    oneLiner: '열탕 소독 가능 · 미세 용량 눈금 실리콘 안심 약병',
+    clinicalReason: '일반 플라스틱 약병과 달리 BPA-free 실리콘으로 세척 및 열탕 소독이 가능해 미생물 번식을 방지하고 부드럽게 짤 수 있습니다.',
+    parentReview: '"딱딱한 플라스틱 약병은 아이 잇몸 다칠까 봐 불안했는데, 실리콘이라 말랑하고 씻기도 너무 편해요."',
+    affiliateUrl: 'https://link.coupang.com/a/hkYOHH8eS4',
+  ),
+  const CuratedCareItem(
+    id: 'saline_tissue',
+    title: '코 헐지 않는 콧물 전용 식염수 물티슈',
+    category: '환절기 감기 케어',
+    price: '4,200원 (로켓배송)',
+    rating: '★ 4.9 (7,280+)',
+    tag: '피부 자극 0% 안심',
+    iconEmoji: '🤧',
+    oneLiner: '생리식염수 성분 함유 · 잦은 콧물 닦기에도 무자극',
+    clinicalReason: '감기 시 잦은 마찰로 콧망울 피부가 짓무르거나 상처가 나기 쉽습니다. 천연 식염수 티슈로 부드럽게 닦아 피부 장벽을 보호합니다.',
+    parentReview: '"일반 물티슈로 닦으면 따갑다고 난리 치던 아이가 이건 시원하다고 얌전히 닦아요!"',
+    affiliateUrl: 'https://link.coupang.com/a/hkY70X2bQW',
+  ),
+  const CuratedCareItem(
+    id: 'reward_candy',
+    title: '약 복용 칭찬용 뽀로로 비타민 C 캔디',
+    category: '복약 보상 1위',
+    price: '3,500원 (로켓배송)',
+    rating: '★ 4.9 (12,300+)',
+    tag: '약 먹이기 성공 치트키',
+    iconEmoji: '🍬',
+    oneLiner: '소아과 공식 칭찬 사탕 · 개별 포장 비타민 C 캔디',
+    clinicalReason: '쓴 약을 삼킨 직후 적절한 긍정적 보상(칭찬 캔디)은 뇌의 조건 반사를 형성하여 복약 거부 행동을 빠르게 개선합니다.',
+    parentReview: '"약 먹을 때마다 전쟁이었는데, \'약 먹고 뽀로로 사탕 먹자\' 한마디에 꿀꺽 잘 먹어요."',
+    affiliateUrl: 'https://link.coupang.com/a/hkZapBdRT2',
+  ),
+  const CuratedCareItem(
+    id: 'medicine_jelly',
+    title: '약 거부 해결 약 먹이는 안심 젤리',
+    category: '가루약·항생제 구원템',
+    price: '6,500원 (로켓배송)',
+    rating: '★ 4.9 (3,950+)',
+    tag: '가루약 쓴맛 완벽 차단',
+    iconEmoji: '🍮',
+    oneLiner: '물 없이 가루약 감싸 삼키는 오브라트 포도/딸기 젤리',
+    clinicalReason: '쓴 항생제나 가루약을 젤리 안에 감싸서 혀의 미뢰에 직접 닿지 않게 하여 쓴맛과 목 넘김 거부감을 원천 차단합니다.',
+    parentReview: '"항생제 냄새 맡고 헛구역질하던 아이인데 젤리에 섞어주니 디저트 먹듯 꿀꺽 먹네요. 진짜 신세계!"',
+    affiliateUrl: 'https://link.coupang.com/a/hkZlJFQ1cW',
+  ),
+];
+
+// 🌿 홈 화면 추천 4종 (가정 내 복약 & 해열 & 유산균 케어)
+// 🍼 아가드 투약기 + 🍮 약 먹이는 안심 젤리 + ❄️ 열냉각패치 + 🛡️ 락토핏 유산균
+final List<CuratedCareItem> _homeCuratedCareItems = [
+  _curatedCareItems[0], // 아가드 실리콘 투약기 세트
+  _curatedCareItems[7], // 약 거부 해결 약 먹이는 안심 젤리
+  _curatedCareItems[1], // 어린이 안심 열냉각패치
+  _curatedCareItems[2], // 락토핏 베베 생유산균
+];
+
+// 🩺 의사 Q&A 화면 추천 4종 (소아과 진료 & 외출 가방 & 콧물/칭찬 보상)
+// 🧴 실리콘 투약병 + 💧 피지오머 비강 스프레이 + 🤧 식염수 물티슈 + 🍬 뽀로로 칭찬 사탕
+final List<CuratedCareItem> _doctorQnaCuratedCareItems = [
+  _curatedCareItems[4], // 말랑말랑 실리콘 안심 투약병 세트
+  _curatedCareItems[3], // 피지오머 베이비 비강세척 스프레이
+  _curatedCareItems[5], // 코 헐지 않는 콧물 전용 식염수 물티슈
+  _curatedCareItems[6], // 약 복용 칭찬용 뽀로로 비타민 C 캔디
 ];
 
 // ----------------------------------------------------------------------
@@ -2326,16 +2397,19 @@ class CuratedCareItemsSection extends StatelessWidget {
   final String title;
   final String subtitle;
   final String badgeText;
+  final List<CuratedCareItem>? items;
 
   const CuratedCareItemsSection({
     super.key,
     this.title = '🌿 안심 복약 & 육아 케어 필수템',
     this.subtitle = '복약 스트레스는 줄이고 아이의 빠른 회복을 돕는 검증된 케어템',
     this.badgeText = '소아과 추천',
+    this.items,
   });
 
   @override
   Widget build(BuildContext context) {
+    final displayItems = items ?? _curatedCareItems;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2400,10 +2474,10 @@ class CuratedCareItemsSection extends StatelessWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
-            itemCount: _curatedCareItems.length,
+            itemCount: displayItems.length,
             separatorBuilder: (context, index) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
-              final item = _curatedCareItems[index];
+              final item = displayItems[index];
               return InkWell(
                 onTap: () => openCuratedItemDetailModal(context, item),
                 borderRadius: BorderRadius.circular(18),
@@ -4968,7 +5042,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // 🌿 우리 아이 안심 복약 & 간호 케어템 (쿠팡 파트너스 큐레이션 위젯)
   // ----------------------------------------------------------------------
   Widget _buildCuratedCareItemsSection() {
-    return const CuratedCareItemsSection();
+    return CuratedCareItemsSection(
+      items: _homeCuratedCareItems,
+    );
   }
 
   Widget _buildTimelineCard(_TodayDoseItem dose) {
@@ -7701,7 +7777,12 @@ class _DoctorQnaScreenState extends State<DoctorQnaScreen> {
           onPressed: _shareDoctorQuestions,
         ),
         const SizedBox(height: 28),
-        const CuratedCareItemsSection(),
+        CuratedCareItemsSection(
+          title: '🩺 소아과 방문 & 안심 복약 필수템',
+          subtitle: '병원 진료 및 처방약 복약 시 챙겨두면 든든한 필수 아이템',
+          badgeText: '진료 준비',
+          items: _doctorQnaCuratedCareItems,
+        ),
         const SizedBox(height: 24),
       ],
     );
