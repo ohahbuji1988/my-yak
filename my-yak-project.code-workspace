@@ -1,0 +1,34 @@
+{
+	"folders": [
+		{
+			"path": "../my-yak-project"
+		},
+		{
+			"path": "../my_yak_app"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../KidSpot"
+		},
+		{
+			"path": "../.gemini/antigravity/scratch/api-usage-tracker"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/build/**": true,
+			"**/.dart_tool/**": true
+		},
+		"search.exclude": {
+			"**/build/**": true,
+			"**/.dart_tool/**": true
+		},
+		"javascript.validate.enable": false,
+		"typescript.validate.enable": false,
+		"dart.analysisExcludedFolders": [
+			"build"
+		]
+	}
+}

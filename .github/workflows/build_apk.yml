@@ -1,4 +1,4 @@
-name: Build Android APK (갤럭시 설치 파일)
+name: Build Kidipedia Android APK
 
 on:
   push:
@@ -37,23 +37,23 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: my-yak-android-apk
+          name: kidipedia-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: Publish Latest APK to GitHub Releases (원클릭 직접 다운로드)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "v1.0.0"
-          name: "My 약 (My Yak) 최신 APK 설치 파일"
+          tag_name: "v1.1.0"
+          name: "Kidipedia (키디피디아) 최신 안드로이드 APK 설치 파일"
           body: |
-            ### 📱 My 약 (My Yak) 안드로이드(갤럭시) 설치 파일
+            ### 📱 Kidipedia (키디피디아) 안드로이드(갤럭시) 설치 파일
             
             - **파일:** `app-release.apk`
             - **설치 방법:**
               1. 아래 **Assets**에서 `app-release.apk`를 스마트폰(갤럭시) 브라우저에서 직접 터치하여 다운로드합니다.
               2. 다운로드 완료 후 파일을 열어 **[설치]**를 진행합니다.
                  *(출처를 알 수 없는 앱 설치 경고가 뜰 경우 '이번에만 허용' 또는 '무시하고 설치' 선택)*
-              3. 앱 실행 후 프로필과 복약 관리를 시작하세요!
+              3. 앱 실행 후 우리아이 안심 복약 수첩을 시작하세요!
           files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

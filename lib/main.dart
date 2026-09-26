@@ -487,7 +487,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                       border: Border.all(color: const Color(0xFFE2D6C3)),
                     ),
                     child: const Text(
-                      '세이지 & 아이보리',
+                      '소아 전문 안심 수첩',
                       style: TextStyle(color: Color(0xFF81745F), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.2),
                     ),
                   ),
@@ -572,7 +572,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
               ),
               const SizedBox(height: 6),
               const Text(
-                '병원 처방전 한 장으로 체중별 정밀 용량 검증과 중복처방 DUR 점검, 소아과 안심 질문지까지 정갈하게 기록합니다.',
+                '병원 처방전 한 장으로 체중별 정밀 용량 검증과 식약처 안전 기준(중복·연령금기) 점검, 소아과 안심 질문지까지 정갈하게 기록합니다.',
                 style: TextStyle(
                   color: Color(0xFF68705F),
                   fontSize: 13,
@@ -755,7 +755,7 @@ class _WelcomeCoverScreenState extends State<WelcomeCoverScreen> {
                       cardBg: const Color(0xFFEDF0E5), // Sage
                       title: '체중 ${_currentChild.weightKg}kg 소아 맞춤 용량 검증',
                       desc: '0.1kg 단위 정밀 계산으로 과다·과소 투약 사고 원천 방지',
-                      badge: 'DUR 가드레일',
+                      badge: '안심 복약 가드레일',
                       badgeColor: const Color(0xFF526454),
                     ),
                     const SizedBox(height: 10),
@@ -1654,85 +1654,270 @@ class _TodayDoseItem {
 }
 
 class _PediatricNewsItem {
+  final String id;
   final String title;
+  final String summary;
   final String content;
+  final String practicalTip;
   final String date;
   final String source;
+  final String category; // '소아과 칼럼', '약사 꿀팁', '육아 공감', '보건 뉴스'
+  final String categoryEmoji; // 🩺, 💊, 👶, 📰
+  final String author;
+  final int minMonths;
+  final int maxMonths;
+  final String readTime;
 
   const _PediatricNewsItem({
+    required this.id,
     required this.title,
+    required this.summary,
     required this.content,
+    required this.practicalTip,
     required this.date,
     required this.source,
+    required this.category,
+    required this.categoryEmoji,
+    required this.author,
+    this.minMonths = 0,
+    this.maxMonths = 156,
+    this.readTime = '1분 완독',
   });
 }
 
-List<_PediatricNewsItem> _getPediatricNewsList(MemberProfile profile) {
-  final months = profile.ageMonths ?? 10;
-  if (months < 12) {
-    return const [
-      _PediatricNewsItem(
-        title: '영유아 RS바이러스(RSV) 유행 대비 항체주사(베이포투스) 권고',
-        content: '가을·겨울철 영아 모세기관지염·폐렴 급증에 대비해 장기 지속형 RSV 예방 항체주사 접종이 권고됩니다. 발열과 쌕쌕거림(천명) 관찰 시 소아과 진료를 서두르세요.',
-        date: '09.18',
-        source: '질병관리청 & 대한소아청소년과학회',
-      ),
-      _PediatricNewsItem(
-        title: '생후 6개월 이상 영유아 인플루엔자(독감) 국가 무료 접종 개시',
-        content: '생후 6개월부터 만 13세 아동을 대상으로 2026-2027절기 4가 독감 무료 백신 접종이 시작되었습니다. 유행 전 사전 접종을 권장합니다.',
-        date: '09.20',
-        source: '질병관리청 예방접종관리과',
-      ),
-      _PediatricNewsItem(
-        title: '환절기 신생아·영아 급성 바이러스 장염 주의 당부',
-        content: '일교차가 큰 시기 로타·노로바이러스 등 장염 감염에 유의하세요. 수유기구 소독 및 기저귀 교환 후 손씻기, 탈수 징후를 면밀히 관찰해야 합니다.',
-        date: '09.14',
-        source: '대한소아감염학회',
-      ),
-    ];
-  } else if (months <= 36) {
-    return const [
-      _PediatricNewsItem(
-        title: '어린이 인플루엔자(독감) 국가 무료 예방접종 시행 안내',
-        content: '생후 6개월~만 13세 이하 어린이를 대상으로 2026-2027절기 4가 인플루엔자 무료 백신 접종이 개시되었습니다. 단체생활 중 마이코플라스마 및 호흡기 감염에 유의하세요.',
-        date: '09.20',
-        source: '질병관리청 예방접종관리과',
-      ),
-      _PediatricNewsItem(
-        title: '소아 마이코플라스마 폐렴 및 백일해 유행 주의보',
-        content: '3주 이상 지속되는 발작성 기침이나 야간 기침 심화 시 소아과 감별 진료를 권장합니다. 가족 간 감염 차단을 위해 마스크 착용이 권고됩니다.',
-        date: '09.16',
-        source: '질병관리청 감염병포털',
-      ),
-      _PediatricNewsItem(
-        title: '어린이집 등 보육시설 내 유아 수족구병 예방 수칙',
-        content: '손발 수포 및 입안 궤양 증상이 나타나면 등원을 중단하고 자택 격리 치료를 권고합니다. 탈수 예방을 위해 차가운 물과 부드러운 음식을 섭취해 주세요.',
-        date: '09.12',
-        source: '대한소아청소년과학회',
-      ),
-    ];
-  } else {
-    return const [
-      _PediatricNewsItem(
-        title: '가을철 소아 호흡기 감염병(마이코플라스마·독감) 예방 수칙',
-        content: '어린이집·유치원 등 단체생활 아동 중심의 발열성 기침 환자가 증가하고 있습니다. 4가 독감 접종 완료와 함께 올바른 손씻기 및 기침 예절을 지도해 주세요.',
-        date: '09.20',
-        source: '질병관리청 감염병포털 & 대한소아감염학회',
-      ),
-      _PediatricNewsItem(
-        title: '환절기 소아 알레르기 비염 및 아토피 피부염 관리 지침',
-        content: '아침저녁 10도 이상 벌어지는 기온차에 대비해 실내 습도 50~60% 유지와 보습제 도포가 권장됩니다. 처방받은 비염 스프레이나 항히스타민제는 정해진 용법을 준수하세요.',
-        date: '09.17',
-        source: '대한소아알레르기호흡기학회',
-      ),
-      _PediatricNewsItem(
-        title: '야간 소아 고열 및 열성경련 시 가정 응급 대처법',
-        content: '열이 급격히 오를 때 옷을 얇게 입히고 미온수로 몸을 닦아주세요. 경련 발생 시 입에 물건을 물리지 말고 고개를 옆으로 돌려 기도를 확보한 뒤 시간을 측정하세요.',
-        date: '09.10',
-        source: '대한응급의학회 소아분과',
-      ),
-    ];
+final List<_PediatricNewsItem> _allPediatricNewsItems = [
+  // 1. 소아과 칼럼 (영아)
+  const _PediatricNewsItem(
+    id: 'news_1',
+    title: '생후 첫 고열 38.5도 넘을 때: 소아과 의사가 알려주는 해열제 교차복용 골든타임',
+    summary: '아세트아미노펜과 이부프로펜 교차 간격과 체온 측정 부위별 팩트체크',
+    content: '생후 3개월 이후 아기에게 갑작스러운 고열이 찾아오면 초보 부모는 당황하기 쉽습니다. 열 자체가 병이 아니라 면역 반응이지만, 38.5도 이상이고 아기가 처지면 해열제를 복용해야 합니다.\n\n아세트아미노펜(타이레놀/챔프 빨강)은 생후 4개월부터 가능하며 4~6시간 간격으로 투약합니다. 같은 계열은 최소 4시간, 다른 계열(이부프로펜/덱시부프로펜)과의 교차 복용은 최소 2시간 간격을 둡니다.\n\n단, 생후 3개월 미만 영아의 38도 이상 발열은 패혈증 등 중증 감염 가능성이 있으므로 해열제를 먹이기 전 즉시 소아응급실로 가야 합니다.',
+    practicalTip: '• 해열제 투약 후 30분~1시간 뒤 체온 재측정\n• 열이 안 떨어진다고 1시간 만에 또 주지 않기 (간 손상 위험)\n• 오한기(손발 차가움)에는 덮어주고, 발열기에는 얇은 옷 입히기',
+    date: '09.25',
+    source: '하정훈 삐뽀삐뽀119 & 소아청소년과 칼럼',
+    category: '소아과 칼럼',
+    categoryEmoji: '🩺',
+    author: '하정훈 소아청소년과 전문의',
+    minMonths: 0,
+    maxMonths: 24,
+    readTime: '2분 완독',
+  ),
+  // 2. 약사 꿀팁 (영아)
+  const _PediatricNewsItem(
+    id: 'news_2',
+    title: '쓴 시럽약, 분유나 모유에 타서 먹여도 될까? 약사 엄마의 팩트체크',
+    summary: '분유 거부증 유발 위험과 약 흡수율 저하를 막는 올바른 영아 투약법',
+    content: '아이가 약을 먹지 않는다고 젖병 분유에 약을 섞어 먹이는 부모님들이 많습니다. 하지만 이는 절대 피해야 합니다!\n\n첫째, 분유 맛이 변해 아이가 평생 분유나 수유 자체를 거부할 수 있습니다.\n둘째, 분유를 다 먹지 못하고 남기면 정확한 약 용량을 알 수 없습니다.\n셋째, 칼슘 등 분유 미네랄이 특정 항생제의 흡수를 방해할 수 있습니다.\n\n가장 좋은 방법은 수유 전(배고플 때) 투약기나 주사기로 혀뿌리 안쪽이나 볼 안쪽으로 소량씩 천천히 밀어 넣어 삼키게 하는 것입니다.',
+    practicalTip: '• 젖꼭지나 실리콘 투약기 활용해 삼킴 반사 유도\n• 눕혀서 먹이면 사레들려 기도로 넘어갈 수 있으니 상체 45도 세우기\n• 약을 먹인 뒤 분유나 미온수로 입가심 보상',
+    date: '09.24',
+    source: '약사 엄마의 안심 육아 복약 지도',
+    category: '약사 꿀팁',
+    categoryEmoji: '💊',
+    author: '김지현 소아전문약사',
+    minMonths: 0,
+    maxMonths: 18,
+    readTime: '1분 완독',
+  ),
+  // 3. 보건 뉴스 (영아/환절기)
+  const _PediatricNewsItem(
+    id: 'news_3',
+    title: '환절기 영유아 RS바이러스(RSV) 유행 대비 항체주사(베이포투스) 국가 권고',
+    summary: '가을·겨울철 급증하는 모세기관지염·폐렴 예방을 위한 신규 항체주사 가이드',
+    content: '질병관리청과 대한소아청소년과학회는 일교차가 커지는 9~10월부터 이듬해 3월까지 유행하는 RSV(호흡기세포융합바이러스)에 대한 주의를 당부했습니다.\n\n특히 1세 미만 영아는 기관지가 좁아 RSV 감염 시 쌕쌕거림(천명)과 호흡곤란, 모세기관지염으로 입원율이 높습니다.\n\n최근 승인된 장기 지속형 RSV 예방 항체주사(베이포투스)는 1회 투여로 5개월간 예방 효과를 보입니다. 콧물, 기침과 함께 숨 쉴 때 갈비뼈가 쏙쏙 들어가는 호흡 곤란 징후가 보이면 지체 없이 소아과를 방문하세요.',
+    practicalTip: '• 생후 첫 가을을 맞은 영아는 RSV 예방 상담 권고\n• 외출 후 손 씻기 및 어른들의 뽀뽀 자제\n• 실내 습도 50~60% 유지로 호흡기 점막 보호',
+    date: '09.22',
+    source: '질병관리청 & 베이비뉴스',
+    category: '보건 뉴스',
+    categoryEmoji: '📰',
+    author: '보건복지부 출입기자',
+    minMonths: 0,
+    maxMonths: 24,
+    readTime: '2분 완독',
+  ),
+  // 4. 육아 공감 (영아/야간 간호)
+  const _PediatricNewsItem(
+    id: 'news_4',
+    title: '새벽 2시, 열나는 아기 앞에서 멘탈 지키는 엄마아빠 실전 체크리스트',
+    summary: '밤샘 체온 간호로 지치지 않는 맘카페 선배들의 꿀팁과 체온 기록법',
+    content: '아기가 아프면 엄마 아빠는 죄책감과 불안감에 뜬눈으로 밤을 지새우게 됩니다. 하지만 부모가 지치면 아이를 제대로 간호할 수 없습니다.\n\n열이 날 때 부모가 번갈아 가며 3시간씩 교대로 자는 수면 교대제를 도입해보세요.\n\n체온계는 한 가지 브랜드로 통일해서 귀 체온계나 이마 체온계 오차를 줄이고, 복약 수첩 앱에 투약 시간과 체온을 1초 만에 기록해두면 새벽에 잠결에도 중복 투약을 완벽히 막을 수 있습니다.',
+    practicalTip: '• 부부 교대 간호 스케줄 정하기\n• 열 패치는 해열제가 아니므로 보조 쿨링으로만 활용\n• 아이 컨디션(수유량, 소변 기저귀 개수)이 가장 중요한 지표',
+    date: '09.20',
+    source: '네이버 파워 육아블로그 (도윤맘의 육아일기)',
+    category: '육아 공감',
+    categoryEmoji: '👶',
+    author: '선배맘 멘토링',
+    minMonths: 0,
+    maxMonths: 36,
+    readTime: '1분 완독',
+  ),
+  // 5. 소아과 칼럼 (유아기 - 28개월 등)
+  const _PediatricNewsItem(
+    id: 'news_5',
+    title: '항생제 처방 3일 치 vs 7일 치, 증상 나아졌다고 끊으면 안 되는 진짜 이유',
+    summary: '내성균 발생과 중이염·축농증 재발을 부르는 조기 중단의 위험성',
+    content: '소아과에서 누런 콧물이나 중이염, 기관지염으로 항생제(아모클란, 세파클러 등)를 처방받으면, 복용 2~3일 만에 열이 내리고 기침이 잦아듭니다.\n\n이때 부모님들은 "약이 독할 텐데 이제 안 먹여도 되지 않을까?" 하고 임의로 중단하는 경우가 많습니다. 그러나 이것이 바로 항생제 내성균을 키우고 만성 중이염으로 재발시키는 가장 큰 원인입니다.\n\n균이 완전히 박멸되지 않은 상태에서 약을 끊으면 살아남은 균들이 내성을 획득하여 다음엔 더 강한 항생제를 써야 합니다. 의사가 처방한 일수(보통 5~7일)는 끝까지 완복해야 합니다.',
+    practicalTip: '• 열이 내려도 처방받은 날짜까지 다 먹이기\n• 설사나 묽은 변 시 유산균 2시간 시차 복용\n• 발진이나 알레르기 발생 시에만 즉시 중단 후 의사 상담',
+    date: '09.26',
+    source: '하정훈 삐뽀삐뽀119 & 소아청소년과학회',
+    category: '소아과 칼럼',
+    categoryEmoji: '🩺',
+    author: '소아청소년과 전문의',
+    minMonths: 6,
+    maxMonths: 84,
+    readTime: '2분 완독',
+  ),
+  // 6. 약사 꿀팁 (유아기 - 투약 거부)
+  const _PediatricNewsItem(
+    id: 'news_6',
+    title: '가루약 뱉고 울부짖을 때: 약과 섞어도 되는 음식 vs 절대 안 되는 음식',
+    summary: '요거트, 젤리, 잼, 아이스크림... 약사 엄마가 정리한 음식별 궁합표',
+    content: '돌이 지나 자아가 생기면 약 먹이기 전쟁이 시작됩니다. 쓴맛을 감추기 위해 다양한 음식에 섞게 되는데, 음식 궁합을 알아야 합니다.\n\n[섞어도 좋은 음식]: 딸기잼, 올리고당, 초코시럽, 과일맛 약 전용 젤리(오브라트 젤리), 바닐라 아이스크림 소량.\n\n[피해야 할 음식]:\n1) 우유/분유 - 특정 항생제 흡수 방해 및 수유 거부 유발.\n2) 자몽/오렌지 주스 - 산성도가 높아 약 코팅을 벗기거나 간 대사 효소 방해.\n3) 꿀 - 돌 전 영아는 보툴리누스 식중독 위험.\n\n특히 클래리시드 같은 쓴맛 코팅 항생제는 산성 음료에 닿으면 코팅이 녹아 쓴맛이 10배 폭발하므로 단맛 시럽이나 젤리에 감싸야 합니다.',
+    practicalTip: '• 약을 섞을 때는 한 숟가락 분량에만 섞어 원샷 유도\n• 쓴 약 복용 후 좋아하는 과자나 칭찬 캔디로 즉시 보상\n• 약을 절대 "달콤한 사탕이야"라고 속이지 말고 정직하게 설명',
+    date: '09.25',
+    source: '약사 엄마의 안심 팩트체크',
+    category: '약사 꿀팁',
+    categoryEmoji: '💊',
+    author: '이서연 소아전문약사',
+    minMonths: 10,
+    maxMonths: 84,
+    readTime: '2분 완독',
+  ),
+  // 7. 육아 공감 (어린이집 투약의뢰서)
+  const _PediatricNewsItem(
+    id: 'news_7',
+    title: '어린이집 등원 후 첫 감기 유목민: 투약의뢰서에 꼭 써야 할 3가지',
+    summary: '선생님도 편하고 아이도 안심되는 어린이집 안전 투약 에티켓',
+    content: '어린이집에 처음 등원하면 1년 내내 감기를 달고 산다고 해도 과언이 아닙니다. 매일 아침 어린이집 키즈노트에 투약의뢰서를 작성할 때 반드시 포함해야 할 3가지가 있습니다.\n\n1) 약 1회 정량과 점심 복용 시간 (예: 점심 식후 12:30, 4.5ml).\n2) 보관 조건 (냉장 보관 항생제 여부 - 빨간 스티커 표기).\n3) 투약 거부 시 대처법 (실리콘 약병 동봉, 약 먹은 후 비타민 사탕 허용 여부).\n\n약병에는 반드시 네임펜으로 아이 이름과 1회 용량을 크게 적어 보내야 다른 아이의 약과 뒤바뀌는 투약 사고를 예방할 수 있습니다.',
+    practicalTip: '• 1회분만 덜어서 밀폐 지퍼백에 이름 써서 보내기\n• 가루약과 시럽약은 섞지 말고 먹이기 직전 교사가 타도록 안내\n• 해열제는 상비용으로 가방에 넣고 최고 체온 기준 명시',
+    date: '09.23',
+    source: '맘스홀릭 베스트 육아 칼럼',
+    category: '육아 공감',
+    categoryEmoji: '👶',
+    author: '어린이집 주임교사 & 육아맘',
+    minMonths: 12,
+    maxMonths: 60,
+    readTime: '1분 완독',
+  ),
+  // 8. 보건 뉴스 (독감 & 마이코플라스마)
+  const _PediatricNewsItem(
+    id: 'news_8',
+    title: '올가을 어린이 인플루엔자(독감) 무료 접종 개시 및 마이코플라스마 동시 유행',
+    summary: '생후 6개월~만 13세 대상 4가 백신 일정과 환절기 호흡기 복합 감염 주의보',
+    content: '질병관리청은 2026-2027절기 어린이 인플루엔자 국가 무료 예방접종을 본격 개시했습니다. 특히 이번 가을은 마이코플라스마 폐렴과 백일해, 코로나19가 복합 유행하고 있어 조기 면역 형성이 필수적입니다.\n\n생애 첫 접종 아동은 4주 간격 2회 접종, 과거 접종 이력이 있는 아동은 1회 접종을 받으면 됩니다.\n\n접종 당일에는 무리한 야외활동을 피하고 목욕은 가볍게 하거나 피하는 것이 좋습니다.',
+    practicalTip: '• 감기 기운이나 열이 없을 때 컨디션 좋은 날 오전에 접종\n• 접종 후 20~30분간 병원 대기하며 급성 알레르기 관찰\n• 접종열 대비 아세트아미노펜 해열제 상비',
+    date: '09.21',
+    source: '질병관리청 감염병포털 & 헬스조선',
+    category: '보건 뉴스',
+    categoryEmoji: '📰',
+    author: '보건복지부 출입기자',
+    minMonths: 6,
+    maxMonths: 156,
+    readTime: '2분 완독',
+  ),
+  // 9. 소아과 칼럼 (비강 세척)
+  const _PediatricNewsItem(
+    id: 'news_9',
+    title: '밤마다 코막힘으로 깨서 우는 아이, 비강 식염수 세척 이렇게 하세요',
+    summary: '중이염 예방과 수면 질 향상을 돕는 소아이비인후과 전문의 가이드',
+    content: '감기약 시럽을 먹여도 밤만 되면 코가 막혀 입으로 숨 쉬다 30분마다 깨서 우는 아이들이 많습니다.\n\n소아는 이관(유스타키오관)이 짧고 수평에 가까워 콧물이 고이면 곧바로 급성 중이염으로 번지기 쉽습니다. 이때 가장 안전하고 즉각적인 해결책은 멸균 생리식염수 스프레이(피지오머 등)를 활용한 비강 세척입니다.\n\n잠들기 15분 전 앉힌 상태에서 양쪽 콧구멍에 가볍게 1~2회 분사하고 콧물 흡입기로 부드럽게 흡인해주면 코점막 부종이 가라앉고 편안하게 숙면할 수 있습니다.',
+    practicalTip: '• 눕혀서 분사하면 귀로 넘어가 중이염 위험 있으니 반드시 세워서 분사\n• 너무 센 압력의 흡입기 사용은 점막 출혈 유발\n• 방 안 습도를 55%로 맞춰 코딱지 굳음 방지',
+    date: '09.19',
+    source: '소아이비인후과 전문의 칼럼',
+    category: '소아과 칼럼',
+    categoryEmoji: '🩺',
+    author: '박준호 이비인후과 전문의',
+    minMonths: 6,
+    maxMonths: 72,
+    readTime: '2분 완독',
+  ),
+  // 10. 약사 꿀팁 (알약 삼키기 훈련)
+  const _PediatricNewsItem(
+    id: 'news_10',
+    title: '시럽약에서 알약·캡슐로 넘어가는 단계별 훈련법',
+    summary: '소아과 약사가 추천하는 사탕·젤리 크기별 물 삼키기 연습',
+    content: '만 4~5세가 되면 물약 시럽의 부피가 10~15ml로 커져 오히려 먹기 버거워집니다. 이때 알약을 삼키는 연습을 시작하기 좋습니다.\n\n처음부터 쓴 알약을 주면 트라우마가 생기므로, 작은 미니 비타민 캔디나 밥알 한 톨 크기의 젤리를 물과 함께 꿀꺽 삼키는 놀이로 시작하세요.\n\n혀 중앙 뒤쪽에 알약을 놓고 물을 한 모금 가득 머금은 뒤 턱을 살짝 아래로 당기며 삼키는 것이 목 넘김에 가장 유리합니다.',
+    practicalTip: '• 알약을 억지로 빻거나 캡슐을 까면 약효 서방형 제형 파괴 위험\n• 고개를 뒤로 젖히면 기도로 들어갈 수 있으니 턱을 당기기\n• 성공할 때마다 폭풍 칭찬과 보상',
+    date: '09.24',
+    source: '대한약사회 소아약료연구회',
+    category: '약사 꿀팁',
+    categoryEmoji: '💊',
+    author: '최민선 전문약사',
+    minMonths: 36,
+    maxMonths: 140,
+    readTime: '1분 완독',
+  ),
+  // 11. 소아과 칼럼 (비염 vs 축농증)
+  const _PediatricNewsItem(
+    id: 'news_11',
+    title: '환절기 알레르기 비염 vs 축농증(부비동염) 구별법과 항생제 사용 기준',
+    summary: '투명한 콧물 vs 노란 콧물, 기침 지속 시간에 따른 감별 진단',
+    content: '가을철 아침마다 재채기를 하고 콧물을 흘리면 단순 비염인지 축농증인지 헷갈립니다.\n\n맑은 콧물과 눈 가려움, 아침 발작성 재채기는 알레르기 비염일 가능성이 높고, 누렇고 끈적한 콧물이 10일 이상 지속되거나 뺨·이마 통증, 입 냄새가 동반되면 세균성 부비동염(축농증)을 의심해야 합니다.\n\n단순 비염에는 항히스타민제나 비강 스테로이드 스프레이를 사용하고, 부비동염에는 적절한 기간 동안 항생제 치료가 필요합니다.',
+    practicalTip: '• 비염 스프레이는 코 안쪽 벽(비중격)이 아닌 바깥쪽(귀 쪽)을 향해 분사\n• 축농증 진단 시 증상이 호전되어도 최소 10~14일 항생제 완복\n• 실내 환기와 침구류 60도 온수 세탁 권장',
+    date: '09.22',
+    source: '대한소아알레르기호흡기학회',
+    category: '소아과 칼럼',
+    categoryEmoji: '🩺',
+    author: '소아알레르기분과 전문의',
+    minMonths: 36,
+    maxMonths: 156,
+    readTime: '2분 완독',
+  ),
+  // 12. 육아 공감 (칭찬과 복약 습관)
+  const _PediatricNewsItem(
+    id: 'news_12',
+    title: '스스로 약 챙겨 먹는 아이로 만드는 칭찬 스티커 & 성취감 육아법',
+    summary: '약 먹기를 강요가 아닌 스스로 건강을 지키는 뿌듯한 습관으로 바꾸는 대화법',
+    content: '아이가 크면서 약 먹기를 완강히 거부할 때 힘으로 억압하면 복약 트라우마가 깊어집니다.\n\n"이 약을 먹으면 우리 몸속 백혈구 군대들이 감기 괴물을 물리칠 힘이 생겨!"처럼 아이 눈높이에 맞는 스토리텔링을 들려주세요.\n\n냉장고에 [복약 칭찬 판]을 붙여두고 스스로 약을 삼킬 때마다 스티커를 붙이게 하면 통제감을 느끼며 자발적으로 약을 찾게 됩니다. 작은 성공 경험이 스스로 건강을 돌보는 평생 습관의 시작입니다.',
+    practicalTip: '• 약 먹기 전 아이에게 "숟가락으로 먹을래, 약병으로 먹을래?" 선택권 주기\n• 약을 삼킨 즉시 "정말 용감하고 멋지다" 구체적 칭찬하기\n• 온 가족이 박수 쳐주며 영웅 대접 해주기',
+    date: '09.18',
+    source: '육아 멘토링 매거진',
+    category: '육아 공감',
+    categoryEmoji: '👶',
+    author: '아동심리발달 전문가',
+    minMonths: 24,
+    maxMonths: 120,
+    readTime: '2분 완독',
+  ),
+];
+
+List<_PediatricNewsItem> _getPediatricNewsList(
+  MemberProfile profile, {
+  String category = '전체',
+  int offset = 0,
+}) {
+  final months = profile.ageMonths ?? 28;
+  // 1. 아이 월령에 맞는 기사 필터링
+  var matching = _allPediatricNewsItems.where((item) =>
+    months >= item.minMonths && months <= item.maxMonths
+  ).toList();
+
+  if (matching.length < 3) {
+    matching = List.from(_allPediatricNewsItems);
   }
+
+  // 2. 카테고리 필터
+  if (category != '전체') {
+    final catFiltered = matching.where((item) => item.category == category).toList();
+    if (catFiltered.isNotEmpty) {
+      matching = catFiltered;
+    } else {
+      // 해당 카테고리가 월령 매칭에 없으면 전체에서 해당 카테고리 기사 가져오기
+      final fallbackCat = _allPediatricNewsItems.where((item) => item.category == category).toList();
+      if (fallbackCat.isNotEmpty) {
+        matching = fallbackCat;
+      }
+    }
+  }
+
+  // 3. 셔플/오프셋 순환 (계속 다른 소식 추천)
+  if (matching.isEmpty) return [];
+  final effectiveOffset = offset % matching.length;
+  final rotated = <_PediatricNewsItem>[
+    ...matching.sublist(effectiveOffset),
+    ...matching.sublist(0, effectiveOffset),
+  ];
+
+  return rotated.take(3).toList();
 }
 
 class _EmergencyHospitalItem {
@@ -2627,6 +2812,11 @@ class _HomeScreenState extends State<HomeScreen> {
   final Map<String, bool> _localCompletionState = {};
   Map<String, bool> get _completionState => widget.doseCompletionState ?? _localCompletionState;
 
+  // 📰 우리아이 맞춤 헬스 & 육아 매거진 상태
+  String _selectedNewsCategory = '전체';
+  int _newsShuffleOffset = 0;
+  final Set<String> _helpfulNewsIds = {};
+
   @override
   void initState() {
     super.initState();
@@ -3321,6 +3511,163 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _openShareAndPwaModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.fromLTRB(22, 14, 22, 28),
+        decoration: const BoxDecoration(
+          color: Color(0xFFF8F6F1),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4D6CC),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEDF0E5),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text('🌿 안심 공유 & 바로가기', style: TextStyle(color: Color(0xFF526454), fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 20, color: Color(0xFF7A7D71)),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '우리아이 수첩 공유 및 앱 설치',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF303C33)),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              '배우자나 조부모님께 안심 수첩을 공유하고, 스마트폰 바탕화면에 앱 아이콘을 추가해 보세요.',
+              style: TextStyle(fontSize: 12.5, color: Color(0xFF68705F), height: 1.45),
+            ),
+            const SizedBox(height: 18),
+
+            // Share Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFEFA),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E7DC)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.share_rounded, size: 18, color: Color(0xFFB95D3C)),
+                      SizedBox(width: 8),
+                      Text('가족에게 복약 수첩 링크 공유', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${widget.profile.name}의 처방 내역과 용량 가이드 링크가 복사됩니다.',
+                    style: const TextStyle(fontSize: 11.5, color: Color(0xFF7A7D71)),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF526454),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(42),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    icon: const Icon(Icons.link_rounded, size: 18),
+                    label: const Text('수첩 링크 복사하기', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('🌿 [${widget.profile.name}] 안심 복약 수첩 공유 링크가 복사되었습니다.'),
+                          duration: const Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            // PWA Installation Guide Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFEFA),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E7DC)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.install_mobile_rounded, size: 18, color: Color(0xFF526454)),
+                      SizedBox(width: 8),
+                      Text('스마트폰 홈 화면에 진짜 앱으로 추가', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Color(0xFF303C33))),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDF0E5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('🍎 아이폰 (Safari)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF384B3B))),
+                        SizedBox(height: 2),
+                        Text('브라우저 하단 중앙 [공유(내보내기) 버튼 📤] ➔ [홈 화면에 추가] 클릭', style: TextStyle(fontSize: 11, color: Color(0xFF526454))),
+                        SizedBox(height: 8),
+                        Text('🤖 갤럭시 / 안드로이드 (Chrome)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF384B3B))),
+                        SizedBox(height: 2),
+                        Text('우측 상단 [메뉴 ⋮] ➔ [앱 설치] 또는 [홈 화면에 추가] 클릭', style: TextStyle(fontSize: 11, color: Color(0xFF526454))),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '※ 추가 시 바탕화면에 키디피디아 아이콘이 생겨 주소창 없이 전체화면으로 실행됩니다.',
+                    style: TextStyle(fontSize: 10.5, color: Color(0xFF8C9083)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -4179,72 +4526,289 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(22),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
-              ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final isHelpful = _helpfulNewsIds.contains(news.id);
+          return Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.88,
             ),
-            const SizedBox(height: 18),
-            Row(
+            decoration: const BoxDecoration(
+              color: Color(0xFFF8F6F1),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(6),
+                // Drag handle
+                const SizedBox(height: 12),
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4D6CC),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                  child: const Text('보건 소식', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Colors.black87)),
                 ),
-                const SizedBox(width: 8),
-                Text('📅 ${news.date}', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                const SizedBox(height: 14),
+
+                // Scrollable content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 22),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Badges Row
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEDF0E5),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: const Color(0xFFD7DEC9)),
+                              ),
+                              child: Text(
+                                '${news.categoryEmoji} ${news.category}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF526454),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1EFE7),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '⏱ ${news.readTime}',
+                                style: const TextStyle(
+                                  fontSize: 10.5,
+                                  color: Color(0xFF7A7D71),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              '📅 ${news.date}',
+                              style: const TextStyle(fontSize: 11, color: Color(0xFF8B8E82)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+
+                        // Title
+                        Text(
+                          news.title,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2C3E2D),
+                            height: 1.38,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Author / Source
+                        Row(
+                          children: [
+                            const Icon(Icons.verified_user_outlined, size: 14, color: Color(0xFF526454)),
+                            const SizedBox(width: 5),
+                            Text(
+                              news.source,
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF526454),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '· ${news.author}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF7A7D71),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+
+                        // Summary Callout Box
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFFEFA),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: const Color(0xFFE2E7DC)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('💡 ', style: TextStyle(fontSize: 14)),
+                              Expanded(
+                                child: Text(
+                                  news.summary,
+                                  style: const TextStyle(
+                                    fontSize: 12.5,
+                                    color: Color(0xFF435144),
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.45,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Main Content
+                        Text(
+                          news.content,
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            color: Color(0xFF333E35),
+                            height: 1.68,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+
+                        // Practical Guide / Action Tip
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFDF8F5),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: const Color(0xFFF3DDD3)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.check_circle_outline_rounded, size: 16, color: Color(0xFFB95D3C)),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    '부모님을 위한 실천 가이드',
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFFB95D3C),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                news.practicalTip,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF4A4441),
+                                  height: 1.55,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Bottom Action Bar
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFFEFA),
+                    border: Border(top: BorderSide(color: Color(0xFFEBEAE2))),
+                  ),
+                  child: Row(
+                    children: [
+                      // Helpful Button
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: isHelpful ? const Color(0xFFB95D3C) : const Color(0xFF526454),
+                          backgroundColor: isHelpful ? const Color(0xFFFDF3EF) : Colors.transparent,
+                          side: BorderSide(
+                            color: isHelpful ? const Color(0xFFE6A691) : const Color(0xFFD4D8CB),
+                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                        onPressed: () {
+                          setModalState(() {
+                            if (isHelpful) {
+                              _helpfulNewsIds.remove(news.id);
+                            } else {
+                              _helpfulNewsIds.add(news.id);
+                            }
+                          });
+                          setState(() {});
+                        },
+                        icon: Icon(
+                          isHelpful ? Icons.thumb_up_alt_rounded : Icons.thumb_up_off_alt_rounded,
+                          size: 16,
+                        ),
+                        label: Text(
+                          isHelpful ? '도움돼요!' : '도움돼요',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Share Button
+                      IconButton(
+                        tooltip: '가족 공유하기',
+                        style: IconButton.styleFrom(
+                          backgroundColor: const Color(0xFFF1EFE7),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        icon: const Icon(Icons.share_outlined, size: 18, color: Color(0xFF526454)),
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('아이 건강 소식 [${news.title}] 링크가 복사되었습니다.'),
+                              duration: const Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Confirm / Close Button
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF526454),
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(44),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 0,
+                          ),
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('닫기', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              news.title,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87, height: 1.35),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              news.content,
-              style: const TextStyle(fontSize: 13, color: Colors.black87, height: 1.55),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                const Icon(Icons.account_balance_outlined, size: 13, color: Colors.grey),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(news.source, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFB95D3C),
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(46),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('확인', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            ),
-            const SizedBox(height: 10),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -4379,6 +4943,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(Icons.share_outlined, color: Color(0xFF526454), size: 21),
+                    tooltip: '가족 공유 및 앱 설치',
+                    onPressed: () => _openShareAndPwaModal(context),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.notifications_active_outlined, color: Color(0xFF526454), size: 21),
                     tooltip: '접종 및 검진 알림',
@@ -4958,15 +5527,21 @@ class _HomeScreenState extends State<HomeScreen> {
         _buildCuratedCareItemsSection(),
         const SizedBox(height: 24),
 
-        // 📢 최신 보건 소식 (Yeojeong Panel)
+        // 📰 우리 아이 맞춤 헬스 & 육아 매거진 (Yeojeong Editorial Panel)
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header Row: Title + Age Badge + Shuffle Button
             Row(
               children: [
                 const Text(
-                  '최신 보건 소식',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF303C33)),
+                  '📰 맞춤 헬스 & 육아 매거진',
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF303C33),
+                    letterSpacing: -0.3,
+                  ),
                 ),
                 const SizedBox(width: 6),
                 Container(
@@ -4974,12 +5549,102 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFEDF0E5),
                     borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: const Color(0xFFD7DEC9)),
                   ),
-                  child: const Text('질병관리청', style: TextStyle(fontSize: 9.5, color: Color(0xFF526454), fontWeight: FontWeight.w600)),
+                  child: Text(
+                    '${widget.profile.age} 맞춤',
+                    style: const TextStyle(
+                      fontSize: 9.5,
+                      color: Color(0xFF526454),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _newsShuffleOffset++;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.refresh_rounded, size: 13, color: Color(0xFFB95D3C)),
+                        SizedBox(width: 3),
+                        Text(
+                          '다른 소식 추천',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFB95D3C),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
+
+            // Category Filter Chips
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final cat in [
+                    {'label': '전체', 'value': '전체'},
+                    {'label': '🩺 소아과 칼럼', 'value': '소아과 칼럼'},
+                    {'label': '💊 약사 꿀팁', 'value': '약사 꿀팁'},
+                    {'label': '👶 육아 공감', 'value': '육아 공감'},
+                    {'label': '📰 보건 뉴스', 'value': '보건 뉴스'},
+                  ]) ...[
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedNewsCategory = cat['value']!;
+                          _newsShuffleOffset = 0;
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                        decoration: BoxDecoration(
+                          color: _selectedNewsCategory == cat['value']
+                              ? const Color(0xFF526454)
+                              : const Color(0xFFFFFEFA),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: _selectedNewsCategory == cat['value']
+                                ? const Color(0xFF526454)
+                                : const Color(0xFFE2E4DC),
+                          ),
+                        ),
+                        child: Text(
+                          cat['label']!,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: _selectedNewsCategory == cat['value']
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                            color: _selectedNewsCategory == cat['value']
+                                ? Colors.white
+                                : const Color(0xFF526454),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // News Cards Container
             Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFFFFEFA),
@@ -4992,35 +5657,95 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               child: Column(
                 children: [
-                  ..._getPediatricNewsList(widget.profile).asMap().entries.map((entry) {
+                  ..._getPediatricNewsList(
+                    widget.profile,
+                    category: _selectedNewsCategory,
+                    offset: _newsShuffleOffset,
+                  ).asMap().entries.map((entry) {
                     final index = entry.key;
                     final news = entry.value;
+                    final isHelpful = _helpfulNewsIds.contains(news.id);
                     return Column(
                       children: [
                         if (index > 0)
                           const Divider(height: 1, thickness: 0.5, color: Color(0xFFECECE3)),
                         InkWell(
                           onTap: () => _showPediatricNewsDetail(context, news),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(10),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 2),
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                const Text('•', style: TextStyle(color: Color(0xFF7A7D71), fontSize: 13, fontWeight: FontWeight.bold)),
-                                const SizedBox(width: 8),
-                                Expanded(
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF4F6F0),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: const Color(0xFFE2E7DC), width: 0.8),
+                                  ),
                                   child: Text(
-                                    news.title,
-                                    style: const TextStyle(fontSize: 12, color: Color(0xFF303C33), fontWeight: FontWeight.w500),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                    news.categoryEmoji,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        news.title,
+                                        style: const TextStyle(
+                                          fontSize: 12.5,
+                                          color: Color(0xFF303C33),
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.35,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            news.source,
+                                            style: const TextStyle(
+                                              fontSize: 10.5,
+                                              color: Color(0xFF7A7D71),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          const Text('·', style: TextStyle(fontSize: 10, color: Color(0xFFB0B3A6))),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            news.date,
+                                            style: const TextStyle(fontSize: 10, color: Color(0xFF8C9083)),
+                                          ),
+                                          if (isHelpful) ...[
+                                            const SizedBox(width: 6),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFFDF3EF),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: const Text(
+                                                '👍 도움됨',
+                                                style: TextStyle(fontSize: 9, color: Color(0xFFB95D3C), fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  news.date,
-                                  style: const TextStyle(fontSize: 10.5, color: Color(0xFF7A7D71)),
-                                ),
+                                const Icon(Icons.arrow_forward_ios_rounded, size: 11, color: Color(0xFFB0B3A6)),
                               ],
                             ),
                           ),

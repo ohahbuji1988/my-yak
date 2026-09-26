@@ -257,3 +257,8 @@ from fastapi.staticfiles import StaticFiles
 
 if os.path.exists(WEB_BUILD_DIR):
     app.mount("/", StaticFiles(directory=WEB_BUILD_DIR, html=True), name="flutter_web")
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)

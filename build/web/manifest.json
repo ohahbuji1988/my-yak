@@ -1,11 +1,11 @@
 {
-    "name": "Kidipedia",
-    "short_name": "Kidipedia",
+    "name": "Kidipedia (키디피디아) - 우리아이 안심 복약 수첩",
+    "short_name": "키디피디아",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FFF7F9",
-    "theme_color": "#FF6B8B",
-    "description": "Kidipedia (키디피디아) - 우리아이 안심 복약 가이드",
+    "background_color": "#F8F6F1",
+    "theme_color": "#526454",
+    "description": "소아과 처방전 3초 안심 분석! 체중별 정밀 용량 검증 및 식약처 안전 기준 점검",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
